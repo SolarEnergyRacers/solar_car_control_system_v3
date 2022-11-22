@@ -11,10 +11,10 @@
 #include <Arduino.h>
 #include <CAN.h>
 
-#include <CAN/CANBus.h>
-#include <CarState/CarState.h>
-#include <Console/Console.h>
-#include <Helper/Helper.h>
+#include <CANBus.h>
+#include <CarState.h>
+#include <Console.h>
+#include <Helper.h>
 
 extern CarState carState;
 extern CANBus can;

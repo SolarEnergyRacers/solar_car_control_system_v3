@@ -14,7 +14,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <../lib/Console/Console.h>
+#include <Console.h>
 #include <Abstract_task.h>
 
 using namespace std;

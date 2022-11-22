@@ -17,12 +17,12 @@
 #include <Arduino.h>
 #include <Wire.h> // I2C
 
-#include <lib/CarState/CarState.h>
-#include <lib/Console/Console.h>
-#include <lib/DAC/DAC.h>
+#include <CarState/CarState.h>
+#include <Console/Console.h>
+#include <DAC/DAC.h>
 //#include <DriverDisplay.h>
-#include <lib/Helper/Helper.h>
-#include <lib/I2CBus/I2CBus.h>
+#include <Helper/Helper.h>
+#include <I2CBus/I2CBus.h>
 //#include <SPI.h>
 
 #define BASE_ADDR_CMD 0xA8

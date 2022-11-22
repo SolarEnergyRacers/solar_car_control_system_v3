@@ -12,7 +12,7 @@
 // #include <../.pio/libdeps/esp32dev/ESP32Time/ESP32Time.h>
 // #include <../.pio/libdeps/esp32dev/RTCDS1307/RTCDS1307.h>
 
-//#include <lib/RTC/RTC.h>
+//#include <RTC/RTC.h>
 
 
 using namespace std;

@@ -13,14 +13,14 @@
 #include <ADS1X15.h>
 #include <Wire.h> // I2C
 
-#include <lib/ADC/ADC.h>
-#include <lib/CarState/CarState.h>
-#include <lib/Console/Console.h>
-#include <lib/I2CBus/I2CBus.h>
+#include <ADC.h>
+#include <CarState.h>
+#include <Console.h>
+#include <I2CBus.h>
 //#include <DAC.h>
 //#include <DriverDisplay.h>
 #include <Abstract_task.h>
-#include <lib/Helper/Helper.h>
+#include <Helper.h>
 
 extern Console console;
 extern CarState carState;
@@ -86,7 +86,7 @@ int16_t ADC::read(Pin pin) {
 float ADC::get_multiplier() {
   if (!adcInited)
     return 0;
-    
+
   return adsDevice.toVoltage(1);
 }
 

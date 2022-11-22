@@ -31,14 +31,15 @@
 #include <Abstract_task.h>
 #include <LocalFunctionsAndDevices.h>
 // local libs
-#include <CarControl/CarControl.h>
-#include <Console/Console.h>
+#include <CarControl.h>
+#include <Console.h>
+
 //#include <Serial/Serial.h>
-#include <ADC/ADC.h>
-#include <CAN/CANBus.h>
-#include <DAC/DAC.h>
-#include <I2CBus/I2CBus.h>
-#include <System/System.h>
+#include <ADC.h>
+#include <CANBus.h>
+#include <DAC.h>
+#include <I2CBus.h>
+#include <System.h>
 
 // add C linkage definition
 extern "C" {

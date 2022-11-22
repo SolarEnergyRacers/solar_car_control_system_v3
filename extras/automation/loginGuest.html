@@ -1,0 +1,1204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" lang="en">
+<head><base href="https://guest.buhlergroup.com/guest/register_login_guest.php">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
+    <title>Network Login</title>
+    <link href="skins/skin-buhler-ag-1.0.6/external/favicon.ico" rel="SHORTCUT ICON" />
+        <link rel="stylesheet" href="skins/skin-buhler-ag-1.0.6/external/nonav_styles_registration.css">
+        <style type="text/css">
+
+
+table.centertable { margin: 0 auto; width: auto; }
+div.mainnavi { width: auto; float: none; }
+div#mainnavi a { margin-left: 10px; }
+div.contactbox h4 { margin-bottom: 10px; }
+div.contactbox a { display: block; }
+div.contactbox a.active { font-weight: bold; }
+div.contactbox a.l3 { margin-left: 1.25em; }
+div.text { 
+  font-size: 12px;
+  line-height: 20px;
+  color: rgb(80,80,80);
+  display: block;
+}
+
+div.text a { color:rgb(0,155,145); }
+div.text a:hover { color: rgb(255,155,50); }
+div#footer .disclaimer span.text { bottom: 0; }
+
+select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+    display: inline-block;
+    padding: 4px 6px;    
+    font-size: 14px;
+    line-height: 20px;
+    color: #555;
+    vertical-align: middle;
+    border-radius: 0;
+    background-color: #FFF;
+    border: 1px solid #CCC;
+    -webkit-transition: border linear .2s,box-shadow linear .2s;
+    -moz-transition: border linear .2s,box-shadow linear .2s;
+    -o-transition: border linear .2s,box-shadow linear .2s;
+    transition: border linear .2s,box-shadow linear .2s;
+}
+
+textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, .uneditable-input:focus {
+    border-color: rgb(0,155,145);
+    outline: 0;
+    outline: thin dotted \9;
+}
+
+select {
+    height: auto;
+}
+
+button, input[type=submit] {
+    padding: 4px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #009b91;
+    background-repeat: repeat-x;
+    border: 1px solid #009b91;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+button:hover, button:active, button.active, button.disabled, button[disabled], input[type=submit]:hover {
+    color: #FFF;
+    background-color: #ff9c33;
+    border: 1px solid #ff9c33;
+}
+
+button.disabled, button[disabled], button[disabled="disabled"], input[type="submit"]:disabled, input[type="button"]:disabled {
+    opacity: 0.4;
+    filter:alpha(opacity=40);
+    cursor: default;
+}
+
+.nonav #content { display: block;}
+div#content { padding-top: 0; margin-top: 16px; }
+#content div.text { margin-bottom: 0; }
+
+@media all and (max-width: 958px) {
+    div#mainchain, div#stage, div.banner { width: auto; }
+
+    div#stage { margin-top: 0; }
+    div#stage img { height: auto; width: 100%; max-width: 100%; }
+    div#mainchain div.logo { text-align: center; width: auto; float: none; margin-bottom: 16px; padding-top: 0; }
+
+}
+
+/* standard Blueware styles */
+HR {
+	border: none 0;
+	border-top: 1px solid #505050;
+	height: 1px;
+}
+PRE {
+	background-color: #f0f0f0;
+	border: 1px solid #505050;
+	padding: 5px;
+}
+FORM {
+	padding: 0;
+	margin: 0;
+}
+TABLE, TR, TD {
+	font-size: 100%;
+}
+TABLE.nwaIndent {
+	padding-left: 2em;
+}
+TABLE.nwaLayout {
+	border: none !important;
+}
+TD.nwaLayout {
+	border: none !important;
+	margin: 0;
+	padding: 0;
+}
+TABLE.nwaContent,
+DIV.nwaContent {
+	border: 1px solid #009B91;
+	background-color: #fff;
+	border-collapse:separate;
+}
+TH.nwaTop,
+DIV.nwaTop {
+	font-size: 13px;
+	font-weight: bold;
+	background-color: #009B91;
+	color: #fff;
+	text-align: center;
+	padding: .5em;
+}
+TH.nwaTop A,
+DIV.nwaTop A {
+		color:inherit;
+}
+DIV.nwaTop { margin: 2px; }
+TH.nwaLeft {
+	font-size: 12px;
+	font-weight: normal;
+	background-color: #f0f0f0;
+	text-align: right;
+	padding: 3px 5px;
+	border-bottom: 2px solid #f0f0f0;
+}
+DIV.nwaLeft {
+	font-size: 12px;
+	font-weight: bold;
+	padding: 3px 5px;
+}
+TH.nwaRight {
+	font-size: 12px;
+	font-weight: normal;
+	background-color: #f0f0f0;
+	text-align: left;
+	padding: 3px 5px;
+	border-bottom: 2px solid #f0f0f0;
+}
+TH.nwaBottom,
+DIV.nwaBottom {
+	font-size: 12px;
+	font-weight: bold;
+	background-color: #f0f0f0;
+	text-align: center;
+	padding: 3px 5px;
+}
+TH.nwaGroup {
+	font-size: 11px;
+	font-weight: bold;
+	text-align: left;
+	background-color: #009B91;
+	color: #fff;
+	padding: .5em;
+}
+TABLE.nwaContent TD {
+	font-size: 12px;
+	padding: 3px 5px;
+	border-bottom: 2px solid #f0f0f0;
+}
+DIV.nwaBody {
+	padding: 3px 5px;
+	border-bottom: 2px solid #f0f0f0;
+}
+.nwaBody {
+	padding-left: 0;
+}
+.nwaHighlight {
+	background-color: #ffffe8 !important;
+}
+.nwaDeleted {
+	color: #A1A1A1;
+	text-decoration: line-through;
+}
+.nwaSelected {
+	background-color: #d2d2d2 !important;
+}
+.nwaSelectedHighlight {
+	background-color: #e0e0d2 !important;
+}
+.nwaEmpty {
+	border: none;
+}
+.nwaIconLink {
+	padding: 0 5px;
+	white-space: nowrap;
+	display: inline-block;
+}
+.nwaForm {
+	padding: 0;
+	margin: 0.5em 0;
+}
+.nwaInfo {
+	font-size: 11px;
+	color: #505050;
+}
+.nwaError {
+	color: #ff3649;
+}
+.nwaImportant {
+	font-size: 15px;
+	font-weight: bold;
+	color: #009B91;
+}
+.nwaUsername {
+	font-weight: bold;
+	color: #009B91;
+	word-wrap: normal !important;
+}
+.nwaPassword {
+	font-size: 20px;
+	font-family: "Courier New";
+	font-weight: bold;
+	color: #009B91;
+	word-wrap: normal !important;
+}
+.nwaInteractivePercent {
+	font-weight: bold;
+}
+.nwaInteractiveProgressBar {
+	height: 14px;
+	border: 1px solid #808080;
+    box-sizing: content-box;
+}
+.nwaInteractiveProgressBarComplete {
+	width: 0;
+	height: 14px;
+	background-color: #009B91;
+    box-sizing: content-box;
+}
+.nwaCommandLink, .nwaCommandLinkHover {
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	padding: 0;
+    box-sizing: content-box;
+}
+.nwaCommandLink {
+	background-color: white;
+	border: 1px solid;
+	border-color: #ddd #bbb #bbb #ddd;
+    box-sizing: content-box;
+}
+.nwaCommandLinkHover {
+	background-color: #f0f0f0;
+	border: 1px solid;
+	border-color: #ccc #555 #555 #ccc;
+    box-sizing: content-box;
+}
+.nwaCommandLinkInner {
+	cursor: pointer;
+	padding: 4px;
+	border: 2px solid white;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+    box-sizing: content-box;
+}
+.nwaCommandLinkText {
+    box-sizing: content-box;
+}
+
+
+    /* skin styles */
+    .nonav DIV.nwaContent {
+        border: 0 none;
+        background-color: transparent;
+    }
+
+    .nonav .nwaTop {
+        border: 0 none;
+        text-align: left;
+        display: none;
+    }
+
+    .nonav .nwaLeft {
+        background-color: transparent;
+        border-bottom: 0 none;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .nonav .nwaBody {
+        border-bottom: 0 none;
+        padding-top: 0;
+        margin-bottom: 1em;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .nonav .nwaBottom {
+        border-bottom: 0 none;
+        background-color: transparent;
+        text-align: left;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .nonav .nwaGroup {
+        border: 0 none;
+        background-color: transparent;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .nonav input[type=text], .nonav input[type=email], .nonav input[type=password] {
+        margin-bottom: 5px;
+    }
+
+    /* HIDE REQUIRED INFO */
+    /*
+        .nonav .nwaRequiredField {
+                display: none;
+        }
+
+        .nonav .nwaInfo {
+                display: none;
+        }
+
+        .nonav .nwaImportant .nwaRequiredField {
+                display: none;
+        }
+
+        .nonav .nwaInfo {
+                display: none;
+        }
+
+        .nonav .nwaTop {
+                display: none;
+        }
+        */
+
+
+html {
+	-webkit-text-size-adjust: none;
+}
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=date] {
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	text-indent: 5px;
+}
+a#ads_interstitial_skip {
+	line-height: 3em;
+	font-size: 14px;
+	padding: 0;
+	margin: 0;
+}
+
+
+    html { height: 100%; }
+    body { background-size: cover; }
+#container { min-width: 0; }
+.nonav #content { width: 100%; }
+    select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+        width: 100% !important;
+        border-top-right-radius: 5px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        border: solid;
+        border-color: #9bafb9;
+        border-width: thin;
+        padding: 4px 0;
+    }
+    button, input[type=submit] {
+        border-top-left-radius: 0;
+        border-top-right-radius: 9px;
+        border-bottom-left-radius: 9px;
+        border-bottom-right-radius: 9px;
+        width: 100% !important;
+    }
+    button:hover, input[type=submit]:hover {
+        background-color: #009b91;
+        border: 1px solid #009b91;
+    }
+    a {
+        text-decoration: none;
+        color: #009b91;
+    }
+    #lan_dropdown { width: 5.8em; }
+    label, .nwaInfo { color: #9bafb9; }
+    @media all and (max-width: 1024px) {
+        body {
+            background-position: top center;
+        }
+    }
+
+
+</style>    
+<style>
+.nwaBody {
+margin-bottom: 0.5em !important;
+}
+div.intl-tel-input.allow-dropdown{
+width: 370px !important;
+}
+#TR_form8e613e63_guest_register_visitor_phone{
+margin-bottom: 0.8em !important;
+}
+#TR_form8e613e63_guest_register_auto_send_sms{
+width: 370px !important;
+}
+#ID_form1be6358a_guest_register_auto_send_sms{
+width: 370px !important;
+}
+#LB_ID_formc1f52459_guest_login_visitor_accept_terms{
+font-size: 12px;
+color: #009b91;
+}
+@media screen and (max-width: 460px) {
+
+#container{
+margin-top:0em;
+}
+#ID_form1be6358a_guest_register_auto_send_sms{
+width: 100% !important;
+}
+
+#TR_form8e613e63_guest_register_auto_send_sms{
+width: 100% !important;
+}
+
+div.intl-tel-input.allow-dropdown{
+width: 100% !important;
+}
+}
+
+#TR_form8a40ec07_weblogin_visitor_accept_terms .nwaBody {    
+    display: flex !important;
+    align-items: center;
+}
+</style>
+
+<script type="text/javascript" language="JavaScript">
+try { top.document.domain } catch (e) {
+ var f = function() { document.body.innerHTML = "Access Denied"; }
+ setInterval(f, 1);
+ if (document.body) document.body.onload = f;
+}
+</script></head><body class="smallscr nonav">
+            <div id="container">
+		<div id="content">
+			<div id="header">
+				<div id="logo"><svg data-v-9d423ee0="" viewBox="0 0 457 87" class="offside-dialog__logo"><path fill="#009b91" d="m198.1 44.5h-9.5l2.8-20.3h9.5zm-110.7-30.4c-18.4 0-32.5 11.7-34.7 27.1-2.3 16.2 8.9 32.1 23.9 34.2l-1.4 10.2h-26.3c-27.4 0-48.1-19-48.1-42.4s20.7-42.4 48.1-42.4h407.7l-1.8 13.2zm348 10.1c13.2 0 21.3 7.5 19.4 20.9-1.3 9.3-6.9 15.7-14.8 18.5l11.3 22h-17.8l-10-20.3h-5.6l-2.8 20.3h-15.9l8.6-61.4zm3.7 20.9c.6-4.5-1.6-7.4-7.3-7.4h-10l-2.1 14.8h10c5.7 0 8.7-2.9 9.4-7.4zm-120.6-20.9-6.7 47.5h25.1l-1.9 13.9h-41.2l8.6-61.4zm23.8 61.4 8.6-61.4h43.9l-1.9 13.8h-28.1l-1.4 9.6h25.7l-1.9 13.5h-25.7l-1.5 10.6h28.1l-1.9 13.9zm-206.2-61.4c12.8 0 19.7 5.7 18.2 16.7-1 6.6-5.3 11.4-10.1 13 5.6 1.9 9 7.6 8 14.5-1.6 11.1-10 17.2-22.8 17.2h-28.2l8.6-61.4zm.9 42.3c.5-3.7-1.7-6-6.2-6h-10.8l-1.7 11.9h10.8c4.5 0 7.4-2.4 7.9-5.9zm1.9-23.6c.5-3.8-1.7-5.5-6.4-5.5h-9.2l-1.6 11.1h9.2c4.7 0 7.5-1.8 8-5.6zm131.1 4.6 3.3-23.3h16.1l-8.6 61.4h-16.1l3.4-24.3h-21.3l-3.4 24.3h-16.1l8.6-61.4h16.1l-3.3 23.3zm-68 11.6 4.9-34.9h16l-5.1 36.4c-2.4 16.8-14.2 26-30.4 26s-25.5-9.2-23.1-26.1l5.1-36.3h16l-4.9 34.9c-1.2 8.7 2.3 13.2 9 13.2 6.6 0 11.3-4.5 12.5-13.2z"></path></svg></div>			</div>
+			<div id="Titel">
+				<h1>Network Login</h1>			</div>
+			<div id="form">
+
+    <div id="content-marker">
+
+<script language="JavaScript" type="text/javascript">
+<!--
+function are_cookies_enabled()
+{
+    var cookieEnabled = (navigator.cookieEnabled) ? true : false;
+
+    if (typeof navigator.cookieEnabled == "undefined" && !cookieEnabled)
+    {
+        document.cookie="testcookie";
+        cookieEnabled = (document.cookie.indexOf("testcookie") != -1) ? true : false;
+    }
+    return (cookieEnabled);
+}
+if (!are_cookies_enabled()) {
+    alert("Your browser does not have cookies enabled.  Certain convenience features on this site require cookies.  Please enable cookies in your browser preferences.");
+}
+// --></script>
+
+<p>
+    Please login to the network using your
+    username and password.
+</p>
+<style>
+#TR_form8a40ec07_weblogin_visitor_accept_terms .nwaBody{
+display: inline-block;
+}
+#ID_form8a40ec07_weblogin_visitor_accept_terms{
+display: inline-block;
+}
+#LB_ID_form8a40ec07_weblogin_visitor_accept_terms{
+display: inline-block;
+}
+</style>
+
+
+<style type="text/css"><!--
+.nwaErrorBorder {
+    border:2px solid red;
+    padding: 1px;
+}
+--></style>
+<div class="nwaForm">
+<script type="text/javascript" charset="UTF-8" language="JavaScript" src="js/core-1613099787.js"></script>
+<script language="JavaScript" type="text/javascript"><!--
+var _form_name = "form8a40ec07_weblogin";
+
+function Nwa_Number00(num) {
+	var s = num.toString();
+	if (s.length == 1) {
+		s = '0' + s;
+	}
+	return s;
+}
+
+
+function Nwa_FloatFormat(num, f) {
+    f = parseInt(f / 1 || 0);
+    if (f < 0 || f > 20) {
+        alert("The number of fractional digits is out of range");
+    }
+    if (isNaN(num)) {
+        return "NaN";
+    }
+    var s = num < 0 ? "-" : "", x = Math.abs(num);
+    if (x > Math.pow(10, 21)) {
+        return s + x.toString();
+    }
+    var m = Math.round(x * Math.pow(10, f)).toString();
+    if (!f) {
+        return s + m;
+    }
+    while (m.length <= f) {
+        m = "0" + m;
+    }
+    return s + m.substring(0, m.length - f) + "." + m.substring(m.length - f);
+}
+
+function Nwa_AdjustTimeZone(time) {
+	// Copyright 1999, 2000 by Ray Stott
+	// OK to use if this copyright is included
+	// Script available at http://www.crays.com/jsc
+	var TimezoneOffset = 7200
+	var ms = time + (new Date().getTimezoneOffset() * 60000) + TimezoneOffset * 1000
+	return new Date(ms)
+}
+
+
+function Nwa_ParseTimestamp(timestamp) {
+    var t_len = timestamp.length;
+    var year = parseInt(timestamp.substr(0,4), 10);
+    var month = parseInt(timestamp.substr(5,2), 10) - 1;
+    var day = parseInt(timestamp.substr(8,2), 10);
+    var hour = t_len >= 13 ? parseInt(timestamp.substr(11,2), 10) : 0;
+    var min = t_len >= 16 ? parseInt(timestamp.substr(14,2), 10) : 0;
+    var sec = t_len >= 19 ? parseInt(timestamp.substr(17,2), 10) : 0;
+    var d = new Date(year, month, day, hour, min, sec);
+    return d;
+}
+
+
+function Nwa_DateFormat(time, format) {
+	time = parseInt(time);
+	if (isNaN(time)) {
+		return "N\/A";
+	}
+	var t = Nwa_AdjustTimeZone(time * 1000);
+	var s = format;
+
+	s = s.replace("%h", "%b");
+	s = s.replace("%D", "%m/%d/%y");
+	s = s.replace("%r", "%l:%M %p");
+	s = s.replace("%T", "%H:%M:%S");
+	s = s.replace("%R", "%H:%M");
+	s = s.replace("%Y", t.getFullYear());
+	s = s.replace("%y", Nwa_Number00(t.getFullYear() % 100));
+	s = s.replace("%x", t.toLocaleDateString());
+	s = s.replace("%X", t.toLocaleTimeString());
+	s = s.replace("%w", t.getDay()); // 0=sunday
+	s = s.replace("%S", Nwa_Number00(t.getSeconds()));
+	s = s.replace("%m", Nwa_Number00(t.getMonth() + 1));  // 01-12
+	s = s.replace("%M", Nwa_Number00(t.getMinutes())); // 00-59
+	s = s.replace("%H", Nwa_Number00(t.getHours())); // 00-23
+	s = s.replace("%I", Nwa_Number00(t.getHours() == 0 ? 12 : t.getHours() > 12 ? t.getHours() - 12 : t.getHours())); // 01-12
+	s = s.replace("%l", t.getHours() == 0 ? 12 : t.getHours() > 12 ? t.getHours() - 12 : t.getHours()); // 1-12
+	s = s.replace("%a", (typeof(Calendar._SDN) !== 'undefined') ? Calendar._SDN[t.getDay()] : Calendar._DN[t.getDay()].substring(0, typeof(Calendar._SDN_len) === 'undefined' ? 3 : Calendar._SDN_len)); // abbreviated weekday name
+	s = s.replace("%A", Calendar._DN[t.getDay()]); // full weekday name
+	s = s.replace("%b", (typeof(Calendar._SMN) !== 'undefined') ? Calendar._SMN[t.getDay()] : Calendar._MN[t.getDay()].substring(0, typeof(Calendar._SMN_len) === 'undefined' ? 3 : Calendar._SMN_len)); // abbreviated  month name
+	s = s.replace("%B", Calendar._MN[t.getMonth()]); // full month name
+	s = s.replace("%c", t.toLocaleString());
+	s = s.replace("%d", Nwa_Number00(t.getDate())); // 01-31
+	s = s.replace("%e", (t.getDate() < 10 ? ' ' + t.getDate() : t.getDate())); // " 1"-"31"
+	s = s.replace("%p", (t.getHours() >= 12 ? "PM" : "AM"));
+	s = s.replace("%C", Nwa_Number00((t.getFullYear() - t.getFullYear() % 100) / 100));
+	s = s.replace("%u", t.getDay() ? t.getDay() : 7); // 7=sunday, 1=monday
+	s = s.replace("%%", "%");
+	return s;
+}
+
+function Nwa_MinutesToNatural(mins) {
+	var str;
+	mins = parseInt(mins)
+	if (isNaN(mins)) {
+		return "N\/A";
+	} else if (mins > 1440) {
+		var days = Math.round(mins/144)/10
+		if (Math.abs(days - 1) < 1.0e-6) {
+			str = "@DAYS@ day".replace('@DAYS@', days)
+		} else {
+			str = "@DAYS@ days".replace('@DAYS@', days)
+		}
+	} else if (mins >= 120) {
+		var hours = Math.floor(mins/60)
+		if (Math.abs(hours - 1) < 1.0e-6) {
+			str = "@HOURS@ hour".replace('@HOURS@', hours)
+		} else {
+			str = "@HOURS@ hours".replace('@HOURS@', hours)
+		}
+	} else {
+		if (Math.abs(mins - 1) < 1.0e-6) {
+			str = "@MINUTES@ minute".replace('@MINUTES@', mins)
+		} else {
+			str = "@MINUTES@ minutes".replace('@MINUTES@', mins)
+		}
+	}
+	return str
+}
+
+function Nwa_SecondsToNatural(seconds) {
+    if (Math.abs(seconds) < 60) {
+        seconds = parseInt(Math.abs(seconds));
+        if (seconds == 1) {
+            return "1 second";
+        } else {
+            return "@SECONDS@ seconds".replace('@SECONDS@', seconds);
+        }
+    }
+	mins = parseInt(seconds) / 60;
+	return Nwa_MinutesToNatural(mins);
+}
+
+function Nwa_SecondsToRemaining(t) {
+    var exp = '';
+    if (t > 86400) {
+        var d = Math.floor(t / 86400);
+        if (d == 1) {
+            exp += "1 day";
+        } else {
+            exp += "%1 days".replace(/%1/, d);
+        }
+        t -= d * 86400;
+    }
+    if (t > 3600) {
+        if (exp != '') {
+            exp += ' ';
+        }
+        var h = Math.floor(t / 3600);
+        if (h == 1) {
+            exp += "1 hour";
+        } else {
+            exp += "%1 hours".replace(/%1/, h);
+        }
+        t -= h * 3600;
+    }
+    if (t > 60) {
+        if (exp != '') {
+            exp += ' ';
+        }
+        var m = Math.floor(t / 60);
+        if (m == 1) {
+            exp += "1 minute";
+        } else {
+            exp += "%1 minutes".replace(/%1/, m);
+        }
+        t -= m * 60;
+    }
+    if (t > 0) {
+        if (exp != '') {
+            exp += ' ';
+        }
+        var s = t;
+        if (s == 1) {
+            exp += "1 second";
+        } else {
+            exp += "%1 seconds".replace(/%1/, s);
+        }
+        t -= s;
+    }
+	return exp;
+}
+
+
+function Nwa_TimestampToNatural(timestamp, do_neg, base_timestamp) {
+    var now = new Date();
+    if (base_timestamp) {
+        now = Nwa_ParseTimestamp(base_timestamp);
+    }
+    now = now.getTime();
+    timestamp = Nwa_ParseTimestamp(timestamp);
+    timestamp = timestamp.getTime();
+	var mins = (timestamp - now) / 1000 / 60;
+    var negative = do_neg && (mins < 0);
+    if (negative) {
+        mins = mins * -1;
+    }
+	var str = Nwa_MinutesToNatural(mins);;
+    if (negative) {
+        str = '-' + str;
+    }
+	return str
+}
+
+
+function Nwa_TextCounter(field, cntfield, maxlimit) {
+    var o = document.getElementById(cntfield);
+    if (!o) {
+        return;
+    }
+
+    var counter = '';
+    if (maxlimit == 1) {
+
+        counter = "@COUNT@ characters".replace('@COUNT@', field.value.length);
+    } else {
+        var cap = false;
+        if (maxlimit < 0) {
+            cap = true;
+            maxlimit = Math.abs(maxlimit);
+        }
+        var delta = maxlimit - field.value.length;
+        if (delta < 0) {
+            delta = Math.abs(delta);
+            if (cap) {
+                field.value = field.value.substring(0, maxlimit);
+                counter = "0 characters left";
+            } else if (delta == 1) {
+                counter = "1 character over";
+            } else {
+                counter = "@DELTA@ characters over".replace('@DELTA@', delta);
+            }
+        } else if (delta == 1) {
+                counter = "1 character left";
+        } else {
+            counter = "@DELTA@ characters left".replace('@DELTA@', delta);
+        }
+    }
+    o.innerHTML = counter;
+}
+
+
+function Nwa_PrivatePasswordOnFocus(pw_v) {
+    var pw_id = pw_v.id;
+    var flag = document.getElementById('F_' + pw_id);
+    if (!flag) return;
+
+    if (flag.value == '1' || flag.value == '2') {
+        pw_v.value='';
+    } else {
+        var val_field = document.getElementById('V_' + pw_id);
+        if (!val_field) return;
+        pw_v.value=val_field.value;
+    }
+    return false;
+}
+
+
+function Nwa_PrivatePasswordOnChange(pw_v) {
+    var pw_id = pw_v.id;
+    var flag = document.getElementById('F_' + pw_id);
+    if (!flag) return;
+    if (pw_v.value != '' || flag.value == '0') {
+        var val_field = document.getElementById('V_' + pw_id);
+        if (val_field) {
+            val_field.value = pw_v.value;
+        }
+    }
+    
+    return false;
+}
+
+
+function Nwa_PrivatePasswordOnBlur(pw_v) {
+    var pw_id = pw_v.id;
+    var flag = document.getElementById('F_' + pw_id);
+    if (!flag) return;
+    if (pw_v.value == '') {
+        if (flag.value == '1') {
+            pw_v.value = "\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf";
+        } else if (flag.value == '2') {
+            pw_v.value = "p_\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf";
+        }
+    } else {
+        flag.value = '0';
+    }
+    var val_field = document.getElementById('V_' + pw_id);
+    if (!val_field) return; // Confirm not a secure field, and no cache
+    if (val_field.value != '') {
+        pw_v.value = "\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf\u25cf";
+    }
+    
+    return false;
+}
+
+
+
+function Nwa_EnableFormButtons(form_name) {
+	var f = document.getElementById(form_name)
+	if (f) {
+		try {
+			for (var i = 0; i < f.elements.length; ++i) {
+				var e = f.elements[i]
+				if (e.type == 'button' || e.type == 'submit') {
+					e.disabled = false;
+					if (e.value_saved)
+						e.value = e.value_saved;
+				}
+			}
+		} catch (e) {
+
+		}
+	}
+}
+
+function Nwa_DisableFormButtons(form_name, submit_id, do_enable) {
+	var f = document.getElementById(form_name)
+	if (f) {
+		try {
+			for (var i = 0; i < f.elements.length; ++i) {
+				var e = f.elements[i]
+				if (e.type == 'button' || e.type == 'submit') {
+					e.disabled = true;
+					if (e.id == submit_id) {
+						e.value_saved = e.value;
+						e.value = 'processing...';
+					}
+				}
+			}
+		} catch (e) {
+
+		}
+	}
+}
+
+if (typeof(Nwa_SubmitForm) !== 'function') {
+	
+	Nwa_SubmitForm = function (form_name, submit_id) {
+		Nwa_DisableFormButtons(form_name, submit_id)
+		var f = document.getElementById(form_name)
+		if (f) {
+			if (typeof(document[form_name].Nwa_OnSubmit) == "function" && !document[form_name].Nwa_OnSubmit(form_name)) {
+                Nwa_EnableFormButtons(form_name);
+				return false;
+			}
+			if (!Nwa_SubmitForm.CallHooks(form_name, submit_id)) {
+				Nwa_EnableFormButtons(form_name);
+				return false;
+			}
+			f.submit()
+		}
+		return false
+	}
+	Nwa_SubmitForm.hooks = [];
+	Nwa_SubmitForm.AddHook = function(hook) {
+		Nwa_SubmitForm.hooks.push(hook);	
+	}
+	Nwa_SubmitForm.CallHooks = function(form_name, submit_id) {
+		if (typeof(Nwa_SubmitForm.hooks) == "object") {
+			for (var i in Nwa_SubmitForm.hooks) {
+				if (typeof(Nwa_SubmitForm.hooks[i]) == "function" && !(Nwa_SubmitForm.hooks[i])(form_name, submit_id)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+}
+
+function Nwa_FocusForm(form_name, element_name, force_focus) {
+	var f = document.getElementById(form_name), hash = self.document.location.hash;
+	if (!force_focus && hash) {
+
+		if (hash.indexOf('#A_') === 0) {
+			hash = hash.substring(3);
+		}
+	}
+	for (var i = 0; i < f.elements.length; ++i) {
+		var e = f.elements[i];
+		if (e.type == "hidden") {
+			continue;
+		}
+		if (hash && (e.name == hash || e.name == hash + '[]')) {
+			try { e.focus(); } catch (ex) { } 
+			if (typeof(e.select) == "function") e.select();
+			break;
+		} else if (e.name == element_name || e.name == element_name + '[]') {
+			try { e.focus(); } catch (ex) { } 
+			if (typeof(e.select) == "function") e.select();
+			if (!hash) break;
+		}
+	}
+}
+
+
+if (typeof(Nwa_AjaxSubmitForm) !== 'function') {
+	
+	Nwa_AjaxSubmitForm = function (form_name, submit_id, callback) {
+		if (typeof(callback) == "function") {
+			Nwa_DisableFormButtons(form_name, submit_id)
+			if (!Nwa_AjaxSubmitForm.CallHooks(form_name, submit_id)) {
+				Nwa_EnableFormButtons(form_name);
+				return false;
+			}
+			if (callback(form_name, Nwa_GetFormPostData(form_name))) {
+                var f = document.getElementById(form_name)
+                if (f) {
+                    f.submit()
+                } else {
+                    return true; // WTF?
+                }
+            } else {
+                Nwa_EnableFormButtons(form_name);
+            }
+            return false;
+		} else {
+			return Nwa_SubmitForm(form_name, submit_id)
+		}
+	}
+	Nwa_AjaxSubmitForm.hooks = [];
+	Nwa_AjaxSubmitForm.AddHook = function(hook) {
+		Nwa_AjaxSubmitForm.hooks.push(hook);	
+	}
+	Nwa_AjaxSubmitForm.CallHooks = function(form_name, submit_id) {
+		if (typeof(Nwa_AjaxSubmitForm.hooks) == "object") {
+			for (var i in Nwa_AjaxSubmitForm.hooks) {
+				if (typeof(Nwa_AjaxSubmitForm.hooks[i]) == "function" && !(Nwa_AjaxSubmitForm.hooks[i])(form_name, submit_id)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+}
+
+//-->
+</script>
+<form name="form8a40ec07_weblogin" id="form8a40ec07_weblogin" method="POST" action="/guest/register_login_guest.php?_browser=1" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded" novalidate="novalidate">
+<div class="nwaContent">
+   <div class="nwaTop">Network Login</div>
+
+  <!-- begin no_login UI element (type: hidden; hidden: 1;) -->
+  <div  style="display: none;">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_no_login">no_login</label>    </div>
+    <div class="nwaBody"><a name="A_no_login"></a>
+      <input type="hidden" name="no_login" id="ID_form8a40ec07_weblogin_no_login" value=""/>
+    </div>
+  </div>
+  <!-- end no_login UI element -->
+
+  <!-- begin static_u UI element (type: hidden; hidden: 1;) -->
+  <div  style="display: none;">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_static_u">static_u</label>    </div>
+    <div class="nwaBody"><a name="A_static_u"></a>
+      <input type="hidden" name="static_u" id="ID_form8a40ec07_weblogin_static_u" value=""/>
+    </div>
+  </div>
+  <!-- end static_u UI element -->
+
+  <!-- begin no_u UI element (type: hidden; hidden: 1;) -->
+  <div  style="display: none;">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_no_u">no_u</label>    </div>
+    <div class="nwaBody"><a name="A_no_u"></a>
+      <input type="hidden" name="no_u" id="ID_form8a40ec07_weblogin_no_u" value=""/>
+    </div>
+  </div>
+  <!-- end no_u UI element -->
+
+  <!-- begin no_p UI element (type: hidden; hidden: 1;) -->
+  <div  style="display: none;">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_no_p">no_p</label>    </div>
+    <div class="nwaBody"><a name="A_no_p"></a>
+      <input type="hidden" name="no_p" id="ID_form8a40ec07_weblogin_no_p" value=""/>
+    </div>
+  </div>
+  <!-- end no_p UI element -->
+
+  <!-- begin username UI element (type: text; hidden: ;) -->
+  <div id="TR_form8a40ec07_weblogin_username" style="display:none;">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_username">Username:</label>    </div>
+    <div class="nwaBody"><a name="A_username"></a>
+      <input type="email" style="width:98%;" name="username" id="ID_form8a40ec07_weblogin_username" value="" autocapitalize="off" autocorrect="off">
+    </div>
+  </div>
+  <!-- end username UI element -->
+
+  <!-- begin password UI element (type: password; hidden: ;) -->
+  <div id="TR_form8a40ec07_weblogin_password" style="display:none;">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_password">Password:</label>    </div>
+    <div class="nwaBody"><a name="A_password"></a>
+      <input type="password" style="width:98%;" name="password" id="ID_form8a40ec07_weblogin_password" value="" autocomplete="new-password">
+     <label for="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-1" style="display:none;" aria-hidden="true">Unused field<input type="password" autocomplete="new-password" id="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-1" value="no-ff-pwmgr-1" style="display:none;" aria-label="Unused field"></label>
+<label for="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-2" style="display:none;" aria-hidden="true">Unused field<input type="password" autocomplete="new-password" id="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-2" value="no-ff-pwmgr-2" style="display:none;" aria-label="Unused field"></label>
+<label for="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-3" style="display:none;" aria-hidden="true">Unused field<input type="password" autocomplete="new-password" id="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-3" value="no-ff-pwmgr-3" style="display:none;" aria-label="Unused field"></label>
+<label for="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-4" style="display:none;" aria-hidden="true">Unused field<input type="password" autocomplete="new-password" id="PW_form8a40ec07_weblogin_password_no-ff-pwmgr-4" value="no-ff-pwmgr-4" style="display:none;" aria-label="Unused field"></label>
+    </div>
+  </div>
+  <!-- end password UI element -->
+
+  <!-- begin visitor_accept_terms UI element (type: checkbox; hidden: ;) -->
+  <div id="TR_form8a40ec07_weblogin_visitor_accept_terms">
+    <div class="nwaLeft">
+      <label for="ID_form8a40ec07_weblogin_visitor_accept_terms">Terms:</label>    </div>
+    <div class="nwaBody"><a name="A_visitor_accept_terms"></a>
+      <input type="checkbox" id="ID_form8a40ec07_weblogin_visitor_accept_terms" name="visitor_accept_terms" value="1">
+      <label id="LB_ID_form8a40ec07_weblogin_visitor_accept_terms" for="ID_form8a40ec07_weblogin_visitor_accept_terms"><p style="font-size:12px;color:#009b91;">I accept the <a href="/guest/public/buhler/Terms_Conditions_en.pdf" target="_blank" style="text-decoration:underline;">terms of use</a> and <a href="/guest/public/buhler/Privcay_Notice_Business_Partners.pdf" target="_blank" style="text-decoration:underline;">privacy notice</a></p></label>
+    </div>
+  </div>
+  <!-- end visitor_accept_terms UI element -->
+   <div id="TR_form8a40ec07_weblogin_submit">
+    <div class="nwaBottom" colspan="2">
+     <a name="A_submit"></a>
+       <input type="submit" id="ID_form8a40ec07_weblogin_submit" value="Log In">
+<script language="JavaScript" type="text/javascript"><!--
+document.getElementById("ID_form8a40ec07_weblogin_submit").onclick = function (ev) {
+	ev = ev || window.event;
+	r = Nwa_SubmitForm("form8a40ec07_weblogin","ID_form8a40ec07_weblogin_submit");
+	ev.returnValue = r;
+	return r;
+}
+//-->
+</script>
+    </div>
+   </div>
+<script type="text/javascript" language="JavaScript"><!--
+function Nwa_FocusFormAuto() {
+    return Nwa_FocusForm("form8a40ec07_weblogin", "username", false);
+}
+if (typeof(addLoadEvent) == 'function') {
+    addLoadEvent(Nwa_FocusFormAuto);
+} else {
+    Nwa_FocusFormAuto();
+}
+//-->
+</script></div>
+
+
+</form>
+
+
+<script language="JavaScript" type="text/javascript"><!--
+
+function Nwa_SetFieldEnabled(id, enable) {
+	if (document.getElementById) {
+		return Nwa_SetInputEnabled(document.getElementById(id), enable);
+	}
+}
+function Nwa_SetInputEnabled(input, enable) {
+	var o = input;
+	if (o) {
+		o.disabled = ! enable;
+		if (o.length) {
+			for (var i = 0; i < o.length; i++) {
+				o[i].disabled = ! enable;
+			}
+		}
+	}
+}
+
+function Nwa_SetOnChange(id, onchange) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onchange = onchange;
+	}
+}
+
+function Nwa_SetOnBlur(id, onblur) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onblur = onblur;
+	}
+}
+
+function Nwa_SetOnFocus(id, onfocus) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onfocus = onfocus;
+	}
+}
+
+function Nwa_SetOnKeyUp(id, onkeyup) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onkeyup = onkeyup;
+	}
+}
+
+function Nwa_SetOnKeyDown(id, onkeydown) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onkeydown = onkeydown;
+	}
+}
+
+function Nwa_SetOnKeyPress(id, onkeypress) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onkeypress = onkeypress;
+	}
+}
+
+function Nwa_SetOnClick(id, onclick) {
+	if (document.getElementById) {
+		var o = document.getElementById(id);
+		if (o) o.onclick = onclick;
+	}
+}
+
+
+
+document.form8a40ec07_weblogin.Nwa_OnFieldsChanged = function () {
+	var form;
+	try {
+
+		form = document.getElementById("form8a40ec07_weblogin");
+		if (typeof(form) !== 'object' || form === null) {
+			return;
+		}
+		with (form) {
+			Nwa_SetStyleDisplay("TR_form8a40ec07_weblogin_username", no_u.value != "1");
+			Nwa_SetStyleDisplay("TR_form8a40ec07_weblogin_password", no_p.value != "1");
+			Nwa_SetFieldEnabled("ID_form8a40ec07_weblogin_submit", (no_login.value == "") && ((typeof(loginTermsOK) == "function") ? loginTermsOK() : ((typeof(visitor_accept_terms) == "undefined") || visitor_accept_terms.checked)) && (username.value != "" || no_p.value == "1"));
+
+		}
+	} catch (e) {
+		alert("Internal form error: problem with element 'visible_if' or 'enable_if': " + e.message)
+	}
+}
+with (document.form8a40ec07_weblogin) {
+
+	for (var i = 0; i < elements.length; ++i) {
+		if (elements[i].id.substr(0, 3) == 'ID_') {
+			if (elements[i].type == 'checkbox' || elements[i].type == 'radio') {
+				elements[i].onclick = function (event) {
+					document.form8a40ec07_weblogin.Nwa_OnFieldsChanged(event);
+				}
+			} else {
+				elements[i].onchange = function (event) {
+					document.form8a40ec07_weblogin.Nwa_OnFieldsChanged(event);
+				}
+			}
+			if (elements[i].type == 'select-one') {
+
+				elements[i].onkeyup = function (event) {
+					document.form8a40ec07_weblogin.Nwa_OnFieldsChanged(event);
+				}
+			}
+		}
+	}
+}
+
+document.form8a40ec07_weblogin.Nwa_OnFieldsChanged();
+addLoadEvent(function () {window.setTimeout(function () {document.form8a40ec07_weblogin.Nwa_OnFieldsChanged()}, 750);}); // Call again after a short delay to catch auto-fill.
+
+
+
+
+// -->
+</script>
+</div>
+
+<p>
+    <a href="register.php" style="font-size:0.8em;"> <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" focusable="false" viewBox="0 0 32 32" role="img" class="base-icon" data-v-435c7010=""><g id="arrow" data-v-6b2e7a5b="" fill="currentColor" role="presentation"><path data-v-572825d6="" d="m19.83 18.25h-15.83v-4.5h15.83l-6.83-6.83 2.92-2.92 12 12-12 12-2.92-2.92z" data-v-6b2e7a5b=""></path></g></svg>Need an account? Click Here</a>
+</p></div>			</div>
+			<div id="footer">
+				<p id="question">Do you have a question?</p>
+<p style="color: #009b91">Our local reception will be pleased to assist you.</p>			</div>
+		</div>
+	</div>
+</body>
+</html>

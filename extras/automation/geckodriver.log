@@ -1,0 +1,22 @@
+1625675462669	geckodriver	INFO	Listening on 127.0.0.1:58893
+1625675462693	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofileKYwwJY"
+1625675463184	Marionette	INFO	Marionette enabled
+console.info: MINT: Trying to use the system region (based on LANG).
+console.info: MINT: System region is US
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at /tmp/rust_mozprofileKYwwJY/search.json.mozlz4", (void 0)))
+console.info: MINT: Loading search-config defaults.
+1625675465239	Marionette	INFO	Listening on port 36905
+1625675465318	Marionette	WARN	TLS certificate errors will be ignored for this session
+1625675489779	geckodriver	INFO	Listening on 127.0.0.1:49489
+1625675489798	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "--marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofilehPzVdI"
+1625675490228	Marionette	INFO	Marionette enabled
+console.info: MINT: Trying to use the system region (based on LANG).
+console.info: MINT: System region is US
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at /tmp/rust_mozprofilehPzVdI/search.json.mozlz4", (void 0)))
+console.info: MINT: Loading search-config defaults.
+1625675492056	Marionette	INFO	Listening on port 34073
+1625675492126	Marionette	WARN	TLS certificate errors will be ignored for this session
+1625675531465	Marionette	INFO	Stopped listening on port 34073
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+

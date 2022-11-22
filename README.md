@@ -4,10 +4,10 @@
 
 ## Folder Structure
 
-```
+```Text
 .
 ├── AC
-│   --> here comes the Auxilary Controller
+│   --> here comes the Auxiliary Controller
 ├── data
 ├── datasheets
 ├── DC
@@ -39,6 +39,7 @@
 - ![signal 4](drafts/signal-2022-10-04-140540_004.jpeg)
 - ![signal 5](drafts/signal-2022-10-04-140540_005.jpeg)
 - ![steering wheel](drafts/SteeringWheel-v0_20221016.png)
+
 ## Documentation and Data Sheets
 
 - [Signal Flows](docs/SignalFlows.md)

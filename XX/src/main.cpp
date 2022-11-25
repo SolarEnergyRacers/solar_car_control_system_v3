@@ -34,7 +34,7 @@
 #include <CarControl.h>
 #include <Console.h>
 
-//#include <Serial/Serial.h>
+//#include <Serial.h>
 #include <ADC.h>
 #include <CANBus.h>
 #include <DAC.h>
@@ -49,7 +49,7 @@ void app_main(void);
 using namespace std;
 
 Console console;
-CANBus can;
+CANBus canBus;
 CarControl carControl;
 CarState carState;
 I2CBus i2c;
@@ -73,13 +73,13 @@ void app_main(void) {
   // engineerDisplay.print(msg + "\n");
   i2c.verboseModeI2C = true;
 
-  msg = can.init();
+  msg = canBus.init();
   console << msg << "\n";
   // engineerDisplay.print(msg + "\n");
-  msg = can.create_task();
+  msg = canBus.create_task();
   console << msg << "\n";
   // engineerDisplay.print(msg + "\n");
-  can.verboseModeCan = true;
+  canBus.verboseModeCan = true;
 
   if (i2c.isDC()) {
     msg = dac.init();

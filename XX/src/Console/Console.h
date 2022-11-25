@@ -44,7 +44,6 @@ public:
   friend Console &operator<<(Console &c, const size_t &var);
   friend Console &operator<<(Console &c, const string &var);
   friend Console &operator<<(Console &c, const unsigned long &var);
-  // friend Console &operator<<(Console &c, const unsigned int &var);
   friend Console &operator<<(Console &c, const uint64_t &var);
   friend Console &operator<<(Console &c, const volatile int &var);
   // // real output

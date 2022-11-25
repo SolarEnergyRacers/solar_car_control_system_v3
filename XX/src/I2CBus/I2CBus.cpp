@@ -11,9 +11,9 @@
 
 #include <Wire.h> // Arduino I2C library
 
-#include <CarState/CarState.h>
-#include <Console/Console.h>
-#include <I2CBus/I2CBus.h>
+#include <CarState.h>
+#include <Console.h>
+#include <I2CBus.h>
 
 extern Console console;
 extern CarState carState;

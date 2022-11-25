@@ -33,4 +33,5 @@ public:
 
   SemaphoreHandle_t mutex;
   bool verboseModeCan = false;
+  bool verboseModeCanDebug = true;
 };

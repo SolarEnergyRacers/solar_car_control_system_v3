@@ -13,9 +13,9 @@
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 
-#include <Console/Console.h>
-#include <Helper/Helper.h>
-//#include <RTC/RTC.h>
+#include <Console.h>
+#include <Helper.h>
+//#include <RTC.h>
 
 extern Console console;
 //extern RTC rtc;

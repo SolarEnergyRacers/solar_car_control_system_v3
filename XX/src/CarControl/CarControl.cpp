@@ -10,27 +10,29 @@
 #include <string>
 
 #include <CAN.h>
+#include <CAN_config.h>
+#include <ESP32CAN.h>
 #include <Wire.h> // I2C
 
-#include <ADC/ADC.h>
-#include <CAN/CANBus.h>
-#include <CarControl/CarControl.h>
-// #include <CarSpeed/CarSpeed.h>
-#include <CarState/CarState.h>
-// #include <ConfigFile/ConfigFile.h>
-#include <Console/Console.h>
-#include <DAC/DAC.h>
-// #include <DriverDisplay/DriverDisplay.h>
-// #include <EngineerDisplay/EngineerDisplay.h>
-#include <Helper/Helper.h>
-#include <I2CBus/I2CBus.h>
-// #include <IOExt/IOExt.h>
-// #include <Indicator/Indicator.h>
-// #include <MCP23017/MCP23017.h>
-// #include <SDCard/SDCard.h>
+#include <ADC.h>
+#include <CANBus.h>
+#include <CarControl.h>
+// #include <CarSpeed.h>
+#include <CarState.h>
+// #include <ConfigFile.h>
+#include <Console.h>
+#include <DAC.h>
+// #include <DriverDisplay.h>
+// #include <EngineerDisplay.h>
+#include <Helper.h>
+#include <I2CBus.h>
+// #include <IOExt.h>
+// #include <Indicator.h>
+// #include <MCP23017.h>
+// #include <SDCard.h>
 
 extern ADC adc;
-extern CANBus can;
+extern CANBus canBus;
 extern CarControl carControl;
 // extern CarSpeed carSpeed;
 extern CarState carState;
@@ -349,20 +351,37 @@ void CarControl::task() {
       someThingChanged |= read_speed();
       // someThingChanged |= read_reference_cell_data();
     }
-    
-    xSemaphoreTakeT(can.mutex);
-    CAN.beginPacket(AC_BASE_ADDR);
-    CAN.write('A');
-    CAN.endPacket();
-    xSemaphoreGive(can.mutex);
-    console << " >AC- " << NL;
 
-    xSemaphoreTakeT(can.mutex);
-    CAN.beginPacket(DC_BASE_ADDR);
-    CAN.write('D');
-    CAN.endPacket();
-    xSemaphoreGive(can.mutex);
-    console << " >DC- " << NL;
+    CAN_frame_t tx_frame;
+    tx_frame.FIR.B.FF = CAN_frame_std;
+    tx_frame.FIR.B.DLC = 8;
+    if (i2c.isAC()) {
+      tx_frame.MsgID = 0x003;
+      tx_frame.data.u8[0] = '-';
+      tx_frame.data.u8[1] = '-';
+      tx_frame.data.u8[2] = 'A';
+      tx_frame.data.u8[3] = 'C';
+      tx_frame.data.u8[4] = '-';
+      tx_frame.data.u8[5] = '-';
+      tx_frame.data.u8[6] = '.';
+      tx_frame.data.u8[7] = '.';
+      // console << " >AC- " << NL;
+    }
+    if (i2c.isDC()) {
+      tx_frame.MsgID = 0x004;
+      tx_frame.data.u8[0] = '=';
+      tx_frame.data.u8[1] = '=';
+      tx_frame.data.u8[2] = 'D';
+      tx_frame.data.u8[3] = 'C';
+      tx_frame.data.u8[4] = '=';
+      tx_frame.data.u8[5] = '=';
+      tx_frame.data.u8[6] = '.';
+      tx_frame.data.u8[7] = '.';
+      // console << " >DC- " << NL;
+    }
+    xSemaphoreTakeT(canBus.mutex);
+    ESP32Can.CANWriteFrame(&tx_frame);
+    xSemaphoreGive(canBus.mutex);
 
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
@@ -382,3 +401,4 @@ void CarControl::task() {
     vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
   }
 }
+  

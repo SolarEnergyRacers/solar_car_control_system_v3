@@ -133,7 +133,6 @@ string CANBus::init() {
   bool hasError = false;
   console << "[  ] Init CANBus...\n";
   mutex = xSemaphoreCreateBinary();
-  //  ESP32Can.setPins(CAN_RX, CAN_TX);
   CAN_cfg.speed = CAN_SPEED_125KBPS;
   CAN_cfg.tx_pin_id = CAN_TX;
   CAN_cfg.rx_pin_id = CAN_RX;

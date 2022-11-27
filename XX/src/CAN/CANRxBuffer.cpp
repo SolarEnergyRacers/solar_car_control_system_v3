@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "CANRxBuffer.h"
+#include <CANRxBuffer.h>
 
 CANRxBuffer::CANRxBuffer() {
   head = 0;

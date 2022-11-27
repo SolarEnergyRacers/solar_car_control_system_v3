@@ -64,3 +64,4 @@ XY/src/I2CBus/I2CBus.cpp
 XY/src/I2CBus/I2CBus.h
 XY/src/System/System.cpp
 XY/src/System/System.h
+XY/include/LocalFunctionsAndDevices.h

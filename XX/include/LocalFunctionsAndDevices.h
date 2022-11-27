@@ -2,17 +2,11 @@
 #ifndef LocalFunctionsAndDevices_H
 #define LocalFunctionsAndDevices_H
 
-//#define ADC_ON true            // analog digital converte, I2C (ADS1015, ADS1115)
-//#define CAN_ON true            // CAN bus (MPPT, BMS, ..)
 #define CARCONTROL_ON true     // central car control task
 #define CARSPEED_ON true       // car pid speed controller
 #define COMMANDHANDLER_ON true // command input and deploy
-//#define DAC_ON true            // digital analog converter, I2C (DS1803)
 #define DS_ON false       // 1-Wire Digital Thermometer (DS18B20)
-#define GYROACC_ON true   // 6-axis Motion Tracking (BMI088)
-#define INDICATOR_ON true // indicator blink
 #define INT_ON false      // interrupt for I/O Expander (MCP23014)
-#define LIFESIGN_ON true  // LifeSign on Screens
 #define PWM_ON false      // 16-channel, 12-bit PWM Fm, I2C (PCA9685)
 //#define RTC_ON true            // real time clock, I2C
 #define SD_ON true           // SD card
@@ -23,8 +17,6 @@
  * external power supply that means with only 5V the logic must be inverted.
  */
 #define VCC_12V true
-
-#define DEBUGLEVEL_VERBOSED true
 
 #define WithTaskSuspend false // use of FreeRTOS task suspend functionality
 

@@ -77,17 +77,30 @@ void CarControl::_handleValueChanged() {
 }
 
 // bool CarControl::read_reference_cell_data() {
-//   carState.ReferenceSolarCell = adc.REFERENCE_CELL; // TODO Reserve_PORT
+//   carState.ReferenceSolarCell = adc.REFERENCE_CELL; // TODO
 //   return true;
 // }
+
+bool CarControl::read_potentiometer() {
+  int value = adc.SWITCH_POTENTIOMENTER_PORT;
+  if (carState.Potentiometer != value) {
+    carState.Potentiometer = value;
+    return true;
+  }
+  return false;
+}
 
 bool CarControl::read_speed() {
   float diameter = 0.50;           // m
   int16_t value = adc.MOTOR_SPEED; // native input
   float voltage = value * adc.get_multiplier();
-  float rpm = 370 * voltage;                                   // round per minute
-  carState.Speed = round(3.1415 * diameter * rpm * 6. / 100.); // unit: km/h
-  return true;
+  float rpm = 370 * voltage;                              // round per minute
+  int speed = round(3.1415 * diameter * rpm * 6. / 100.); // unit: km/h
+  if (carState.Speed != speed) {
+    carState.Speed = speed;
+    return true;
+  }
+  return false;
 }
 
 int CarControl::calculate_displayvalue_acc_dec(int valueDec, int valueAcc) {
@@ -349,6 +362,7 @@ void CarControl::task() {
     if (i2c.isDC()) {
       someThingChanged |= read_paddles();
       someThingChanged |= read_speed();
+      someThingChanged |= read_potentiometer();
       // someThingChanged |= read_reference_cell_data();
     }
 
@@ -356,7 +370,7 @@ void CarControl::task() {
     tx_frame.FIR.B.FF = CAN_frame_std;
     tx_frame.FIR.B.DLC = 8;
     if (i2c.isAC()) {
-      tx_frame.MsgID = 0x003;
+      tx_frame.MsgID = 3;
       tx_frame.data.u8[0] = '-';
       tx_frame.data.u8[1] = '-';
       tx_frame.data.u8[2] = 'A';
@@ -365,23 +379,28 @@ void CarControl::task() {
       tx_frame.data.u8[5] = '-';
       tx_frame.data.u8[6] = '.';
       tx_frame.data.u8[7] = '.';
-      // console << " >AC- " << NL;
     }
     if (i2c.isDC()) {
-      tx_frame.MsgID = 0x004;
+      tx_frame.MsgID = 4;
       tx_frame.data.u8[0] = '=';
       tx_frame.data.u8[1] = '=';
       tx_frame.data.u8[2] = 'D';
       tx_frame.data.u8[3] = 'C';
-      tx_frame.data.u8[4] = '=';
-      tx_frame.data.u8[5] = '=';
-      tx_frame.data.u8[6] = '.';
-      tx_frame.data.u8[7] = '.';
-      // console << " >DC- " << NL;
+      // tx_frame.data.u8[4] = '=';
+      // tx_frame.data.u8[5] = '=';
+      // tx_frame.data.u8[6] = '.';
+      // tx_frame.data.u8[7] = '.';
+      tx_frame.data.u32[1] = carState.Potentiometer;
     }
     xSemaphoreTakeT(canBus.mutex);
-    ESP32Can.CANWriteFrame(&tx_frame);
+    int retValue = ESP32Can.CANWriteFrame(&tx_frame);
     xSemaphoreGive(canBus.mutex);
+    console << "cs:" << retValue << NL;
+
+    // // xSemaphoreTakeT(canBus.mutex);
+    // int retValue = CAN_write_frame(&tx_frame);
+    // // xSemaphoreGive(canBus.mutex);
+    // console << retValue << NL;
 
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {

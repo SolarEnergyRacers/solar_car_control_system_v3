@@ -39,6 +39,7 @@
 #include <CANBus.h>
 #include <DAC.h>
 #include <I2CBus.h>
+#include <SPIBus.h>
 #include <System.h>
 
 // add C linkage definition
@@ -57,6 +58,7 @@ ADC adc;
 bool adcInited = false;
 DAC dac;
 bool dacInited = false;
+SPIBus spiBus;
 
 void app_main(void) {
   string msg;
@@ -80,6 +82,7 @@ void app_main(void) {
   console << msg << "\n";
   // engineerDisplay.print(msg + "\n");
   canBus.verboseModeCan = true;
+  canBus.verboseModeCanDebug = true;
 
   if (i2c.isDC()) {
     msg = dac.init();
@@ -93,7 +96,7 @@ void app_main(void) {
     msg = adc.create_task();
     console << msg << "\n";
     // engineerDisplay.print(msg + "\n");
-    adc.verboseModeADC = false;
+    adc.verboseModeADC = true;
   }
 
   msg = carControl.init();
@@ -103,4 +106,14 @@ void app_main(void) {
   console << msg << "\n";
   // engineerDisplay.print(msg + "\n");
   carControl.verboseMode = true;
+
+  console << "------------------------------------------------------------\n";
+  if (i2c.isDC()) {
+    console << "Initialization ready as DriveController\n";
+  } else if (i2c.isAC()) {
+    console << "Initialization ready as AuxiliaryController\n";
+  } else {
+    console << "Initialization failed, no Controller recognized\n";
+  }
+  console << "------------------------------------------------------------\n";
 }

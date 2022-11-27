@@ -36,6 +36,7 @@ CarStatePin *CarState::getPin(string pinName) { return &(carState.pins[carState.
 void CarState::init_values() {
   // values read from sensors
   Speed = 0;
+  Potentiometer = 0;
   Acceleration = 0;
   Deceleration = 0;
   BatteryVoltage = 0;
@@ -112,6 +113,7 @@ const string CarState::print(string msg, bool withColors) {
   if (msg.length() > 0)
     ss << msg << "\n";
   ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << "\n";
+  ss << "otentiometer .......... " << Potentiometer << "\n";
   ss << "Speed ................. " << Speed << "\n";
   ss << "Acceleration locked ... " << BOOL_str[(int)(AccelerationLocked)] << "\n";
   ss << "Acceleration .......... " << Acceleration << "\n";
@@ -198,6 +200,7 @@ const string CarState::serialize(string msg) {
   cJSON_AddStringToObject(dynData, "timeStamp", timeStamp.c_str());
   cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
   cJSON_AddStringToObject(dynData, "msg", msg.c_str());
+  cJSON_AddNumberToObject(dynData, "potentiometer", Potentiometer);
   cJSON_AddNumberToObject(dynData, "speed", Speed);
   cJSON_AddNumberToObject(dynData, "acceleration", Acceleration);
   cJSON_AddNumberToObject(dynData, "deceleration", Deceleration);
@@ -253,6 +256,7 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "Epoch, ";
     ss << "uptime, ";
     ss << "msg, ";
+    ss << "potentiomenter, ";
     ss << "speed, ";
     ss << "acceleration, ";
     ss << "deceleration, ";
@@ -308,6 +312,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << "XXXXXXX"; // ss << esp32time.getEpoch() << ", " ;
   ss << millis() / 1000 << ", ";
   ss << msg.c_str() << ", ";
+  ss << Potentiometer << ", ";
   ss << Speed << ", ";
   ss << Acceleration << ", ";
   ss << Deceleration << ", ";

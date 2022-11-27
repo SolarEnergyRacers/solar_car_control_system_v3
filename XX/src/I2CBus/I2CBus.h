@@ -5,10 +5,18 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_I2CBUS_H
 #define SOLAR_CAR_CONTROL_SYSTEM_I2CBUS_H
 
-#include <string>
-
+#include <fmt/core.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include <freertos/semphr.h> // semaphore
+#include <iostream>
+
+#include <Wire.h> // Arduino I2C library
+
+#include <definitions.h>
+
+#include <CarState.h>
+#include <Console.h>
+#include <I2CBus.h>
 
 using namespace std;
 

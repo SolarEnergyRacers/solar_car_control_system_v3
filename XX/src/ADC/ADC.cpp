@@ -94,15 +94,21 @@ void ADC::task() {
   // polling loop
   while (1) {
     // ADC0
-    MOTOR_SPEED = read(Pin::MOTOR_SPEED_PORT);
-    RESERVE = read(Pin::Reserve_PORT);
-    STW_ACC = read(Pin::STW_ACC_PORT);
-    STW_DEC = read(Pin::STW_DEC_PORT);
+    int motor_s = read(Pin::MOTOR_SPEED_PORT);
+    int potenti = read(Pin::SWITCH_POTENTIOMENTER_PORT);
+    int stw_acc = read(Pin::STW_ACC_PORT);
+    int stw_dec = read(Pin::STW_DEC_PORT);
 
-    if (verboseModeADC) {
-      console << fmt::format("adc: speed {:3d} | acc {:5d} | dec {:5d} | res {:5d}\n", MOTOR_SPEED, STW_ACC, STW_DEC, RESERVE);
+    if ((abs(MOTOR_SPEED - motor_s) > 2 || abs(SWITCH_POTENTIOMENTER - potenti) > 2 || abs(STW_ACC - stw_acc) > 2 ||
+         abs(STW_DEC - stw_dec) > 2)) {
+      if (verboseModeADC)
+        console << fmt::format("ADC: speed={:3d} | acc={:5d} | dec={:5d} | pot {:5d}\n", motor_s, stw_acc, stw_dec, potenti);
+
+      MOTOR_SPEED = motor_s;
+      SWITCH_POTENTIOMENTER = potenti;
+      STW_ACC = stw_acc;
+      STW_DEC = stw_dec;
     }
-
     // sleep
     vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
   }

@@ -30,6 +30,7 @@ public:
   static void valueChangedHandler() { valueChangeRequest++; };
 
   // bool read_reference_cell_data();
+  bool read_potentiometer();
   bool read_speed(); // in km/h
 
   int calculate_displayvalue_acc_dec(int valueDec, int valueAcc);

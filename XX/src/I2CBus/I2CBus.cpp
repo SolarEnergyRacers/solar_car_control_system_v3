@@ -1,15 +1,14 @@
 //
 // I2C Bus
 //
-#include <definitions.h>
-
 #include <fmt/core.h>
-#include <iostream>
-
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h> // semaphore
+#include <iostream>
 
 #include <Wire.h> // Arduino I2C library
+
+#include <definitions.h>
 
 #include <CarState.h>
 #include <Console.h>

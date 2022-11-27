@@ -148,9 +148,10 @@ public:
   bool initalize_config();
 
   // physical car data (measurement values)
-  int Speed;        // ADC
-  int Acceleration; // ADC Steering Wheel
-  int Deceleration; // ADC Steering Wheel
+  int Potentiometer; // ADC potentiometer from switch board
+  int Speed;         // ADC
+  int Acceleration;  // ADC Steering Wheel
+  int Deceleration;  // ADC Steering Wheel
   // #SAFETY#: acceleration lock
   bool AccelerationLocked; // DSC lock
   bool PaddlesAdjusted;    // did just padd adjustment: release lock if AccelerationDisplay==0

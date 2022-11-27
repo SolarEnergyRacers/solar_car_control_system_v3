@@ -8,8 +8,6 @@
 #include <CAN/CANRxBuffer.h>
 #include <CarState/CarState.h>
 
-void read_can_demo_task(void *pvParameter);
-
 class CANBus : public Abstract_task {
 
 public:
@@ -25,7 +23,7 @@ private:
   CANRxBuffer rxBuffer;
   std::map<uint16_t, int32_t> max_ages;
   std::map<uint16_t, int32_t> ages;
-
+  int handle_rx_packet(CANPacket packet);
 public:
   CANBus();
 
@@ -33,5 +31,5 @@ public:
 
   SemaphoreHandle_t mutex;
   bool verboseModeCan = false;
-  bool verboseModeCanDebug = true;
+  bool verboseModeCanDebug = false;
 };

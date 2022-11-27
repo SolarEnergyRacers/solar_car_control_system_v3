@@ -29,6 +29,8 @@ public:
 
   void onReceive(int packetSize);
 
+  int writePacket(uint16_t adr, uint64_t data);
+
   SemaphoreHandle_t mutex;
   bool verboseModeCan = false;
   bool verboseModeCanDebug = false;

@@ -10,8 +10,6 @@
 
 #include <Arduino.h>
 #include <CAN.h>
-#include <CAN_config.h>
-#include <ESP32CAN.h>
 
 #include <CANBus.h>
 #include <CarState.h>
@@ -25,8 +23,8 @@ extern CANBus canBus;
 extern I2CBus i2c;
 
 void onReceiveForwarder(int packetSize) {
-  if (canBus.verboseModeCanDebug)
-    console << "can-forwarder called" << NL;
+  // if (canBus.verboseModeCanDebug)
+  //   console << "can-forwarder called" << NL;
   canBus.onReceive(packetSize);
 }
 
@@ -126,38 +124,27 @@ CANBus::CANBus() {
 
 string CANBus::re_init() {
   CAN.end();
-  ESP32Can.CANStop();
+  // ESP32Can.CANStop();
   return CANBus::init();
 }
 
-CAN_device_t CAN_cfg;         // CAN Config
-const int rx_queue_size = 10; // Receive Queue size
-const int tx_queue_size = 10; // Transmit Queue size
 string CANBus::init() {
   bool hasError = false;
   console << "[  ] Init CANBus...\n";
   mutex = xSemaphoreCreateBinary();
-  CAN_cfg.speed = CAN_SPEED_125KBPS;
-  CAN_cfg.tx_pin_id = CAN_TX;
-  CAN_cfg.rx_pin_id = CAN_RX;
-  CAN_cfg.rx_queue = xQueueCreate(rx_queue_size, sizeof(CAN_frame_t));
-  CAN_cfg.tx_queue = xQueueCreate(tx_queue_size, sizeof(CAN_frame_t));
-  ESP32Can.CANInit();
-  xSemaphoreGive(mutex);
-  console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED_125KBPS);
-
-  // CAN.onReceive(onReceiveForwarder); // couldn't get it to work with method of object
+  CAN.setPins(CAN_RX, CAN_TX);
+  CAN.onReceive(onReceiveForwarder); // couldn't get it to work with method of object
 
   // xSemaphoreTakeT(mutex);
-  // if (!CAN.begin(CAN_SPEED)) {
-  //   xSemaphoreGive(mutex);
-  //   // opening CAN failed :,(
-  //   console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
-  //   hasError = true;
-  // } else {
-  //   xSemaphoreGive(mutex);
-  //   console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
-  // }
+  if (!CAN.begin(CAN_SPEED)) {
+    xSemaphoreGive(mutex);
+    // opening CAN failed :,(
+    console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
+    hasError = true;
+  } else {
+    xSemaphoreGive(mutex);
+    console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
+  }
 
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
@@ -177,10 +164,10 @@ void CANBus::onReceive(int packetSize) {
   xSemaphoreTakeT(mutex);
   packet.setID(CAN.packetId());
   xSemaphoreGive(mutex);
-  if (verboseModeCanDebug)
-    console << "CAN recieve: " << packet.getID() << NL;
+  // if (verboseModeCanDebug)
+  //   console << "CAN receive: " << packet.getID() << NL;
 
-  if (max_ages[packet.getID()] == 0 || (max_ages[packet.getID()] != -1 && millis() - ages[packet.getID()] > max_ages[packet.getID()])) {
+  //if (max_ages[packet.getID()] == 0 || (max_ages[packet.getID()] != -1 && millis() - ages[packet.getID()] > max_ages[packet.getID()])) {
 
     ages[packet.getID()] = millis();
     xSemaphoreTakeT(mutex);
@@ -195,7 +182,24 @@ void CANBus::onReceive(int packetSize) {
 
     // Add packet to buffer so task can handle it later
     rxBuffer.push(packet);
-  }
+  //}
+}
+
+int CANBus::writePacket(uint16_t adr, uint64_t data) {
+  xSemaphoreTakeT(mutex);
+  CAN.beginPacket(adr);
+  CANPacket packet = CANPacket(adr, data);
+  CAN.write(packet.getData_ui8(0));
+  CAN.write(packet.getData_ui8(1));
+  CAN.write(packet.getData_ui8(2));
+  CAN.write(packet.getData_ui8(3));
+  CAN.write(packet.getData_ui8(4));
+  CAN.write(packet.getData_ui8(5));
+  CAN.write(packet.getData_ui8(6));
+  CAN.write(packet.getData_ui8(7));
+  CAN.endPacket();
+  xSemaphoreGive(mutex);
+  return 0;
 }
 
 void CANBus::task() {
@@ -206,23 +210,23 @@ void CANBus::task() {
       console << 'c';
 
     // Handle recieved message with ESP32Can
-    CAN_frame_t rx_frame;
-    if (xQueueReceive(CAN_cfg.rx_queue, &rx_frame, 3 * portTICK_PERIOD_MS) == pdTRUE) {
-      if ((rx_frame.MsgID == 3 && i2c.isDC()) || (rx_frame.MsgID == 4 && i2c.isAC())) {
+    // CAN_frame_t rx_frame;
+    // if (xQueueReceive(CAN_cfg.rx_queue, &rx_frame, 3 * portTICK_PERIOD_MS) == pdTRUE) {
+    //   if ((rx_frame.MsgID == 3 && i2c.isDC()) || (rx_frame.MsgID == 4 && i2c.isAC())) {
 
-        if (rx_frame.FIR.B.RTR == CAN_RTR) {
-          console << "Id: " << rx_frame.MsgID << ", DLC " << rx_frame.FIR.B.DLC;
-        } else {
-          console << "Id: " << rx_frame.MsgID << ", DLC " << rx_frame.FIR.B.DLC << ", data: ";
-          for (int i = 0; i < rx_frame.FIR.B.DLC; i++) {
-            console << fmt::format("{:d} ", rx_frame.data.u8[i]);
-          }
-          console << fmt::format(" --- {:d}", rx_frame.data.u32[1]);
-          console << "\n";
-        }
-      }
-      // handle_rx_packet(packet);
-    }
+    //     if (rx_frame.FIR.B.RTR == CAN_RTR) {
+    //       console << "Id: " << rx_frame.MsgID << ", DLC " << rx_frame.FIR.B.DLC;
+    //     } else {
+    //       console << "Id: " << rx_frame.MsgID << ", DLC " << rx_frame.FIR.B.DLC << ", data: ";
+    //       for (int i = 0; i < rx_frame.FIR.B.DLC; i++) {
+    //         console << fmt::format("{:c} ", rx_frame.data.u8[i]);
+    //       }
+    //       console << fmt::format(" --- {:d}", rx_frame.data.u32[1]);
+    //       console << "\n";
+    //     }
+    //   }
+    //   // handle_rx_packet(packet);
+    // }
 
     // Handle recieved message with CANBus
     while (this->rxBuffer.isAvailable()) {

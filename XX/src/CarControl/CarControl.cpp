@@ -10,8 +10,6 @@
 #include <string>
 
 #include <CAN.h>
-#include <CAN_config.h>
-#include <ESP32CAN.h>
 #include <Wire.h> // I2C
 
 #include <ADC.h>
@@ -366,41 +364,9 @@ void CarControl::task() {
       // someThingChanged |= read_reference_cell_data();
     }
 
-    CAN_frame_t tx_frame;
-    tx_frame.FIR.B.FF = CAN_frame_std;
-    tx_frame.FIR.B.DLC = 8;
-    if (i2c.isAC()) {
-      tx_frame.MsgID = 3;
-      tx_frame.data.u8[0] = '-';
-      tx_frame.data.u8[1] = '-';
-      tx_frame.data.u8[2] = 'A';
-      tx_frame.data.u8[3] = 'C';
-      tx_frame.data.u8[4] = '-';
-      tx_frame.data.u8[5] = '-';
-      tx_frame.data.u8[6] = '.';
-      tx_frame.data.u8[7] = '.';
-    }
-    if (i2c.isDC()) {
-      tx_frame.MsgID = 4;
-      tx_frame.data.u8[0] = '=';
-      tx_frame.data.u8[1] = '=';
-      tx_frame.data.u8[2] = 'D';
-      tx_frame.data.u8[3] = 'C';
-      // tx_frame.data.u8[4] = '=';
-      // tx_frame.data.u8[5] = '=';
-      // tx_frame.data.u8[6] = '.';
-      // tx_frame.data.u8[7] = '.';
-      tx_frame.data.u32[1] = carState.Potentiometer;
-    }
-    xSemaphoreTakeT(canBus.mutex);
-    int retValue = ESP32Can.CANWriteFrame(&tx_frame);
-    xSemaphoreGive(canBus.mutex);
-    console << "cs:" << retValue << NL;
-
-    // // xSemaphoreTakeT(canBus.mutex);
-    // int retValue = CAN_write_frame(&tx_frame);
-    // // xSemaphoreGive(canBus.mutex);
-    // console << retValue << NL;
+    
+    int retValue = canBus.writePacket(3, 0x1122334455667788);
+    console << retValue << NL;
 
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {

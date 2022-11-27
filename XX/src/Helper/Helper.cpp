@@ -18,8 +18,8 @@
 //#include <RTC.h>
 
 extern Console console;
-//extern RTC rtc;
-//extern ESP32Time esp32time;
+// extern RTC rtc;
+// extern ESP32Time esp32time;
 
 using namespace std;
 
@@ -51,12 +51,13 @@ void xSemaphoreTakeT(xQueueHandle mutex) {
 }
 
 // https://github.com/fbiego/ESP32Time
-string getDateTime() { return "xx.xx.xxxx xx:xx";}// esp32time.getTime("%Y-%m-%d,%H:%M:%S").c_str(); }
-string getTime() { return  "xx:xx";}//esp32time.getTime("%H:%M:%S").c_str(); }
+string getDateTime() { return "xx.xx.xxxx xx:xx"; } // esp32time.getTime("%Y-%m-%d,%H:%M:%S").c_str(); }
+string getTime() { return "xx:xx"; }                // esp32time.getTime("%H:%M:%S").c_str(); }
 
 // string formatDateTime(RtcDateTime now) {
 //   string static dateTimeString =
-//       fmt::format("{:04d}-{:02d}-{:02d},{:02d}:{:02d}:{:02d}", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
+//       fmt::format("{:04d}-{:02d}-{:02d},{:02d}:{:02d}:{:02d}", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(),
+//       now.Second());
 //   return dateTimeString;
 // }
 

@@ -137,13 +137,15 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Drive Direction ....... " << DRIVE_DIRECTION_str[(int)(DriveDirection)] << "\n";
   ss << "Green Light ........... " << GreenLight << "\n";
   ss << "Fan ................... " << Fan << "\n";
-  ss << "------------------------" << "\n";
+  ss << "------------------------"
+     << "\n";
   ss << "Indicator ............. " << INDICATOR_str[(int)(Indicator)] << "\n";
   ss << "Constant Mode On ...... " << BOOL_str[(int)(ConstantModeOn)] << "\n";
   ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << "\n";
   ss << "Target Speed .......... " << TargetSpeed << "\n";
   ss << "Target Power .......... " << TargetPower << "\n";
-  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << "\n";
+  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")"
+     << "\n";
   ss << "Info Last ............. "
      << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << tempStr << "\n";
   ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << "\n";
@@ -178,7 +180,8 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Telemetry send intervall" << SendInterval << "\n";
   ss << "Telemetry cache records " << MaxCachedRecords << "\n";
 
-  ss << "===========================================================================================" << "\n";
+  ss << "==========================================================================================="
+     << "\n";
   return ss.str();
 }
 
@@ -302,8 +305,8 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "\n";
   }
   // data
-  ss << "XXXXXXX"; //ss << esp32time.getEpoch() << ", " ;
-  ss << millis()/1000 << ", ";
+  ss << "XXXXXXX"; // ss << esp32time.getEpoch() << ", " ;
+  ss << millis() / 1000 << ", ";
   ss << msg.c_str() << ", ";
   ss << Speed << ", ";
   ss << Acceleration << ", ";
@@ -340,7 +343,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << SdCardDetect << ", ";
 
   ss << DISPLAY_STATUS_str[(int)displayStatus] << ", ";
-  
+
   ss << TargetSpeed << ", ";
   ss << Kp << ", ";
   ss << Ki << ", ";
@@ -351,7 +354,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << LIGHT_str[(int)(Light)] << ", ";
   ss << GreenLight << ", ";
   ss << Fan << ", ";
-  ss << printIOs("", false).c_str()<< ", ";
+  ss << printIOs("", false).c_str() << ", ";
   ss << timeStamp.c_str() << ", ";
   ss << "\n";
   return ss.str();

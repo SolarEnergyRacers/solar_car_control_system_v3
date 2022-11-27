@@ -14,12 +14,11 @@
 
 //#include <RTC/RTC.h>
 
-
 using namespace std;
 
 char *fgets_stdio_blocking(char *str, int n);
 void xSemaphoreTakeT(xQueueHandle mutex);
-//string formatDateTime(RtcDateTime now);
+// string formatDateTime(RtcDateTime now);
 string getDateTime();
 string getTime();
 string getTimeStamp();

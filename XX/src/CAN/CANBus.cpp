@@ -23,7 +23,7 @@ extern Console console;
 extern CANBus canBus;
 
 void onReceiveForwarder(int packetSize) {
-  if(canBus.verboseModeCanDebug)
+  if (canBus.verboseModeCanDebug)
     console << "can-forwarder called\n";
   canBus.onReceive(packetSize);
 }

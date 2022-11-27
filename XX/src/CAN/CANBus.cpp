@@ -133,7 +133,7 @@ string CANBus::init() {
   console << "[  ] Init CANBus...\n";
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
-  CAN.onReceive(onReceiveForwarder); // couldn't get it to work with method of object
+
 
   // xSemaphoreTakeT(mutex);
   if (!CAN.begin(CAN_SPEED)) {
@@ -146,6 +146,8 @@ string CANBus::init() {
     console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   }
 
+  CAN.onReceive(onReceiveForwarder); // couldn't get it to work with method of object
+  
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
 

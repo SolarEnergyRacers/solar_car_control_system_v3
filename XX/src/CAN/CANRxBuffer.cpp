@@ -9,7 +9,7 @@ CANRxBuffer::CANRxBuffer() {
 }
 
 void CANRxBuffer::push(CANPacket packet) {
-  rxBuffer[this->head] = packet;
+  rxBuffer[head] = packet;
   head++;
   items++;
 

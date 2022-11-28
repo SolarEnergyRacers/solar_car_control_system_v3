@@ -236,12 +236,14 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   switch (packetId) {
   case AC_BASE_ADDR:
     if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(), packetId, packet.getData_ui64())
+      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(),
+                             canBus.getMaxPacketsBufferUsage(), packetId, packet.getData_ui64())
               << NL;
     break;
   case DC_BASE_ADDR:
     if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(), packetId, packet.getData_ui64())
+      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(),
+                             canBus.getMaxPacketsBufferUsage(), packetId, packet.getData_ui64())
               << NL;
     break;
   case BMS_BASE_ADDR:

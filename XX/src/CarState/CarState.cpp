@@ -9,33 +9,34 @@
 #include <string>
 
 #include <CarState.h>
-#include <ConfigFile.h>
+// #include <ConfigFile.h>
 #include <Console.h>
-#include <ESP32Time.h>
+// #include <ESP32Time.h>
 #include <Helper.h>
-#include <IOExt.h>
-#include <Indicator.h>
-#include <RTC.h>
-#include <SDCard.h>
+// #include <IOExt.h>
+// #include <Indicator.h>
+// #include <RTC.h>
+// #include <SDCard.h>
 #include <definitions.h>
 
 using namespace std;
 
 extern CarState carState;
 extern Console console;
-extern SDCard sdCard;
-extern IOExt ioExt;
-extern RTC rtc;
-extern ESP32Time esp32time;
+// extern SDCard sdCard;
+// extern IOExt ioExt;
+// extern RTC rtc;
+// extern ESP32Time esp32time;
 
 int CarState::getIdx(string pinName) { return idxOfPin.find(pinName)->second; }
-CarStatePin *CarState::getPin(int devNr, int pinNr) { return &(carState.pins[IOExt::getIdx(devNr, pinNr)]); }
-CarStatePin *CarState::getPin(int port) { return &(carState.pins[IOExt::getIdx(port)]); }
+// CarStatePin *CarState::getPin(int devNr, int pinNr) { return &(carState.pins[IOExt::getIdx(devNr, pinNr)]); }
+// CarStatePin *CarState::getPin(int port) { return &(carState.pins[IOExt::getIdx(port)]); }
 CarStatePin *CarState::getPin(string pinName) { return &(carState.pins[carState.getIdx(pinName)]); }
 
 void CarState::init_values() {
   // values read from sensors
   Speed = 0;
+  Potentiometer = 0;
   Acceleration = 0;
   Deceleration = 0;
   BatteryVoltage = 0;
@@ -60,41 +61,41 @@ void CarState::init_values() {
 
   // read from SER4CONFIG.INI file
   initalize_config();
-  console << print("State after reading SER4CONFIG.INI") << "\n";
+  console << print("State after reading SER4CONFIG.INI") << NL;
 }
 
 bool CarState::initalize_config() {
-  try {
-    ConfigFile cf = ConfigFile(FILENAME_SER4CONFIG);
-    // [Main]
-    LogFilename = cf.get("Main", "LogFilename", "/SER4DATA.CSV");
-    LogFilePeriod = cf.get("Main", "LogFilePeriod", 1000);
-    LogInterval = cf.get("Main", "LogInterval", 1);
-    // [PID]
-    Kp = cf.get("PID", "Kp", 15);
-    Ki = cf.get("PID", "Ki", 5);
-    Kd = cf.get("PID", "Kd", 0.05);
-    // [Dynamic]
-    PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
-    PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
-    PaddleAdjustCounter = cf.get("Dynamic", "PaddleAdjustCounter", 18);
-    ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
-    ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
-    ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
-    ButtonControlModeIncreaseHeigh = cf.get("Dynamic", "ButtonControlModeIncreaseHeigh", 10);
-    ButtonControlModeIncrease = ButtonControlModeIncreaseLow;
-    // [Communication]
-    CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 3000);
-    Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);
-    Serial2Baudrate = cf.get("Communication", "Serial2Baudrate", 9600);
-    // [Telemetry]
-    SendInterval = cf.get("Telemetry", "", 1000);
-    MaxCachedRecords = cf.get("Telemetry", "MaxCachedRecords", 100);
+  // try {
+  //   ConfigFile cf = ConfigFile(FILENAME_SER4CONFIG);
+  //   // [Main]
+  //   LogFilename = cf.get("Main", "LogFilename", "/SER4DATA.CSV");
+  //   LogFilePeriod = cf.get("Main", "LogFilePeriod", 1000);
+  //   LogInterval = cf.get("Main", "LogInterval", 1);
+  //   // [PID]
+  //   Kp = cf.get("PID", "Kp", 15);
+  //   Ki = cf.get("PID", "Ki", 5);
+  //   Kd = cf.get("PID", "Kd", 0.05);
+  //   // [Dynamic]
+  //   PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
+  //   PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
+  //   PaddleAdjustCounter = cf.get("Dynamic", "PaddleAdjustCounter", 18);
+  //   ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
+  //   ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
+  //   ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
+  //   ButtonControlModeIncreaseHeigh = cf.get("Dynamic", "ButtonControlModeIncreaseHeigh", 10);
+  //   ButtonControlModeIncrease = ButtonControlModeIncreaseLow;
+  //   // [Communication]
+  //   CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 3000);
+  //   Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);
+  //   Serial2Baudrate = cf.get("Communication", "Serial2Baudrate", 9600);
+  //   // [Telemetry]
+  //   SendInterval = cf.get("Telemetry", "", 1000);
+  //   MaxCachedRecords = cf.get("Telemetry", "MaxCachedRecords", 100);
 
-  } catch (exception &ex) {
-    console << "WARN: No config file: '" << FILENAME_SER4CONFIG << "' found or readable: " << ex.what() << "\n";
-    return false;
-  }
+  // } catch (exception &ex) {
+  //   console << "WARN: No config file: '" << FILENAME_SER4CONFIG << "' found or readable: " << ex.what() << NL;
+  //   return false;
+  // }
   return true;
 }
 
@@ -110,75 +111,76 @@ const string CarState::print(string msg, bool withColors) {
   // ss << t.tm_year << "." << t.tm_mon << "." << t.tm_mday << "_" << t.tm_hour << ":" << t.tm_min << ":" << t.tm_sec;
   ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
   if (msg.length() > 0)
-    ss << msg << endl;
-  ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << endl;
-  ss << "Speed ................. " << Speed << endl;
-  ss << "Acceleration locked ... " << BOOL_str[(int)(AccelerationLocked)] << endl;
-  ss << "Acceleration .......... " << Acceleration << endl;
-  ss << "Deceleration .......... " << Deceleration << endl;
-  ss << "Acceleration Display... " << AccelerationDisplay << endl;
-  ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << endl;
-  ss << "Battery On............. " << BatteryOn << endl;
-  ss << "Battery Voltage ....... " << BatteryVoltage << endl;
-  ss << "Battery Current........ " << BatteryCurrent << endl;
-  ss << "Battery Errors ........." << batteryErrorsAsString(true) << endl;
-  ss << "Battery Precharge State " << PRECHARGE_STATE_str[(int)(PrechargeState)] << endl;
-  ss << "Photo Voltaic On ...... " << PhotoVoltaicOn << endl;
-  ss << "MPPT1 Current ......... " << Mppt1Current << endl;
-  ss << "MPPT2 Current ......... " << Mppt2Current << endl;
-  ss << "MPPT3 Current ......... " << Mppt3Current << endl;
-  ss << "Photo Voltaic Current . " << PhotoVoltaicCurrent << endl;
-  ss << "Photo Reference Cell .. " << ReferenceSolarCell << endl;
-  ss << "Acceleration Display .. " << AccelerationDisplay << endl;
-  ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << endl;
-  ss << "Photo Voltaic On ...... " << PhotoVoltaicOn << endl;
-  ss << "Motor On .............. " << MotorOn << endl;
-  ss << "Motor Current ......... " << MotorCurrent << endl;
-  ss << "Drive Direction ....... " << DRIVE_DIRECTION_str[(int)(DriveDirection)] << endl;
-  ss << "Green Light ........... " << GreenLight << endl;
-  ss << "Fan ................... " << Fan << endl;
-  ss << "------------------------" << endl;
-  ss << "Indicator ............. " << INDICATOR_str[(int)(Indicator)] << endl;
-  ss << "Constant Mode On ...... " << BOOL_str[(int)(ConstantModeOn)] << endl;
-  ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << endl;
-  ss << "Target Speed .......... " << TargetSpeed << endl;
-  ss << "Target Power .......... " << TargetPower << endl;
-  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << endl;
+    ss << msg << NL;
+  ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << NL;
+  ss << "otentiometer .......... " << Potentiometer << NL;
+  ss << "Speed ................. " << Speed << NL;
+  ss << "Acceleration locked ... " << BOOL_str[(int)(AccelerationLocked)] << NL;
+  ss << "Acceleration .......... " << Acceleration << NL;
+  ss << "Deceleration .......... " << Deceleration << NL;
+  ss << "Acceleration Display... " << AccelerationDisplay << NL;
+  ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << NL;
+  ss << "Battery On............. " << BatteryOn << NL;
+  ss << "Battery Voltage ....... " << BatteryVoltage << NL;
+  ss << "Battery Current........ " << BatteryCurrent << NL;
+  ss << "Battery Errors ........." << batteryErrorsAsString(true) << NL;
+  ss << "Battery Precharge State " << PRECHARGE_STATE_str[(int)(PrechargeState)] << NL;
+  ss << "Photo Voltaic On ...... " << PhotoVoltaicOn << NL;
+  ss << "MPPT1 Current ......... " << Mppt1Current << NL;
+  ss << "MPPT2 Current ......... " << Mppt2Current << NL;
+  ss << "MPPT3 Current ......... " << Mppt3Current << NL;
+  ss << "Photo Voltaic Current . " << PhotoVoltaicCurrent << NL;
+  ss << "Photo Reference Cell .. " << ReferenceSolarCell << NL;
+  ss << "Acceleration Display .. " << AccelerationDisplay << NL;
+  ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << NL;
+  ss << "Photo Voltaic On ...... " << PhotoVoltaicOn << NL;
+  ss << "Motor On .............. " << MotorOn << NL;
+  ss << "Motor Current ......... " << MotorCurrent << NL;
+  ss << "Drive Direction ....... " << DRIVE_DIRECTION_str[(int)(DriveDirection)] << NL;
+  ss << "Green Light ........... " << GreenLight << NL;
+  ss << "Fan ................... " << Fan << NL;
+  ss << "------------------------" << NL;
+  ss << "Indicator ............. " << INDICATOR_str[(int)(Indicator)] << NL;
+  ss << "Constant Mode On ...... " << BOOL_str[(int)(ConstantModeOn)] << NL;
+  ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << NL;
+  ss << "Target Speed .......... " << TargetSpeed << NL;
+  ss << "Target Power .......... " << TargetPower << NL;
+  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << NL;
   ss << "Info Last ............. "
-     << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << tempStr << endl;
-  ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << endl;
-  ss << "Light ................. " << LIGHT_str[(int)(Light)] << endl;
-  ss << "IO .................... " << printIOs("", false) << endl;
+     << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << tempStr << NL;
+  ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << NL;
+  ss << "Light ................. " << LIGHT_str[(int)(Light)] << NL;
+  ss << "IO .................... " << printIOs("", false) << NL;
 
-  ss << "Log file name ......... " << LogFilename << endl;
-  ss << "Log file period [h].... " << LogFilePeriod << endl;
-  ss << "Log file interval [ms]. " << LogInterval << endl;
+  ss << "Log file name ......... " << LogFilename << NL;
+  ss << "Log file period [h].... " << LogFilePeriod << NL;
+  ss << "Log file interval [ms]. " << LogInterval << NL;
 
   // [TaskTimings]
-  ss << "Sleep time EIOExt ..... " << SleepTimeIOExt << endl;
+  ss << "Sleep time EIOExt ..... " << SleepTimeIOExt << NL;
 
   // [PID]
-  ss << "Kp .................... " << Kp << endl;
-  ss << "Ki .................... " << Ki << endl;
-  ss << "Kd .................... " << Kd << endl;
+  ss << "Kp .................... " << Kp << NL;
+  ss << "Ki .................... " << Ki << NL;
+  ss << "Kd .................... " << Kd << NL;
 
   // [Dynamic]
-  ss << "Paddle damping ........ " << PaddleDamping << endl;
-  ss << "Paddle offset ......... " << PaddleOffset << endl;
-  ss << "Paddle adjustment ..... " << PaddleAdjustCounter << endl;
-  ss << "Const speed increase .. " << ConstSpeedIncrease << endl;
-  ss << "Const power invrease .. " << ConstPowerIncrease << endl;
+  ss << "Paddle damping ........ " << PaddleDamping << NL;
+  ss << "Paddle offset ......... " << PaddleOffset << NL;
+  ss << "Paddle adjustment ..... " << PaddleAdjustCounter << NL;
+  ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
+  ss << "Const power invrease .. " << ConstPowerIncrease << NL;
 
   // [Communication]
-  ss << "Car data send period [ms]. " << CarDataSendPeriod << endl;
-  ss << "Serial 1 baud rate .... " << Serial1Baudrate << endl;
-  ss << "Serial 2 baud rate .... " << Serial2Baudrate << endl;
+  ss << "Car data send period [ms]. " << CarDataSendPeriod << NL;
+  ss << "Serial 1 baud rate .... " << Serial1Baudrate << NL;
+  ss << "Serial 2 baud rate .... " << Serial2Baudrate << NL;
 
   // [Telemetry]
-  ss << "Telemetry send intervall" << SendInterval << endl;
-  ss << "Telemetry cache records " << MaxCachedRecords << endl;
+  ss << "Telemetry send intervall" << SendInterval << NL;
+  ss << "Telemetry cache records " << MaxCachedRecords << NL;
 
-  ss << "===========================================================================================" << endl;
+  ss << "===========================================================================================" << NL;
   return ss.str();
 }
 
@@ -195,6 +197,7 @@ const string CarState::serialize(string msg) {
   cJSON_AddStringToObject(dynData, "timeStamp", timeStamp.c_str());
   cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
   cJSON_AddStringToObject(dynData, "msg", msg.c_str());
+  cJSON_AddNumberToObject(dynData, "potentiometer", Potentiometer);
   cJSON_AddNumberToObject(dynData, "speed", Speed);
   cJSON_AddNumberToObject(dynData, "acceleration", Acceleration);
   cJSON_AddNumberToObject(dynData, "deceleration", Deceleration);
@@ -250,6 +253,7 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "Epoch, ";
     ss << "uptime, ";
     ss << "msg, ";
+    ss << "potentiomenter, ";
     ss << "speed, ";
     ss << "acceleration, ";
     ss << "deceleration, ";
@@ -299,12 +303,13 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "io, ";
     ss << "timeStampDate, ";
     ss << "timeStampTime, ";
-    ss << endl;
+    ss << NL;
   }
   // data
-  ss << esp32time.getEpoch() << ", ";
+  ss << "XXXXXXX"; // ss << esp32time.getEpoch() << ", " ;
   ss << millis() / 1000 << ", ";
   ss << msg.c_str() << ", ";
+  ss << Potentiometer << ", ";
   ss << Speed << ", ";
   ss << Acceleration << ", ";
   ss << Deceleration << ", ";
@@ -353,7 +358,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << Fan << ", ";
   ss << printIOs("", false).c_str() << ", ";
   ss << timeStamp.c_str() << ", ";
-  ss << endl;
+  ss << NL;
   return ss.str();
 }
 
@@ -368,39 +373,39 @@ const string CarState::printIOs(string msg, bool withColors, bool deltaOnly) {
   }
   stringstream ss(msg);
   if (msg.length() > 0)
-    ss << msg << endl;
+    ss << msg << NL;
 
   bool hasDelta = false;
   for (int devNr = 0; devNr < MCP23017_NUM_DEVICES; devNr++) {
     ss << devNr << ": ";
-    for (int pinNr = 0; pinNr < MCP23017_NUM_PORTS; pinNr++) {
-      int idx = IOExt::getIdx(devNr, pinNr);
-      CarStatePin *pin = carState.getPin(devNr, pinNr);
-      if (pin->mode == OUTPUT) {
-        if (pin->value != pin->oldValue) {
-          hasDelta = true;
-          ss << highLightColorChg << pin->value << normalColor;
-        } else {
-          ss << highLightColorOut << pin->value << normalColor;
-        }
-      } else {
-        if (pin->value != pin->oldValue) {
-          hasDelta = true;
-          ss << highLightColorChg << pin->value << normalColor;
-        } else {
-          ss << pin->value;
-        }
-      }
-      if (idx < MCP23017_NUM_DEVICES * MCP23017_NUM_PORTS - 1) {
-        if ((idx + 1) % 8 == 0)
-          ss << " | ";
-        else if ((idx + 1) % 4 == 0)
-          ss << "-";
-      }
-    }
+    // for (int pinNr = 0; pinNr < MCP23017_NUM_PORTS; pinNr++) {
+    //   int idx = IOExt::getIdx(devNr, pinNr);
+    //   CarStatePin *pin = carState.getPin(devNr, pinNr);
+    //   if (pin->mode == OUTPUT) {
+    //     if (pin->value != pin->oldValue) {
+    //       hasDelta = true;
+    //       ss << highLightColorChg << pin->value << normalColor;
+    //     } else {
+    //       ss << highLightColorOut << pin->value << normalColor;
+    //     }
+    //   } else {
+    //     if (pin->value != pin->oldValue) {
+    //       hasDelta = true;
+    //       ss << highLightColorChg << pin->value << normalColor;
+    //     } else {
+    //       ss << pin->value;
+    //     }
+    //   }
+    //   if (idx < MCP23017_NUM_DEVICES * MCP23017_NUM_PORTS - 1) {
+    //     if ((idx + 1) % 8 == 0)
+    //       ss << " | ";
+    //     else if ((idx + 1) % 4 == 0)
+    //       ss << "-";
+    //   }
+    // }
   }
 
-  // ss << endl;
+  // ss << NL;
   if (hasDelta || !deltaOnly)
     return ss.str();
   else

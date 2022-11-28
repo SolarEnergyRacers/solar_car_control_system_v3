@@ -15,6 +15,13 @@ Version 2022.10.18
 | Button Constant Mode on/off      | >    | CAN         | carStateDC              |
 | Button Constant Mode speed/power | >    | CAN         | carStateDC              |
 | Break pedal state                | <    | CAN         | carStateDC              |
+| Step width Plus/Minus            | <    | CAN         | carStateDC              |
+
+## Communication SwitchBoard - DC
+
+| SwitchBoard | Dir  | Type | DC (drive controller) |
+| ----------- | ---- | ---- | --------------------- |
+| Potentiometer (step width?)          | >    | analog 0-5V | carStateDC ➡ MC |
 
 ## Communication MC - DC
 

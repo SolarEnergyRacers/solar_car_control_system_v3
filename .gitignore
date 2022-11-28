@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+# local device settings fior development and test
+XX/include/LocalFunctionsAndDevices.h
+
+XY/**

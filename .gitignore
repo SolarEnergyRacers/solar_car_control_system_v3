@@ -30,4 +30,9 @@
 *.exe
 *.out
 *.app
+
+# local device settings fior development and test
+XX/include/LocalFunctionsAndDevices.h
+
+# tenmporary used folder for mini prove of concepts
 XY/**

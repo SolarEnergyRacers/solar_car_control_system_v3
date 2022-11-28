@@ -87,8 +87,8 @@
 #define CAN_RX (gpio_num_t)26
 #define CAN_SPEED 125E3 // CAN Speed 125 kb/s
 //#define CAN_SPEED 500E3 // CAN Speed 500 kb/s
-#define AC_BASE_ADDR 0x800
-#define DC_BASE_ADDR 0x810
+#define AC_BASE_ADDR 0x777
+#define DC_BASE_ADDR 0x778
 #define BMS_BASE_ADDR 0x700
 #define MPPT1_BASE_ADDR 0x600
 #define MPPT2_BASE_ADDR 0x610

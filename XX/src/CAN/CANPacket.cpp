@@ -19,9 +19,9 @@ CANPacket::CANPacket(uint16_t id, uint64_t data) {
   this->data.data_u64 = data;
 }
 
-void CANPacket::setID(uint16_t id) { this->id = id; }
+uint16_t CANPacket::getId() { return id; }
 
-uint16_t CANPacket::getID() { return id; }
+void CANPacket::setId(uint16_t id) { this->id = id; }
 
 void CANPacket::setData(uint8_t data[]) {
   for (int i = 0; i < 8; i++) {

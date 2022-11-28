@@ -302,8 +302,8 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << endl;
   }
   // data
-  ss << esp32time.getEpoch() << ", " ;
-  ss << millis()/1000 << ", ";
+  ss << esp32time.getEpoch() << ", ";
+  ss << millis() / 1000 << ", ";
   ss << msg.c_str() << ", ";
   ss << Speed << ", ";
   ss << Acceleration << ", ";
@@ -340,7 +340,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << SdCardDetect << ", ";
 
   ss << DISPLAY_STATUS_str[(int)displayStatus] << ", ";
-  
+
   ss << TargetSpeed << ", ";
   ss << Kp << ", ";
   ss << Ki << ", ";
@@ -351,7 +351,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << LIGHT_str[(int)(Light)] << ", ";
   ss << GreenLight << ", ";
   ss << Fan << ", ";
-  ss << printIOs("", false).c_str()<< ", ";
+  ss << printIOs("", false).c_str() << ", ";
   ss << timeStamp.c_str() << ", ";
   ss << endl;
   return ss.str();

@@ -31,8 +31,8 @@ public:
     return *this;
   };
 
-  void setID(uint16_t id);
-  uint16_t getID();
+  void setId(uint16_t id);
+  uint16_t getId();
 
   void setData(uint8_t data[]);
   void setData(uint64_t data);

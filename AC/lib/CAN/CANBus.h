@@ -5,8 +5,8 @@
 #include <map>
 
 #include <CAN/CANRxBuffer.h>
-#include <abstract_task.h>
 #include <CarState/CarState.h>
+#include <abstract_task.h>
 
 void read_can_demo_task(void *pvParameter);
 

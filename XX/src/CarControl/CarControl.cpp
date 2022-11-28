@@ -80,7 +80,7 @@ void CarControl::_handleValueChanged() {
 // }
 
 bool CarControl::read_potentiometer() {
-  int value = adc.SWITCH_POTENTIOMENTER_PORT;
+  int value = adc.SWITCH_POTENTIOMENTER;
   if (carState.Potentiometer != value) {
     carState.Potentiometer = value;
     return true;
@@ -297,7 +297,7 @@ void CarControl::adjust_paddles(int cycles) {
   delay(1000);
   string result = carState.AccelerationDisplay == 0 ? "ok" : (carState.AccelerationDisplay == -64) ? "BRK?" : "ERR";
   s = fmt::format("=> dec {:5}-{:5}        => acc {:5}-{:5} => {}", ads_min_dec, ads_max_dec, ads_min_acc, ads_max_acc, result);
-  console << "\n    " << s << "\n";
+  console << "\n    " << s << NL;
   // if (engineerDisplay.get_DisplayStatus() == DISPLAY_STATUS::DRIVER_RUNNING) {
   //   carState.DriverInfo = s;
   // }
@@ -354,7 +354,7 @@ void CarControl::task() {
     // handle changed INPUT pins
     bool someThingChanged = false;
     // if (carState.ControlMode == CONTROL_MODE::PADDLES)
-    //   someThingChanged |= read_paddles();
+    //   someThingChanged |= read_pChanges not staged for commit:addles();
     // else if (!carState.ConstantModeOn)
     //   someThingChanged |= read_PLUS_MINUS();
     if (i2c.isDC()) {
@@ -364,9 +364,13 @@ void CarControl::task() {
       // someThingChanged |= read_reference_cell_data();
     }
 
-    
-    int retValue = canBus.writePacket(3, 0x1122334455667788);
-    console << retValue << NL;
+    if (i2c.isAC()) {
+      canBus.writePacket(DC_BASE_ADDR, (uint64_t)0x123a);
+    } else if (i2c.isDC()) {
+      canBus.writePacket(AC_BASE_ADDR, (uint64_t)carState.Potentiometer);
+    } else {
+      console << "? ";
+    }
 
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {

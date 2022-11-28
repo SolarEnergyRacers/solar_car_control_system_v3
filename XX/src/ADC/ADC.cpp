@@ -43,7 +43,7 @@ string ADC::init() {
     xSemaphoreGive(i2c.mutex);
     console << fmt::format("\n        ERROR: Wrong ADS1x15 at address: {:#04x}.\n", I2C_ADDRESS_ADS1x15);
   } else {
-    console << "\n";
+    console << NL;
     // set gain amplifier value
     // 2/3x gain +/- 6.144V
     // 1 bit = 3mV (ADS1015) / 0.1875mV (ADS1115)
@@ -56,7 +56,7 @@ string ADC::init() {
     // 1 bit = 3mV (ADS1015) 0.1875mV (ADS1115)
     float multiplier = adsDevice.toVoltage(1); // voltage factor
     xSemaphoreGive(i2c.mutex);
-    console << "        Max voltage=" << adsDevice.getMaxVoltage() << " with multiplier=" << multiplier << "\n";
+    console << "        Max voltage=" << adsDevice.getMaxVoltage() << " with multiplier=" << multiplier << NL;
     // read all inputs & report
     for (int i = 0; i < 4; i++) {
       xSemaphoreTakeT(i2c.mutex);

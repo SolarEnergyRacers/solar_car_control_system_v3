@@ -139,13 +139,13 @@ void app_main(void) {
   msg = carControl.init();
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
-  msg = carControl.create_task(10, 200, 8000);
+  msg = carControl.create_task(10, 500, 8000);
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
   carControl.verboseMode = true;
 
   if (i2cBus.isAC()) {
-    msg = engineerDisplay.create_task(10);
+    msg = engineerDisplay.create_task(10, 300, 8000);
     console << msg << "\n";
     engineerDisplay.print(msg + "\n");
     driverDisplay.init();

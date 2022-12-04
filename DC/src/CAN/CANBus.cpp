@@ -183,20 +183,41 @@ void CANBus::onReceive(int packetSize) {
 }
 
 bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3) {
-  console << "ERROR: not implemented yet\n";
-  return false;
+  try {
+    CANPacket packet = CANPacket(adr, data0, data1, data2, data3);
+    return writePacket(adr, packet);
+  } catch (exception &ex) {
+    console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
+    return false;
+  }
+  return true;
 }
 
 bool CANBus::writePacket(uint16_t adr, uint32_t data0, uint32_t data1) {
-  console << "ERROR: not implemented yet\n";
-  return false;
+  try {
+    CANPacket packet = CANPacket(adr, data0, data1);
+    return writePacket(adr, packet);
+  } catch (exception &ex) {
+    console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
+    return false;
+  }
+  return true;
 }
 
 bool CANBus::writePacket(uint16_t adr, uint64_t data) {
   try {
+    CANPacket packet = CANPacket(adr, data);
+    return writePacket(adr, packet);
+  } catch (exception &ex) {
+    console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
+    return false;
+  }
+}
+
+bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
+  try {
     xSemaphoreTakeT(mutex);
     CAN.beginPacket(adr);
-    CANPacket packet = CANPacket(adr, data);
     CAN.write(packet.getData_ui8(0));
     CAN.write(packet.getData_ui8(1));
     CAN.write(packet.getData_ui8(2));
@@ -208,7 +229,7 @@ bool CANBus::writePacket(uint16_t adr, uint64_t data) {
     CAN.endPacket();
     xSemaphoreGive(mutex);
   } catch (exception &ex) {
-    console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
+    console << "ERROR: Couldn not send data to address " << adr << NL;
     return false;
   }
   return true;

@@ -362,7 +362,7 @@ void CarControl::task() {
     someThingChanged |= read_potentiometer();
     // someThingChanged |= read_reference_cell_data();
 
-    canBus.writePacket(AC_BASE_ADDR, (uint64_t)carState.Potentiometer);
+    canBus.writePacket(AC_BASE_ADDR, 0, carState.Acceleration, carState.Deceleration, carState.Potentiometer);
 
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {

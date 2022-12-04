@@ -115,7 +115,7 @@ void app_main(void) {
   msg = canBus.init();
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
-  msg = canBus.create_task(15, 600, 8000);
+  msg = canBus.create_task(15, 500, 8000);
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
   canBus.verboseModeCan = true;
@@ -131,7 +131,7 @@ void app_main(void) {
     msg = adc.init();
     console << msg << NL;
     // engineerDisplay.print(msg + "\n");
-    msg = adc.create_task(6, 300, 8000);
+    msg = adc.create_task(6, 500, 8000);
     console << msg << NL;
     // engineerDisplay.print(msg + "\n");
     adc.verboseModeADC = true;
@@ -140,7 +140,7 @@ void app_main(void) {
   msg = carControl.init();
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
-  msg = carControl.create_task(10, 200, 8000);
+  msg = carControl.create_task(10, 500, 8000);
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
   carControl.verboseMode = true;

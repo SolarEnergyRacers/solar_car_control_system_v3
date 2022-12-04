@@ -20,6 +20,8 @@ private:
 public:
   CANPacket();
   CANPacket(uint16_t id, uint8_t data[]);
+  CANPacket(uint16_t id, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3);
+  CANPacket(uint16_t id, uint32_t data0, uint32_t data1);
   CANPacket(uint16_t id, uint64_t data);
 
   CANPacket &operator=(const CANPacket &that) {

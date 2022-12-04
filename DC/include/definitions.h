@@ -4,12 +4,15 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-#define VERSION "$GIT_BRANCH_$GIT_COMMIT_HASH"
+//#define VERSION "$GIT_BRANCH_$GIT_COMMIT_HASH"
+#define VERSION "3.0.0"
 
 #include <LocalFunctionsAndDevices.h>
 
 #define FILENAME_SER4CONFIG "SER4CONF.INI"
 //#define FILENAME_SER4DATA "/ser4data.csv"
+
+#define NL "\n"
 
 /* Non free selectable addresses:
  *
@@ -20,6 +23,7 @@
  * RTC
  * const uint8_t DS1307_ADDRESS = 0x68;
  */
+#define ITC_ADDRESS_DS1307 0x68
 
 /*
  *  GPInputOutput
@@ -41,10 +45,7 @@
 //#define I2C_FREQ 50000 // 50kHz
 
 // analog digital coder
-#define NUM_ADC_DEVICES 3
-#define I2C_ADDRESS_ADS1x15_0 0x48
-#define I2C_ADDRESS_ADS1x15_1 0x49
-#define I2C_ADDRESS_ADS1x15_2 0x4a
+#define I2C_ADDRESS_ADS1x15 0x48
 #define ADC_MAX 65535
 
 // Puls width modifier
@@ -84,7 +85,10 @@
  */
 #define CAN_TX (gpio_num_t)25
 #define CAN_RX (gpio_num_t)26
-#define CAN_SPEED 125E3 // Change CAN Speed on BMS to 125
+#define CAN_SPEED 125E3 // CAN Speed 125 kb/s
+//#define CAN_SPEED 500E3 // CAN Speed 500 kb/s
+#define AC_BASE_ADDR 0x777
+#define DC_BASE_ADDR 0x778
 #define BMS_BASE_ADDR 0x700
 #define MPPT1_BASE_ADDR 0x600
 #define MPPT2_BASE_ADDR 0x610

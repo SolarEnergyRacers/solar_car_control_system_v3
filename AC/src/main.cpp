@@ -3,65 +3,49 @@
  * initialize devices, ..
  *
  * clang style:
- *    ./extras/format.sh
+ *    ../extras/format.sh
  */
-
-#include <fmt/core.h>
+// project variables
+#include <sdkconfig.h>
 
 // local definitions
 #include <definitions.h>
-
 // standard libraries
 #include <Streaming.h>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-// FreeRTOS / Arduino
+// Arduino
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+// FreeRTOS
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
-
-// project variables
-#include <sdkconfig.h>
-
+// local includes
+#include <Abstract_task.h>
+#include <LocalFunctionsAndDevices.h>
 // local libs
 #include <ADC.h>
 #include <CANBus.h>
-#include <CarSpeed.h>
-#include <CmdHandler.h>
+#include <CarControl.h>
 #include <Console.h>
 #include <DAC.h>
 #include <Display.h>
 #include <DriverDisplay.h>
-#include <ESP32Time.h>
+//#include <ESP32Time.h>
 #include <EngineerDisplay.h>
 #include <GPIO.h>
-#include <GyroAcc.h>
 #include <I2CBus.h>
-#include <IOExt.h>
-#include <IOExtHandler.h>
-#include <Indicator.h>
-#include <MCP23017.h>
+#include <OneWire.h>
 #include <OneWireBus.h>
-#include <PWM.h>
-#include <RTC.h>
-#include <SDCard.h>
 #include <SPIBus.h>
 #include <Serial.h>
-#include <Temp.h>
-#include <system.h>
+#include <System.h>
 
-#include <LocalFunctionsAndDevices.h>
-#include <abstract_task.h>
-
-#include <CarControl.h>
-#include <CarState.h>
-#include <CarStatePin.h>
+#include <fmt/core.h>
 
 // add C linkage definition
 extern "C" {
@@ -70,54 +54,26 @@ void app_main(void);
 
 using namespace std;
 
-// Global objects (not possible to deactivate)
+ADC adc;
+CANBus canBus;
 CarControl carControl;
 CarState carState;
-CmdHandler cmdHandler;
 Console console;
+DAC dac;
 DriverDisplay driverDisplay;
 EngineerDisplay engineerDisplay;
+// ESP32Time esp32time(0);
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
-Indicator indicator;
 OneWireBus oneWireBus;
-SDCard sdCard;
+// RTC rtc;
+// SDCard sdCard;
 SPIBus spiBus;
-// Global objects (possibly to deactivated)
-IOExt ioExt;
-#if ADC_ON
-ADC adc;
-#endif
-#if DS_ON
-Temp ds; // temperature
-#endif
-#if GYROACC_ON
-GyroAcc gyroAcc;
-#endif
-#if PWM_ON
-PWM pwm;
-#endif
-#if RTC_ON
-RTC rtc;
-ESP32Time esp32time(0);
-#endif
-#if DAC_ON
-DAC dac;
-#endif
-#if CAN_ON
-CANBus can;
-#endif
-#if CARSPEED_ON
-CarSpeed carSpeed;
-#endif
-
-bool startOk = true;
-bool systemOk = false;
-
-string msg;
+bool adcInited = false;
+bool dacInited = false;
 
 void app_main(void) {
-
+  string msg;
   console << "\n";
 
 #if SERIAL_RADIO_ON
@@ -127,251 +83,103 @@ void app_main(void) {
   console << msg << "\n";
 #endif
 
-#if TEST_SERIAL2
-  // Testcode for buffered Serial2 transfer
-  console << "a:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7f8f9x1x\n";
-  console << "b:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7f8f9x1\n";
-  console << "c:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7f8f9x\n";
-  console << "d:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7f8f9\n";
-  console << "e:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7f8f\n";
-  console << "f:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7f8\n";
-  console << "g:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f7\n";
-  console << "h:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6f\n";
-  console << "i:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f6\n";
-  console << "j:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5f\n";
-  console << "k:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f5\n";
-  console << "l:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4f\n";
-  console << "m:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f4\n";
-  console << "n:a1a2a3a4a5a6a7a8a9b1b2b3b4b5b6b7b8b9c1c2c3c4c5vc6c7c8c9d1d2d3d4d5d6d7d8d9e1e2e3e4e5e6e7e8e9f1f2f3f\n";
-  console << "o:a1\n";
-  console << "\n";
-  console << "p:a1a2\n";
-#endif
-
-  console << "\n--------------------\n";
+  delay(1000);
+  console << "\n------------------------------------------------------------\n";
   console << "esp32dev + free RTOS\n";
-  console << "Solar Energy Car Racers SER4 Controller: " << VERSION;
-  console << "\n--------------------\n";
-
+  console << "Solar Energy Car Racers SER4 Controller: v" << VERSION << ", build time: " << __DATE__ << " " << __TIME__ << NL;
+  console << "ARDUINO: " << ARDUINO << NL;
+  console << "------------------------------------------------------------\n";
   // init arduino library
   initArduino();
-
-  // report chip info
-  console << "-chip info -------------------\n";
+  console << "------------------------------------------------------------\n";
   chip_info();
-  console << "-gpio pin settings ----------\n";
+  console << "------------------------------------------------------------\n";
+
+  console << "-gpio pin settings -----------------------------------------\n";
   msg = gpio.init();
   delay(200);
-  console << msg << "\n";
-  console << "-init bus systems ------------\n";
+  console << msg << NL;
+
+  console << "-init bus systems ------------------------------------------\n";
   // init buses
   msg = spiBus.init();
-  console << msg << "\n";
+  console << msg << NL;
   msg = oneWireBus.init();
-  console << msg << "\n";
+  console << msg << NL;
   msg = i2cBus.init();
-  console << msg << "\n";
-  // #if RTC_ON
-  //   msg = rtc.init();
-  //   console << msg << "\n";
-  //   engineerDisplay.print(msg + "\n");
-  // #endif
-  msg = engineerDisplay.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-// ---- init modules ----
-#if INT_ON
-  gpio.register_gpio_interrupt();
-#endif
+  console << msg << NL;
+  delay(200);
 
-  // IOEXT
-  msg = ioExt.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-  // console << "     Reread all IOs in foreced mode:";
-  // ioExt.readAndHandlePins(PinHandleMode::FORCED);
-  // console << carState.printIOs("", true, false) << "\n";
-
-#if SD_ON
-  sdCardDetectHandler();
-  msg = sdCard.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-
-  //--- SD card available ----------------------------
-  carState.init_values();
-  sdCard.open_log_file();
-  //------from now config ini values can be used------
-
-#if COMMANDHANDLER_ON
-  msg = cmdHandler.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if RTC_ON
-  msg = rtc.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if INDICATOR_ON
-  msg = indicator.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if DAC_ON
-  msg = dac.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if ADC_ON
-  msg = adc.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if DS_ON
-  msg = ds.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if GYROACC_ON
-  msg = gyroAcc.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if PWM_ON
-  msg = pwm.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if CAN_ON
-  msg = can.init();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-  // #if CARCONTROL_ON
-  //   carControl.init();
-  //   console << msg << "\n";
-  //   engineerDisplay.print(msg + "\n");
-  // #endif
-  // #if CARSPEED_ON
-  //   msg = carSpeed.init();
-  //   console << msg << "\n";
-  //   engineerDisplay.print(msg + "\n");
-  // #endif
-
-  if (!startOk) {
-    console << "ERROR in init sequence(s). System halted!\n";
-    exit(0);
+  if (i2cBus.isDC()) {
+    console << "-Drive Controller recognized-\n";
+  } else {
+    console << "-Auxiliary Controller recognized-\n";
   }
 
-  engineerDisplay.print("Startup sequence successful, creating FreeRTOS tasks.\n");
-  console << "\n";
-  console << "-----------------------------------------------------------------\n";
-  console << "Startup sequence(s) successful. System creating FreeRTOS tasks...\n";
-  console << "-----------------------------------------------------------------\n\n";
-  // ---- create tasks ----
+  if (i2cBus.isAC()) {
+    console << "-Auxiliary Controller specific initialization ------------\n";
+    // #if RTC_ON
+    //   msg = rtc.init();
+    //   console << msg << NL;
+    //   engineerDisplay.print(msg + "\n");
+    // #endif
+    console << "-display init --------------------------------------------\n";
+    msg = engineerDisplay.init();
+    console << msg << NL;
+    console << "-display first usage -------------------------------------\n";
+    engineerDisplay.print(msg + "\n");
+  }
 
-  // IOEXT
-  carState.Indicator = INDICATOR::OFF;
-  carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
-  carState.SdCardDetect = false;
-  carState.ConstantMode = CONSTANT_MODE::SPEED;
-  carState.Light = LIGHT::OFF;
-  msg = ioExt.create_task(20, 100, 8000);
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
+  i2cBus.verboseModeI2C = true;
+  msg = canBus.init();
+  console << msg << NL;
+  // engineerDisplay.print(msg + "\n");
+  msg = canBus.create_task(15, 600, 8000);
+  console << msg << NL;
+  // engineerDisplay.print(msg + "\n");
+  canBus.verboseModeCan = true;
+  canBus.verboseModeCanDebug = true;
 
-#if INDICATOR_ON
-  msg = indicator.create_task();
-  engineerDisplay.print(msg + "\n");
-  console << msg << "\n";
-#endif
-#if DS_ON
-  msg = ds.create_task();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if ADC_ON
-  msg = adc.create_task(21, 50);
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if GYROACC_ON
-  msg = gyroAcc.create_task();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if PWM_ON
-  msg = pwm.create_task();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if INT_ON
-  msg = gpio.create_task();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if COMMANDHANDLER_ON
-  msg = cmdHandler.create_task(15, 300, 8000);
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if CAN_ON
-  msg = can.create_task();
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if CARCONTROL_ON
+  if (i2cBus.isDC()) {
+    console << "-Drive Controller specific initialization ----------------\n";
+    msg = dac.init();
+    console << msg << NL;
+    // engineerDisplay.print(msg + "\n");
+    dac.verboseModeDAC = true;
+
+    msg = adc.init();
+    console << msg << NL;
+    // engineerDisplay.print(msg + "\n");
+    msg = adc.create_task(6, 300, 8000);
+    console << msg << NL;
+    // engineerDisplay.print(msg + "\n");
+    adc.verboseModeADC = true;
+  }
+  
   msg = carControl.init();
-  console << msg << "\n";
-  msg = carControl.create_task(10, 100, 6000);
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if CARSPEED_ON
-  msg = carSpeed.init();
-  console << msg << "\n";
-  msg = carSpeed.create_task(10, 250, 3000);
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-#endif
-#if RTC_ON
-  string actTime = formatDateTime(rtc.read_rtc_datetime());
-  msg = rtc.create_task(3, 1000 * 60 * 10); // 10 minutes
-  console << msg << " RTC DateTime: " << actTime << "\n";
-  engineerDisplay.print(fmt::format("{} {}\n", msg, getDateTime()));
-#endif
+  console << msg << NL;
+  // engineerDisplay.print(msg + "\n");
+  msg = carControl.create_task(10, 200, 8000);
+  console << msg << NL;
+  // engineerDisplay.print(msg + "\n");
+  carControl.verboseMode = true;
 
-  engineerDisplay.print("\nready");
-#if RTC_ON
-  engineerDisplay.print(fmt::format(" at {}", getDateTime()));
-#endif
-  //--let the bootscreen visible for a moment ------------------
-  engineerDisplay.print(".\nWaiting for start of life display: ");
-  int waitAtConsoleView = 5;
-  while (waitAtConsoleView-- > 0) {
-    engineerDisplay.print(to_string(waitAtConsoleView));
+  if (i2cBus.isAC()) {
+    msg = engineerDisplay.create_task(10);
+    console << msg << "\n";
+    engineerDisplay.print(msg + "\n");
+    driverDisplay.init();
+    driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
+    msg = driverDisplay.create_task(16);
+    console << msg << driverDisplay.get_DisplayStatus_text() << NL;
+    engineerDisplay.print(msg + "\n");
     delay(1000);
-    engineerDisplay.print("-");
   }
-  engineerDisplay.print("start");
-  engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
-  //------------------------------------------------------------
-  msg = engineerDisplay.create_task(10);
-  console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-  driverDisplay.init();
-  driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
-  msg = driverDisplay.create_task(16);
-  console << msg << driverDisplay.get_DisplayStatus_text() << "\n";
-  engineerDisplay.print(msg + "\n");
-  delay(1000);
-  systemOk = true;
-
-  console << "-----------------------------------------------------------------\n";
-  console << "FreeRTOS tasks successfully created. System running.\n";
-  console << "-----------------------------------------------------------------\n";
-
-  ioExt.readAndHandlePins(PinHandleMode::FORCED);
+  console << "------------------------------------------------------------\n";
+  if (i2cBus.isDC()) {
+    console << "Initialization ready as DriveController\n";
+  } else {
+    console << "Initialization ready as AuxiliaryController\n";
+  }
+  console << "------------------------------------------------------------\n";
 }

@@ -49,10 +49,7 @@ string CarControl::init() {
   bool hasError = false;
   console << "[  ] Init 'CarControl'...";
   justInited = true;
-  // mutex = xSemaphoreCreateMutex();
-  // xSemaphoreGive(mutex);
   carState.AccelerationDisplay = -99;
-  // adjust_paddles(carState.PaddleAdjustCounter); // manually adjust paddles (5s handling time)
   console << "done.\n";
   return fmt::format("[{}] CarControl initialized.", hasError ? "--" : "ok");
 }
@@ -180,8 +177,8 @@ bool CarControl::read_paddles() {
   //   _set_dec_acc_values(DAC_MAX, 0, ADC_MAX, 0, -64);
   //   if (verboseMode) {
   //     console << fmt::format(
-  //         "paddle mode BREAK PEDAL: valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n", DAC_MAX,
-  //         0, ADC_MAX, 0, -64);
+  //         "paddle mode BREAK PEDAL: valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n",
+  //         DAC_MAX, 0, ADC_MAX, 0, -64);
   //   }
   //   return true;
   // }
@@ -215,8 +212,8 @@ bool CarControl::read_paddles() {
   // _set_dec_acc_values(valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
   // if (verboseMode && hasChanged) {
   //   console << fmt::format(
-  //       "paddle mode            : valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n", valueDecPot,
-  //       valueAccPot, valueDec, valueAcc, valueDisplay);
+  //       "paddle mode            : valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n",
+  //       valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
   // }
   return hasChanged;
 }
@@ -349,18 +346,20 @@ void CarControl::task() {
     //   someThingChanged |= read_pChanges not staged for commit:addles();
     // else if (!carState.ConstantModeOn)
     //   someThingChanged |= read_PLUS_MINUS();
-    if (i2cBus.isDC()) {
-      someThingChanged |= read_paddles();
-      someThingChanged |= read_speed();
-      someThingChanged |= read_potentiometer();
-      // someThingChanged |= read_reference_cell_data();
-    }
+    // if (i2cBus.isDC()) {
+    //   someThingChanged |= read_paddles();
+    //   someThingChanged |= read_speed();
+    //   someThingChanged |= read_potentiometer();
+    //   // someThingChanged |= read_reference_cell_data();
+    // }
 
-    if (i2cBus.isDC()) {
-      canBus.writePacket(AC_BASE_ADDR, (uint64_t)carState.Potentiometer);
-    } else {
-      canBus.writePacket(DC_BASE_ADDR, (uint64_t)0x123a);
-    }
+    int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
+    int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);
+    uint64_t value = button1pressed << 1 | button2pressed;
+    console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
+
+    canBus.writePacket(DC_BASE_ADDR, value);
+
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

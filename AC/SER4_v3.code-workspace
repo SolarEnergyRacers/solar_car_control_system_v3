@@ -5,7 +5,7 @@
 		}
 		,
 		{
-			"path": "~/.platformio"
+			"path": "../../../../.platformioo"
 		}
 	],
 	"settings": {}

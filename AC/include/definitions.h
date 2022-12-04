@@ -14,6 +14,12 @@
 
 #define NL "\n"
 
+/*
+ * ESP32 IOs.
+*/
+#define ESP32_AC_BUTTON_1 27
+#define ESP32_AC_BUTTON_2 33
+
 /* Non free selectable addresses:
  *
  * 6-axis inertial sensor, gyro:

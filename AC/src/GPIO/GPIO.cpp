@@ -34,6 +34,9 @@ string GPInputOutput::init() {
   pinMode(SPI_CS_TFT, OUTPUT);
   pinMode(SPI_RST, OUTPUT);
 
+  pinMode(ESP32_AC_BUTTON_1, INPUT);
+  pinMode(ESP32_AC_BUTTON_2, INPUT);
+
   digitalWrite(SPI_CS_TFT, HIGH);
   digitalWrite(SPI_CS_SDCARD, HIGH);
 

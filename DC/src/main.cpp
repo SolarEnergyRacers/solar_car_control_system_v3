@@ -3,13 +3,14 @@
  * initialize devices, ..
  *
  * clang style:
- *    ./extras/format.sh
+ *    ../extras/format.sh
  */
 #ifndef ARDUINO
 #define ARDUINO 10805
 #endif
 
-#include <fmt/core.h>
+// project variables
+#include <sdkconfig.h>
 
 // local definitions
 #include <definitions.h>
@@ -31,16 +32,20 @@
 #include <Abstract_task.h>
 #include <LocalFunctionsAndDevices.h>
 // local libs
-#include <CarControl.h>
-#include <Console.h>
-
-//#include <Serial.h>
 #include <ADC.h>
 #include <CANBus.h>
+#include <CarControl.h>
+#include <Console.h>
 #include <DAC.h>
+//#include <ESP32Time.h>
+#include <GPIO.h>
 #include <I2CBus.h>
+#include <OneWire.h>
+#include <OneWireBus.h>
 #include <SPIBus.h>
 #include <System.h>
+
+#include <fmt/core.h>
 
 // add C linkage definition
 extern "C" {
@@ -49,31 +54,64 @@ void app_main(void);
 
 using namespace std;
 
-Console console;
+ADC adc;
 CANBus canBus;
 CarControl carControl;
 CarState carState;
-I2CBus i2c;
-ADC adc;
-bool adcInited = false;
+Console console;
 DAC dac;
-bool dacInited = false;
+GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
+I2CBus i2cBus;
+OneWireBus oneWireBus;
 SPIBus spiBus;
+bool adcInited = false;
+bool dacInited = false;
 
 void app_main(void) {
   string msg;
+  console << "\n";
+
+#if SERIAL_RADIO_ON
+  // init console IO and radio console
+  Uart uart; // SERIAL
+  msg = uart.init();
+  console << msg << "\n";
+#endif
+
   delay(1000);
   console << "\n------------------------------------------------------------\n";
   console << "esp32dev + free RTOS\n";
   console << "Solar Energy Car Racers SER4 Controller: v" << VERSION << ", build time: " << __DATE__ << " " << __TIME__ << NL;
   console << "ARDUINO: " << ARDUINO << NL;
+  console << "------------------------------------------------------------\n";
+  // init arduino library
+  initArduino();
+  console << "------------------------------------------------------------\n";
   chip_info();
   console << "------------------------------------------------------------\n";
 
-  msg = i2c.init();
+  console << "-gpio pin settings -----------------------------------------\n";
+  msg = gpio.init();
+  delay(200);
   console << msg << NL;
-  // engineerDisplay.print(msg + "\n");
-  i2c.verboseModeI2C = true;
+
+  console << "-init bus systems ------------------------------------------\n";
+  // init buses
+  msg = spiBus.init();
+  console << msg << NL;
+  msg = oneWireBus.init();
+  console << msg << NL;
+  msg = i2cBus.init();
+  console << msg << NL;
+  delay(200);
+
+  if (i2cBus.isDC()) {
+    console << "-Drive Controller recognized-\n";
+  } else {
+    console << "-Auxiliary Controller recognized-\n";
+  }
+
+  i2cBus.verboseModeI2C = true;
   msg = canBus.init();
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
@@ -83,7 +121,8 @@ void app_main(void) {
   canBus.verboseModeCan = true;
   canBus.verboseModeCanDebug = true;
 
-  if (i2c.isDC()) {
+  if (i2cBus.isDC()) {
+    console << "-Drive Controller specific initialization ----------------\n";
     msg = dac.init();
     console << msg << NL;
     // engineerDisplay.print(msg + "\n");
@@ -107,12 +146,10 @@ void app_main(void) {
   carControl.verboseMode = true;
 
   console << "------------------------------------------------------------\n";
-  if (i2c.isDC()) {
+  if (i2cBus.isDC()) {
     console << "Initialization ready as DriveController\n";
-  } else if (i2c.isAC()) {
-    console << "Initialization ready as AuxiliaryController\n";
   } else {
-    console << "Initialization failed, no Controller recognized\n";
+    console << "Initialization ready as AuxiliaryController\n";
   }
   console << "------------------------------------------------------------\n";
 }

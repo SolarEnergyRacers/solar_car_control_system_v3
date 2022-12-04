@@ -5,6 +5,10 @@
  * clang style:
  *    ../extras/format.sh
  */
+#ifndef ARDUINO
+#define ARDUINO 10805
+#endif
+
 // project variables
 #include <sdkconfig.h>
 
@@ -28,11 +32,9 @@
 #include <Abstract_task.h>
 #include <LocalFunctionsAndDevices.h>
 // local libs
-#include <ADC.h>
 #include <CANBus.h>
 #include <CarControl.h>
 #include <Console.h>
-#include <DAC.h>
 #include <Display.h>
 #include <DriverDisplay.h>
 //#include <ESP32Time.h>
@@ -54,12 +56,10 @@ void app_main(void);
 
 using namespace std;
 
-ADC adc;
 CANBus canBus;
 CarControl carControl;
 CarState carState;
 Console console;
-DAC dac;
 DriverDisplay driverDisplay;
 EngineerDisplay engineerDisplay;
 // ESP32Time esp32time(0);
@@ -69,8 +69,6 @@ OneWireBus oneWireBus;
 // RTC rtc;
 // SDCard sdCard;
 SPIBus spiBus;
-bool adcInited = false;
-bool dacInited = false;
 
 void app_main(void) {
   string msg;
@@ -123,10 +121,8 @@ void app_main(void) {
     //   console << msg << NL;
     //   engineerDisplay.print(msg + "\n");
     // #endif
-    console << "-display init --------------------------------------------\n";
     msg = engineerDisplay.init();
     console << msg << NL;
-    console << "-display first usage -------------------------------------\n";
     engineerDisplay.print(msg + "\n");
   }
 
@@ -140,22 +136,6 @@ void app_main(void) {
   canBus.verboseModeCan = true;
   canBus.verboseModeCanDebug = true;
 
-  if (i2cBus.isDC()) {
-    console << "-Drive Controller specific initialization ----------------\n";
-    msg = dac.init();
-    console << msg << NL;
-    // engineerDisplay.print(msg + "\n");
-    dac.verboseModeDAC = true;
-
-    msg = adc.init();
-    console << msg << NL;
-    // engineerDisplay.print(msg + "\n");
-    msg = adc.create_task(6, 300, 8000);
-    console << msg << NL;
-    // engineerDisplay.print(msg + "\n");
-    adc.verboseModeADC = true;
-  }
-  
   msg = carControl.init();
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");

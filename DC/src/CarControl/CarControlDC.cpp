@@ -38,7 +38,7 @@ extern Console console;
 extern DAC dac;
 // extern DriverDisplay driverDisplay;
 // extern EngineerDisplay engineerDisplay;
-extern I2CBus i2c;
+extern I2CBus i2cBus;
 // extern Indicator indicator;
 // extern IOExt ioExt;
 // extern SDCard sdCard;
@@ -357,21 +357,18 @@ void CarControl::task() {
     //   someThingChanged |= read_pChanges not staged for commit:addles();
     // else if (!carState.ConstantModeOn)
     //   someThingChanged |= read_PLUS_MINUS();
-    if (i2c.isDC()) {
+    if (i2cBus.isDC()) {
       someThingChanged |= read_paddles();
       someThingChanged |= read_speed();
       someThingChanged |= read_potentiometer();
       // someThingChanged |= read_reference_cell_data();
     }
 
-    if (i2c.isAC()) {
-      canBus.writePacket(DC_BASE_ADDR, (uint64_t)0x123a);
-    } else if (i2c.isDC()) {
+    if (i2cBus.isDC()) {
       canBus.writePacket(AC_BASE_ADDR, (uint64_t)carState.Potentiometer);
     } else {
-      console << "? ";
+      canBus.writePacket(DC_BASE_ADDR, (uint64_t)0x123a);
     }
-
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

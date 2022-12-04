@@ -23,7 +23,7 @@
  * RTC
  * const uint8_t DS1307_ADDRESS = 0x68;
  */
-#define ITC_ADDRESS_DS1307 0x68
+#define I2C_ADDRESS_DS1307 0x68
 
 /*
  *  GPInputOutput
@@ -137,7 +137,7 @@
  *  GPIO19   MOSI
  *  GPIO18   MISO
  *  GPIO5    CLK
- *  GPIO21    CS (first spi device)
+ *  GPIO21   CS (first spi device)
  *
  */
 #define SPI_MOSI 18

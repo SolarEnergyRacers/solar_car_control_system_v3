@@ -5,8 +5,8 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_SERIAL_H
 #define SOLAR_CAR_CONTROL_SYSTEM_SERIAL_H
 
-#include <SoftwareSerial.h>
 #include <Abstract_task.h>
+#include <SoftwareSerial.h>
 
 class Uart : public Abstract_task {
 public:

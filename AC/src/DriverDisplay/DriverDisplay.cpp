@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <string>
 
-#include <LocalFunctionsAndDevices.h>
 #include <Abstract_task.h>
+#include <LocalFunctionsAndDevices.h>
 
 // #include <ADC.h>
 #include <CarState.h>
@@ -426,7 +426,7 @@ DISPLAY_STATUS DriverDisplay::task(int lifeSignCounter) {
     MotorCurrent.set_epsilon(0.1);
     MotorOn.showLabel(tft);
     TargetSpeedPower.showLabel(tft);
-    //DateTimeStamp.showLabel(tft);
+    // DateTimeStamp.showLabel(tft);
     sleep_polling_ms = 300;
     status = DISPLAY_STATUS::DRIVER_RUNNING;
     break;
@@ -524,8 +524,7 @@ DISPLAY_STATUS DriverDisplay::task(int lifeSignCounter) {
     // DateTimeStamp.Value = getTime();
     // DateTimeStamp.showValue(tft);
     justInited = false;
-    break;  
-  
+    break;
 
   default:
     // ignore others

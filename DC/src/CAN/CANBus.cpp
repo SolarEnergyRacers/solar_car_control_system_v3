@@ -20,7 +20,7 @@
 extern CarState carState;
 extern Console console;
 extern CANBus canBus;
-extern I2CBus i2c;
+extern I2CBus i2cBus;
 
 void onReceiveForwarder(int packetSize) { canBus.onReceive(packetSize); }
 
@@ -235,6 +235,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   // Do something with packet
   switch (packetId) {
   case AC_BASE_ADDR:
+    carState.Speed = (int)(packet.getData_ui64() / 10);
     if (canBus.verboseModeCan)
       console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(),
                              canBus.getMaxPacketsBufferUsage(), packetId, packet.getData_ui64())

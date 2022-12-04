@@ -66,12 +66,10 @@ void Display::exit() {
   // todo
 }
 
-//Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
+// Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
 Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
 
-Display::Display() {
-  carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
-};
+Display::Display() { carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE; };
 
 string Display::_setup() {
   bool hasError = false;

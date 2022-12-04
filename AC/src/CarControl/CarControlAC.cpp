@@ -356,7 +356,8 @@ void CarControl::task() {
     int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
     int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);
     uint64_t value = button1pressed << 1 | button2pressed;
-    console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
+    if(carControl.verboseModeCarControlMax)
+      console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
 
     canBus.writePacket(DC_BASE_ADDR, value);
 

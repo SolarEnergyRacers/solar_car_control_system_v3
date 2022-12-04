@@ -362,8 +362,13 @@ void CarControl::task() {
     someThingChanged |= read_potentiometer();
     // someThingChanged |= read_reference_cell_data();
 
-    canBus.writePacket(AC_BASE_ADDR, 0, carState.Acceleration, carState.Deceleration, carState.Potentiometer);
-
+    canBus.writePacket(AC_BASE_ADDR | 0x00, carState.Speed, carState.AccelerationDisplay, carState.Deceleration, carState.Potentiometer);
+    canBus.writePacket(AC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration, carState.Potentiometer);
+    if (canBus.verboseModeCan)
+      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data:dummy={:4d}, speed={:4d}, decl={:4d}, accl={:4d}",
+                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), 00, carState.Speed, carState.Deceleration,
+                             carState.Acceleration, carState.Potentiometer)
+              << NL;
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

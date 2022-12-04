@@ -234,17 +234,20 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   int packetId = packet.getId();
   // Do something with packet
   switch (packetId) {
-  case AC_BASE_ADDR: {
-    int16_t dummy = (int16_t)(packet.getData_ui16(0));
-    carState.Speed = (int)(packet.getData_ui16(1)) / 10;
+  case AC_BASE_ADDR | 0x00: {
+    carState.Speed = (int)(packet.getData_ui16(0)) / 10;
+    carState.AccelerationDisplay = (int)packet.getData_i8(2);
     carState.Deceleration = (int)(packet.getData_ui16(2)) / 10;
-    carState.Acceleration = (int)(packet.getData_ui16(3)) / 10;
+    carState.Potentiometer = (int)(packet.getData_ui16(3)) / 10;
     if (canBus.verboseModeCan)
       console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data:dummy={:4d}, speed={:4d}, decl={:4d}, accl={:4d}",
-                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId, dummy, carState.Speed,
-                             carState.Deceleration, carState.Acceleration)
+                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId, carState.Speed, carState.Deceleration,
+                             carState.Acceleration, carState.Potentiometer)
               << NL;
   } break;
+
+  case AC_BASE_ADDR | 0x01:
+    break;
   case DC_BASE_ADDR:
     if (canBus.verboseModeCan)
       console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(),

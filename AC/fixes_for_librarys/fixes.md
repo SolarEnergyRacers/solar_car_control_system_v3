@@ -7,7 +7,7 @@
 /home/ksc/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.c:102:24: error: 'rtc_gpio_desc' undeclared (first use in this function); did you mean 'rtc_io_desc'?
 ```
 
-[](https://github.com/maximkulkin/esp32-homekit-camera/issues/57)
+[issues57](https://github.com/maximkulkin/esp32-homekit-camera/issues/57)
 
 FIX:  
 

@@ -25,12 +25,12 @@ string SPIBus::re_init() { return init(); }
 
 string SPIBus::init(void) {
   bool hasError = false;
-  console << "[  ] Init 'SPI bus' with: SPI_CLK=" << SPI_CLK << ", SPI_MOSI=" << SPI_MOSI << ", SPI_MISO=" << SPI_MISO << "...\n";
+  console << "[  ] Init 'SPI bus' with: SPI_CLK=" << SPI_CLK << ", SPI_MISO=" << SPI_MISO << ", SPI_MOSI=" << SPI_MOSI << "...\n";
 
   mutex = xSemaphoreCreateMutex();
   spi = SPIClass(VSPI);
   // init mutex (it is acquired)
-  spi.begin(SPI_CLK, SPI_MISO, SPI_MOSI);
+  spi.begin(SPI_CLK, SPI_MISO, SPI_MOSI, SPI_CS_TFT);
 
   // // initialize SPI:
   // spi.begin(SPI_CLK, SPI_MISO, SPI_MOSI, SPI_CS_SDCARD);
@@ -39,7 +39,6 @@ string SPIBus::init(void) {
   // spi.end();
 
   xSemaphoreGive(mutex);
-  // // CRITICAL SECTION SPI: end
 
   return fmt::format("[{}] SPIBus initialized.", hasError ? "--" : "ok");
 }

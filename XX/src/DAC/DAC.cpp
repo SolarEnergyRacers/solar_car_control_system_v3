@@ -29,7 +29,7 @@
 
 extern CarState carState;
 // extern DriverDisplay driverDisplay;
-extern I2CBus i2c;
+extern I2CBus i2cBus;
 extern Console console;
 extern bool dacInited;
 
@@ -81,7 +81,7 @@ bool DAC::reset_pot() {
   bool success = false;
   uint8_t command = get_cmd(POT_CHAN_ALL);
   //#SAFTY#
-  xSemaphoreTakeT(i2c.mutex);
+  xSemaphoreTakeT(i2cBus.mutex);
   try {
     Wire.beginTransmission(I2C_ADDRESS_DS1803);
     if (Wire.write(command) > 0) {
@@ -97,7 +97,7 @@ bool DAC::reset_pot() {
   } catch (exception &ex) {
     success = false;
   }
-  xSemaphoreGive(i2c.mutex);
+  xSemaphoreGive(i2cBus.mutex);
   return success;
 }
 
@@ -124,7 +124,7 @@ bool DAC::set_pot(uint8_t val, pot_chan channel) {
   uint8_t oldValue = get_pot(channel);
   if (oldValue != val) {
     try {
-      xSemaphoreTakeT(i2c.mutex);
+      xSemaphoreTakeT(i2cBus.mutex);
       Wire.beginTransmission(I2C_ADDRESS_DS1803);
       if (Wire.write(command) == 0) {
         success = false;
@@ -141,7 +141,7 @@ bool DAC::set_pot(uint8_t val, pot_chan channel) {
     } catch (exception &ex) {
       success = false;
     }
-    xSemaphoreGive(i2c.mutex);
+    xSemaphoreGive(i2cBus.mutex);
     if (verboseModeDAC) {
       console << fmt::format("dac:    {:02x}-chn | {:5d}-val | {:5d}-acc | {:5d}-dec  | {:5d}-accD | {}-lck\n", channel, val,
                              carState.Acceleration, carState.Deceleration, carState.AccelerationDisplay, carState.AccelerationLocked);
@@ -155,11 +155,11 @@ uint16_t DAC::get_pot(pot_chan channel) {
     return 0;
   uint8_t pot0 = 0; // get pot0
   uint8_t pot1 = 0; // get pot1
-  xSemaphoreTakeT(i2c.mutex);
+  xSemaphoreTakeT(i2cBus.mutex);
   Wire.requestFrom(I2C_ADDRESS_DS1803, 2); // request 2 bytes
   pot0 = Wire.read();
   pot1 = Wire.read();
-  xSemaphoreGive(i2c.mutex);
+  xSemaphoreGive(i2cBus.mutex);
 
   if (channel == POT_CHAN_ALL) {
     return pot0 | (pot1 << 8);

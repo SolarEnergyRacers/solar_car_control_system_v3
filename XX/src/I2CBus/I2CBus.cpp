@@ -25,12 +25,6 @@ string I2CBus::init(void) {
   bool hasError = false;
   console << "[  ] Init 'I2CBus'...\n";
 
-  // devices["Mst"] = "0x00 | ESP32 I2C master                | AC + DC";
-  // devices["Ext"] = "0x20 | MCP23017, Extended digital IOs  | DC";
-  // devices["DAC"] = "0x28 | DS1803, digital analog coder    | DC";
-  // devices["ADC"] = "0x48 | ADS1115, analog digital coder   | DC";
-  // devices["RTC"] = "0x68 | DS1307, real time clock         | AC";
-
   mutex = xSemaphoreCreateMutex();
   // init i2c wire library
   uint32_t frequency = I2C_FREQ;           // make to int to find the correct signature
@@ -94,19 +88,19 @@ uint8_t I2CBus::scan_i2c_devices() {
 
   console << "Scan completed: " << fmt::format("{}", i2cDevices) << " I2C devices found.\n";
 
-  msg = "     Expected addresses:\n";
+  msg = "     Known I2C addresses (DC and AC):\n";
   msg += "     Address | Device                               | Location      \n";
   msg += "     ------- | ------------------------------------ | --------------\n";
-  msg += "      0x00   | ESP32 I2C master                     | AC + DC    \n";
-  msg += "      0x20   | MCP23017, Extended digital IOs       | DC    \n";
-  msg += "      0x28   | DS1803, digital analog coder         | DC    \n";
-  msg += "      0x48   | ADS1115, analog digital coder        | DC    \n";
-  msg += "      0x68   | DS1307, real time clock              | AC    \n";
+  msg += "      0x{:02x}   | ESP32 I2C master                     | AC + DC    \n";
+  msg += "      0x{:02x}   | MCP23017, Extended digital IOs       | DC    \n";
+  msg += "      0x{:02x}   | DS1803, digital analog coder         | DC    \n";
+  msg += "      0x{:02x}   | ADS1115, analog digital coder        | DC    \n";
+  msg += "      0x{:02x}   | DS1307, real time clock              | AC    \n";
   // msg += "      0x19   | BMI088, 6-axis inertial sensor, acc  | main board    \n";
   // msg += "      0x21   | MCP23017, Extended digital IOs       | steering wheel\n";
   // msg += "      0x49   | ADS1115, analog digital coder        | main board    \n";
   // msg += "      0x4a   | ADS1115, analog digital coder        | steering wheel\n";
   // msg += "      0x69   | BMI088, 6-axis inertial sensor, gyro | main board    \n";
-  console << msg;
+  console << fmt::format(msg, _Master_, _ExtIO_, _DAC_, _ADC_, _RTC_);
   return i2cDevices;
 }

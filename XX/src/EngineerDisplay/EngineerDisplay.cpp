@@ -4,8 +4,7 @@
 
 #include <iostream>
 
-#undef B1
-//#include <Adafruit_GFX.h>     // graphics library
+#include <Adafruit_GFX.h>     // graphics library
 #include <Adafruit_ILI9341.h> // display
 #include <SPIBus.h>
 

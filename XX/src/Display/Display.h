@@ -47,13 +47,12 @@ private:
 
 protected:
   int bgColor;
-  static Adafruit_ILI9341 tft;
-
-  // volatile DISPLAY_STATUS status;
 
 public:
   virtual ~Display(){};
-  Display() { carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE; };
+  Display(); // { carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE; };
+  
+  static Adafruit_ILI9341 tft;
 
   void set_DisplayStatus(DISPLAY_STATUS theNewStatus) { carState.displayStatus = theNewStatus; };
 

@@ -36,3 +36,6 @@ XX/include/LocalFunctionsAndDevices.h
 
 # tenmporary used folder for mini prove of concepts
 XY/**
+XX/XX.code-workspace
+
+.gitignore

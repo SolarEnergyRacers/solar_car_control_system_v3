@@ -36,7 +36,7 @@
 
 extern SPIBus spiBus;
 extern CarState carState;
-//extern SDCard sdCard;
+// extern SDCard sdCard;
 extern Console console;
 
 using namespace std;
@@ -65,14 +65,19 @@ string Display::re_init(void) { return _setup(); }
 void Display::exit() {
   // todo
 }
-// ------------
 
-Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
+//Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
+Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
+
+Display::Display() {
+  carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
+};
 
 string Display::_setup() {
   bool hasError = false;
-  console << "     Setup 'ILI9341' for '" << getName() << "' with: SPI_CLK=" << SPI_CLK << ", SPI_MOSI=" << SPI_MOSI
-          << ", SPI_MISO=" << SPI_MISO << ", SPI_CS_TFT=" << SPI_CS_TFT << "\n";
+  console << "     Setup 'ILI9341' for '" << getName() << "' with: SPI_DC=" << SPI_DC << ", SPI_CS_TFT=" << SPI_CS_TFT
+          << ", SPI_RST=" << SPI_RST << NL << "     and SPI BUS: SPI_CLK=" << SPI_CLK << ", SPI_MOSI=" << SPI_MOSI
+          << ", SPI_MISO=" << SPI_MISO << NL;
   height = 0;
   width = 0;
   try {
@@ -368,13 +373,12 @@ int Display::write_nat_999(int x, int y, int valueLast, int value, int textSize,
   return value;
 }
 
-#if LIFESIGN_ON == true
 unsigned long secondLast = 0;
 void Display::lifeSign() {
   int color = ILI9341_GREEN;
-  if (!sdCard.isReadyForLog()) {
-    color = ILI9341_RED;
-  }
+  // if (!sdCard.isReadyForLog()) {
+  //   color = ILI9341_RED;
+  // }
   xSemaphoreTakeT(spiBus.mutex);
   tft.fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
   xSemaphoreGive(spiBus.mutex);
@@ -386,7 +390,6 @@ void Display::lifeSign() {
     secondLast = allSeconds;
   }
 }
-#endif
 
 void Display::drawCentreString(const string &buf, int x, int y) { return; }
 

@@ -24,7 +24,7 @@
 
 extern Console console;
 extern CarState carState;
-extern I2CBus i2c;
+extern I2CBus i2cBus;
 extern ADC adc;
 extern bool adcInited;
 // extern DAC dac;
@@ -36,11 +36,11 @@ string ADC::re_init() { return init(); }
 
 string ADC::init() {
   console << fmt::format("     Init 'ADC' with address {:#04x} ...", I2C_ADDRESS_ADS1x15);
-  xSemaphoreTakeT(i2c.mutex);
+  xSemaphoreTakeT(i2cBus.mutex);
   adsDevice = ADS1115(I2C_ADDRESS_ADS1x15);
   adcInited = adsDevice.begin();
   if (!adcInited) {
-    xSemaphoreGive(i2c.mutex);
+    xSemaphoreGive(i2cBus.mutex);
     console << fmt::format("\n        ERROR: Wrong ADS1x15 at address: {:#04x}.\n", I2C_ADDRESS_ADS1x15);
   } else {
     console << NL;
@@ -55,13 +55,13 @@ string ADC::init() {
     // bit-value -> mV: 2/3x gain +/- 6.144V
     // 1 bit = 3mV (ADS1015) 0.1875mV (ADS1115)
     float multiplier = adsDevice.toVoltage(1); // voltage factor
-    xSemaphoreGive(i2c.mutex);
+    xSemaphoreGive(i2cBus.mutex);
     console << "        Max voltage=" << adsDevice.getMaxVoltage() << " with multiplier=" << multiplier << NL;
     // read all inputs & report
     for (int i = 0; i < 4; i++) {
-      xSemaphoreTakeT(i2c.mutex);
+      xSemaphoreTakeT(i2cBus.mutex);
       int16_t value = adsDevice.readADC(i);
-      xSemaphoreGive(i2c.mutex);
+      xSemaphoreGive(i2cBus.mutex);
       console << "          [ADS1x15] AIN" << i << " --> " << value << ": " << multiplier * value << "mV\n";
     }
     console << fmt::format("     ok ADC at 0x{:x} inited.\n", I2C_ADDRESS_ADS1x15);
@@ -77,9 +77,9 @@ int16_t ADC::read(Pin pin) {
   if (!adcInited)
     return 0;
 
-  xSemaphoreTakeT(i2c.mutex);
+  xSemaphoreTakeT(i2cBus.mutex);
   int16_t value = adsDevice.readADC(pin & 0xf);
-  xSemaphoreGive(i2c.mutex);
+  xSemaphoreGive(i2cBus.mutex);
   return value;
 }
 

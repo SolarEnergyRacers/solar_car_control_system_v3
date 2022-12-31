@@ -4,11 +4,11 @@
 
 #include <map>
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <CAN/CANRxBuffer.h>
 #include <CarState/CarState.h>
 
-class CANBus : public Abstract_task {
+class CANBus : public AbstractTask {
 
 public:
   // RTOS task
@@ -16,22 +16,31 @@ public:
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void);
+  // string create_task(int priority, uint32_t sleep_polling, int stack_size, const BaseType_t xCoreID);
+  void task(void * pvParams);
+  uint32_t sleep_polling_ms;
 
   // Class functions and members
 private:
+  int packetsCountMax;
   CANRxBuffer rxBuffer;
+
   std::map<uint16_t, int32_t> max_ages;
   std::map<uint16_t, int32_t> ages;
   int handle_rx_packet(CANPacket packet);
-  int packetsCountMax;
+  string print_raw_packet(CANPacket packet);
 
 public:
   CANBus();
-  int availiblePackets();
-  int getMaxPacketsBufferUsage() { return packetsCountMax; };
 
-  void onReceive(int packetSize);
+  void push(CANPacket packet);
+  CANPacket pop() { return rxBuffer.pop(); }
+
+  bool isPacketToRenew(uint16_t packetId);
+  void setPacketTimeStamp(uint16_t packetId, int32_t millis);
+
+  int availiblePackets() { return rxBuffer.getSize(); }
+  int getMaxPacketsBufferUsage() { return packetsCountMax; };
 
   bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3);
   bool writePacket(uint16_t adr, uint32_t data0, uint32_t data1);
@@ -39,5 +48,7 @@ public:
 
   SemaphoreHandle_t mutex;
   bool verboseModeCan = false;
+  bool verboseModeCanIn = false;
+  bool verboseModeCanOut = false;
   bool verboseModeCanDebug = false;
 };

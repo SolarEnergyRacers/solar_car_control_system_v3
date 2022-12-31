@@ -9,18 +9,14 @@
 #include <stdint.h>
 #include <string>
 
-#if WithTaskSuspend == true
-#include <task.h>
-#endif
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 using namespace std;
 
 class Abstract_task {
 private:
-  // put private/internal variables/functions here
-#if WithTaskSuspend == true
-  TaskHandle_t xHandle;
-#endif
+  TaskHandle_t taskHandle;
 
 public:
   virtual string getName(void);
@@ -31,16 +27,14 @@ public:
 
   string getInfo(void);
 
-#if WithTaskSuspend == true
-  TaskHandle_t getHandle() { return xHandle; };
-#endif
+  TaskHandle_t getTaskHandle() { return taskHandle; };
 
   uint32_t sleep_polling_ms;
   void sleep(void);
   void sleep(int polling_ms);
   string report_task_init();
   string report_task_init(Abstract_task *task);
-  string create_task(int priority = 10, uint32_t sleep_polling = 330, int stack_size = 4096);
+  string create_task(int priority = 10, uint32_t sleep_polling = 330, int stack_size = 4096, const BaseType_t xCoreID = 1);
   static void init_task(void *pvParams) { ((Abstract_task *)pvParams)->task(); };
 };
 

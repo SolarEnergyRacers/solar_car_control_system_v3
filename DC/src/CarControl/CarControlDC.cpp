@@ -176,7 +176,7 @@ bool CarControl::read_PLUS_MINUS() {
   }
   if (verboseMode) {
     console << fmt::format(
-        "button mode: acc={:3d} --> valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n",
+        "button mode: acc={:5d} --> valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n",
         acceleration, valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
   }
   return hasChanged;
@@ -188,7 +188,7 @@ bool CarControl::read_paddles() {
     _set_dec_acc_values(DAC_MAX, 0, ADC_MAX, 0, -64);
     if (verboseMode) {
       console << fmt::format(
-          "paddle mode BREAK PEDAL: valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n", DAC_MAX,
+          "paddle mode BREAK PEDAL: valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", DAC_MAX,
           0, ADC_MAX, 0, -64);
     }
     return true;
@@ -223,7 +223,7 @@ bool CarControl::read_paddles() {
   _set_dec_acc_values(valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
   if (verboseMode && hasChanged) {
     console << fmt::format(
-        "paddle mode            : valueDecPot={:4d}, valueAccPot={:4d} | valueDec={:3d}, valueAcc={:3d}, valueDisplay={:3d}\n", valueDecPot,
+        "paddle mode            : valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", valueDecPot,
         valueAccPot, valueDec, valueAcc, valueDisplay);
   }
   return hasChanged;
@@ -305,7 +305,7 @@ void CarControl::adjust_paddles(int cycles) {
     delay(640);
     carState.DriverInfo = "";
   }
-  //#SAFTY#
+  // #SAFTY#
   carState.PaddlesAdjusted = true;
 }
 
@@ -341,7 +341,7 @@ void CarControl::_handle_indicator() {
 }
 
 volatile int CarControl::valueChangeRequest = 0;
-
+uint64_t counter = 0xff00l;
 void CarControl::task() {
   // polling loop
   while (1) {
@@ -357,18 +357,27 @@ void CarControl::task() {
     //   someThingChanged |= read_pChanges not staged for commit:addles();
     // else if (!carState.ConstantModeOn)
     //   someThingChanged |= read_PLUS_MINUS();
-    someThingChanged |= read_paddles();
-    someThingChanged |= read_speed();
-    someThingChanged |= read_potentiometer();
     // someThingChanged |= read_reference_cell_data();
 
-    canBus.writePacket(AC_BASE_ADDR | 0x00, carState.Speed, carState.AccelerationDisplay, carState.Deceleration, carState.Potentiometer);
-    canBus.writePacket(AC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration, carState.Potentiometer);
-    if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data:dummy={:4d}, speed={:4d}, decl={:4d}, accl={:4d}",
-                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), 00, carState.Speed, carState.Deceleration,
-                             carState.Acceleration, carState.Potentiometer)
+    // someThingChanged |= read_paddles();
+    // someThingChanged |= read_speed();
+    // someThingChanged |= read_potentiometer();
+    // canBus.writePacket(DC_BASE_ADDR | 0x00, carState.Speed, carState.Acceleration, carState.Deceleration, carState.Potentiometer);
+    canBus.writePacket(DC_BASE_ADDR | 0x00, 0x1234, 0x5678, 0x9abc, 0xdef0);
+    canBus.writePacket(DC_BASE_ADDR | 0x01, 0x6677, 0x4455, 0x2233, 0xaa11);
+    canBus.writePacket(DC_BASE_ADDR | 0x01, counter);
+    if (verboseModeCarControlMax)
+      console << fmt::format("{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d}, ", counter,
+                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.Speed,
+                             carState.Deceleration, carState.Acceleration, carState.Potentiometer)
               << NL;
+    counter++;
+    // canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration, carState.Potentiometer);
+    // if (canBus.verboseModeCan)
+    //   console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
+    //                          canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,
+    //                          carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+    //           << NL;
     // one data row per second
     if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

@@ -2,9 +2,6 @@
  *
  * Driver's Display
  *
- * The driver's display is passive with the exception of the indicator function.
- * This means that all sensors send their values to the display.
- *
  ***/
 
 #include <definitions.h>
@@ -16,7 +13,7 @@
 #include <stdio.h>
 #include <string>
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <LocalFunctionsAndDevices.h>
 
 // #include <ADC.h>
@@ -28,15 +25,15 @@
 
 #include <Adafruit_GFX.h>     // graphics library
 #include <Adafruit_ILI9341.h> // display
-#include <Fonts/FreeMono12pt7b.h>
-#include <Fonts/FreeMono18pt7b.h>
-#include <Fonts/FreeMono24pt7b.h>
-#include <Fonts/FreeMono9pt7b.h>
-#include <Fonts/FreeMonoBold24pt7b.h>
-#include <Fonts/FreeSans12pt7b.h>
-#include <Fonts/FreeSans18pt7b.h>
-#include <Fonts/FreeSans24pt7b.h>
-#include <Fonts/FreeSans9pt7b.h>
+// #include <Fonts/FreeMono12pt7b.h>
+// #include <Fonts/FreeMono18pt7b.h>
+// #include <Fonts/FreeMono24pt7b.h>
+// #include <Fonts/FreeMono9pt7b.h>
+// #include <Fonts/FreeMonoBold24pt7b.h>
+// #include <Fonts/FreeSans12pt7b.h>
+// #include <Fonts/FreeSans18pt7b.h>
+// #include <Fonts/FreeSans24pt7b.h>
+// #include <Fonts/FreeSans9pt7b.h>
 
 extern Console console;
 extern SPIBus spiBus;
@@ -129,10 +126,11 @@ void DriverDisplay::draw_target_value_border(int color) {
 }
 
 void DriverDisplay::draw_display_background() {
-  xSemaphoreTakeT(spiBus.mutex);
-  infoFrameSizeX = tft.width();
-  speedFrameX = (tft.width() - speedFrameSizeX) / 2;
-  xSemaphoreGive(spiBus.mutex);
+  // xSemaphoreTakeT(spiBus.mutex);
+  // infoFrameSizeX = tft.width();
+  // xSemaphoreGive(spiBus.mutex);
+  infoFrameSizeX = width;
+  speedFrameX = (infoFrameSizeX - speedFrameSizeX) / 2;
 
   draw_display_border(ILI9341_GREEN);
   draw_speed_border(ILI9341_YELLOW);
@@ -310,52 +308,6 @@ void DriverDisplay::write_drive_direction() {
   xSemaphoreGive(spiBus.mutex);
 }
 
-void DriverDisplay::_turn_Left(int color) {
-  int x = indicatorLeftX;
-  int y = indicatorY;
-
-  xSemaphoreTakeT(spiBus.mutex);
-  tft.fillTriangle(x, y, x + indicatorWidth, y - indicatorHeight, x + indicatorWidth, y + indicatorHeight, color);
-  xSemaphoreGive(spiBus.mutex);
-}
-
-void DriverDisplay::_turn_Right(int color) {
-  int x = indicatorRightX;
-  int y = indicatorY;
-
-  xSemaphoreTakeT(spiBus.mutex);
-  tft.fillTriangle(x, y, x - indicatorWidth, y - indicatorHeight, x - indicatorWidth, y + indicatorHeight, color);
-  xSemaphoreGive(spiBus.mutex);
-}
-
-void DriverDisplay::show_indicator() {
-  INDICATOR indicator = Indicator.get_recent_overtake_last();
-  switch (indicator) {
-  case INDICATOR::OFF:
-    _turn_Left(bgColor);
-    _turn_Right(bgColor);
-    break;
-
-  case INDICATOR::LEFT:
-    _turn_Left(ILI9341_YELLOW);
-    _turn_Right(bgColor);
-    break;
-
-  case INDICATOR::RIGHT:
-    _turn_Left(bgColor);
-    _turn_Right(ILI9341_YELLOW);
-    break;
-
-  case INDICATOR::WARN:
-    _turn_Left(ILI9341_RED);
-    _turn_Right(ILI9341_RED);
-    break;
-
-  default:
-    break;
-  }
-}
-
 // Write the speed in the centre frame: 0...999
 void DriverDisplay::write_speed() {
   int value = Speed.get_recent_overtake_last();
@@ -401,7 +353,7 @@ void DriverDisplay::write_driver_info() {
   }
 }
 
-DISPLAY_STATUS DriverDisplay::task(int lifeSignCounter) {
+DISPLAY_STATUS DriverDisplay::display_task(int lifeSignCounter) {
   DISPLAY_STATUS status = carState.displayStatus;
   switch (carState.displayStatus) {
   // initializing states:
@@ -489,11 +441,6 @@ DISPLAY_STATUS DriverDisplay::task(int lifeSignCounter) {
     EcoModeOn.Value = carState.EcoOn;
     if (EcoModeOn.Value != EcoModeOn.ValueLast || justInited) {
       eco_power_mode_show();
-    }
-
-    Indicator.Value = carState.Indicator;
-    if (Indicator.Value != Indicator.ValueLast || justInited) {
-      show_indicator();
     }
 
     BatteryVoltage.Value = carState.BatteryVoltage;

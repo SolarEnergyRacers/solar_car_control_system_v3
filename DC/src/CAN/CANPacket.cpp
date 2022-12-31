@@ -14,20 +14,6 @@ CANPacket::CANPacket(uint16_t id, uint8_t data[]) {
   }
 }
 
-CANPacket::CANPacket(uint16_t id, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3) {
-  this->id = id;
-  this->data.data_u16[0] = data0;
-  this->data.data_u16[1] = data1;
-  this->data.data_u16[2] = data2;
-  this->data.data_u16[3] = data3;
-}
-
-CANPacket::CANPacket(uint16_t id, uint32_t data0, uint32_t data1) {
-  this->id = id;
-  this->data.data_u32[0] = data0;
-  this->data.data_u32[1] = data1;
-}
-
 CANPacket::CANPacket(uint16_t id, uint64_t data) {
   this->id = id;
   this->data.data_u64 = data;

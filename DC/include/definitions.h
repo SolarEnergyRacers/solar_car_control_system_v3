@@ -4,6 +4,7 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
+#define SER4TYPE "DC"
 //#define VERSION "$GIT_BRANCH_$GIT_COMMIT_HASH"
 #define VERSION "3.0.0"
 

@@ -5,17 +5,17 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_SERIAL_H
 #define SOLAR_CAR_CONTROL_SYSTEM_SERIAL_H
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <SoftwareSerial.h>
 
-class Uart : public Abstract_task {
+class Uart : public AbstractTask {
 public:
   // RTOS task
   string getName() { return "SerialWire-SerialRadio"; };
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void);
+  void task(void * pvParams);
 };
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_SERIAL_H

@@ -4,6 +4,7 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
+#define SER4TYPE "AC"
 //#define VERSION "$GIT_BRANCH_$GIT_COMMIT_HASH"
 #define VERSION "3.0.0"
 
@@ -16,7 +17,7 @@
 
 /*
  * ESP32 IOs.
-*/
+ */
 #define ESP32_AC_BUTTON_1 27
 #define ESP32_AC_BUTTON_2 33
 

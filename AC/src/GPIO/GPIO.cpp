@@ -63,7 +63,7 @@ void GPInputOutput::register_gpio_interrupt() {
 volatile int GPInputOutput::interrupt_counter = 0;
 // portMUX_TYPE GPInputOutput::mutex = portMUX_INITIALIZER_UNLOCKED;
 
-void GPInputOutput::task() {
+void GPInputOutput::task(void * pvParams) {
 
   // polling loop
   while (1) {

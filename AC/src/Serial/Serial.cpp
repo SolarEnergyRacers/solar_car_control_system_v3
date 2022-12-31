@@ -14,7 +14,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <Console.h>
 #include <DriverDisplay.h>
 
@@ -26,15 +26,14 @@ using namespace std;
 #include <Streaming.h>
 
 extern Console console;
-extern DriverDisplay driverDisplay;
-extern Console console;
+//extern DriverDisplay driverDisplay;
 
 string Uart::re_init() { return init(); }
 
 string Uart::init() {
   bool hasError = false;
   console = Console();
-  // abstract_task::init();
+  // AbstractTask::init();
   //  init serial for console IO
   Serial.begin(carState.Serial1Baudrate);
   delay(1000);
@@ -60,7 +59,7 @@ void Uart::exit() {}
 
 // bool payload1;
 // bool payload2;
-void Uart::task() {
+void Uart::task(void * pvParams) {
   while (1) {
     // // payload1 = payload2 = false;
     // while (Serial2.available()) {

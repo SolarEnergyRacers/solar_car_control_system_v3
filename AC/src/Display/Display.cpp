@@ -7,7 +7,7 @@
 
 #include <LocalFunctionsAndDevices.h>
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <definitions.h>
 
 #include <fmt/core.h>
@@ -18,7 +18,7 @@
 #include <Console.h>
 #include <Display.h>
 #include <Helper.h>
-//#include <SDCard.h>
+// #include <SDCard.h>
 #include <SPIBus.h>
 
 #include <ADS1X15.h>
@@ -120,6 +120,7 @@ string Display::_setup() {
 }
 
 void Display::clear_screen(int bgColor) {
+  console << "clear_screen(" << bgColor << ")" << NL;
   xSemaphoreTakeT(spiBus.mutex);
   tft.fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
@@ -394,27 +395,27 @@ void Display::drawCentreString(const string &buf, int x, int y) { return; }
 // -------------
 // FreeRTOS TASK
 // -------------
-void Display::task(void) {
+void Display::task(void *pvParams) {
   // polling loop
   while (1) {
     switch (carState.displayStatus) {
     // initializing states:
     case DISPLAY_STATUS::DRIVER_SETUP:
       bgColor = ILI9341_BLACK;
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       break;
     case DISPLAY_STATUS::ENGINEER_SETUP:
       bgColor = ILI9341_ORANGE;
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       break;
     case DISPLAY_STATUS::DRIVER_BACKGROUND:
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       break;
     case DISPLAY_STATUS::ENGINEER_BACKGROUND:
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       break;
     case DISPLAY_STATUS::DRIVER_DEMOSCREEN:
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       break;
     // working states:
     case DISPLAY_STATUS::ENGINEER_CONSOLE:
@@ -425,14 +426,14 @@ void Display::task(void) {
       }
       break;
     case DISPLAY_STATUS::ENGINEER_RUNNING:
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       if (lifeSignCounter > 2) {
         lifeSign();
         lifeSignCounter = 0;
       }
       break;
     case DISPLAY_STATUS::DRIVER_RUNNING:
-      carState.displayStatus = task(lifeSignCounter);
+      carState.displayStatus = display_task(lifeSignCounter);
       if (lifeSignCounter > 1) {
         lifeSign();
         lifeSignCounter = 0;
@@ -440,9 +441,8 @@ void Display::task(void) {
       break;
     case DISPLAY_STATUS::ENGINEER_HALTED:
       sleep_polling_ms = 1500;
-      break;
 #if WithTaskSuspend == true
-      vTaskSuspend(getHandle());
+      vTaskSuspend(getTaskHandle());
 #endif
       break;
     default:

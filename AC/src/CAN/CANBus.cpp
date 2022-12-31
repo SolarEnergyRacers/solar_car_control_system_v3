@@ -19,13 +19,43 @@
 
 extern CarState carState;
 extern Console console;
-extern CANBus canBus;
 extern I2CBus i2cBus;
+extern CANBus canBus;
+extern bool SystemInited;
 
-void onReceiveForwarder(int packetSize) { canBus.onReceive(packetSize); }
+void onReceive(int packetSize) {
+
+  if (!SystemInited)
+    return;
+
+  //xSemaphoreTakeT(canBus.mutex);
+  int packetId = CAN.packetId();
+  if (packetId != (DC_BASE_ADDR | 0x00) && packetId != (DC_BASE_ADDR | 0x01) && !canBus.isPacketToRenew(packetId)) {
+    //xSemaphoreGive(canBus.mutex);
+    return;
+  }
+
+  canBus.setPacketTimeStamp(packetId, millis());
+
+  if (CAN.available()) {
+    uint64_t rxData = 0l;
+    for (int i = 0; i < packetSize && i < 8; i++) {
+      rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
+    }
+    canBus.push(CANPacket(packetId, rxData));
+  }
+  //xSemaphoreGive(canBus.mutex);
+}
+
+bool CANBus::isPacketToRenew(uint16_t packetId) {
+  return max_ages[packetId] == 0 || (max_ages[packetId] != -1 && millis() - ages[packetId] > max_ages[packetId]);
+}
+
+void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
 
 CANBus::CANBus() {
   packetsCountMax = 0;
+
   // init max ages
   max_ages[BMS_BASE_ADDR] = MAXAGE_BMU_HEARTBEAT;
   max_ages[BMS_BASE_ADDR | 0x1] = MAXAGE_CMU_TEMP;     // CMU1
@@ -131,72 +161,54 @@ string CANBus::init() {
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
-    xSemaphoreGive(mutex);
+    xSemaphoreGive(canBus.mutex);
     console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
     hasError = true;
   } else {
-    xSemaphoreGive(mutex);
+    xSemaphoreGive(canBus.mutex);
     console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   }
-  CAN.onReceive(onReceiveForwarder); // couldn't get it to work with method of object
-
+  xSemaphoreTakeT(canBus.mutex);
+  CAN.onReceive(onReceive);
+  xSemaphoreGive(canBus.mutex);
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
 
 void CANBus::exit() {
-  // Exit needs to be implemented for Task, here or in Abstract_task
-  xSemaphoreTakeT(mutex);
+  // Exit needs to be implemented for Task, here or in AbstractTask
+  xSemaphoreTakeT(canBus.mutex);
   CAN.end();
-  xSemaphoreGive(mutex);
+  xSemaphoreGive(canBus.mutex);
 }
 
-int CANBus::availiblePackets() { return rxBuffer.getSize(); }
-
-void CANBus::onReceive(int packetSize) {
-
-  xSemaphoreTakeT(mutex);
-  int packetId = CAN.packetId();
-  xSemaphoreGive(mutex);
-
-  if (packetId == DC_BASE_ADDR || packetId == AC_BASE_ADDR || max_ages[packetId] == 0 ||
-      (max_ages[packetId] != -1 && millis() - ages[packetId] > max_ages[packetId])) {
-
-    ages[packetId] = millis();
-
-    CANPacket packet;
-    uint64_t rxData = 0;
-    xSemaphoreTakeT(mutex);
-    for (int i = 0; i < packetSize; i++) {
-      if (CAN.available()) {
-        rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
-      }
-    }
-    xSemaphoreGive(mutex);
-
-    packet.setId(packetId);
-    packet.setData(rxData);
-
-    rxBuffer.push(packet);
-    if (packetsCountMax < availiblePackets())
-      packetsCountMax = availiblePackets();
-  }
+void CANBus::push(CANPacket packet) {
+  rxBuffer.push(packet);
+  // register level of rxBuffer filling:
+  // if (packetsCountMax < availiblePackets())
+  //   packetsCountMax = availiblePackets();
 }
 
-bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3) {
-  console << "ERROR: not implemented yet\n";
-  return false;
+bool CANBus::writePacket(uint16_t adr, uint16_t data3, uint16_t data2, uint16_t data1, uint16_t data0) {
+  uint64_t data = (uint64_t)data3 << 48 | (uint64_t)data2 << 32 | (uint64_t)data1 << 16 | (uint64_t)data0 << 0;
+  if (canBus.verboseModeCanOut)
+    console << fmt::format("{:08x} <== {:02x} - {:02x} - {:02x} - {:02x}\n", data, data3, data2, data1, data0);
+  return writePacket(adr, data);
 }
 
-bool CANBus::writePacket(uint16_t adr, uint32_t data0, uint32_t data1) {
-  console << "ERROR: not implemented yet\n";
-  return false;
+bool CANBus::writePacket(uint16_t adr, uint32_t data1, uint32_t data0) {
+  uint64_t data = (uint64_t)data1 << 32 | (uint64_t)data0 << 0;
+  if (canBus.verboseModeCanOut)
+    console << fmt::format("{:08x} <== {:04x} - {:04x}\n", data, data1, data0);
+  return writePacket(adr, data);
 }
 
 bool CANBus::writePacket(uint16_t adr, uint64_t data) {
+  CANPacket packet = CANPacket(adr, data);
+  if (canBus.verboseModeCanOut)
+    console << fmt::format("{:08x} <== {:08x}\n", data, data);
   try {
-    xSemaphoreTakeT(mutex);
+    xSemaphoreTakeT(canBus.mutex);
     CAN.beginPacket(adr);
-    CANPacket packet = CANPacket(adr, data);
     CAN.write(packet.getData_ui8(0));
     CAN.write(packet.getData_ui8(1));
     CAN.write(packet.getData_ui8(2));
@@ -206,7 +218,7 @@ bool CANBus::writePacket(uint16_t adr, uint64_t data) {
     CAN.write(packet.getData_ui8(6));
     CAN.write(packet.getData_ui8(7));
     CAN.endPacket();
-    xSemaphoreGive(mutex);
+    xSemaphoreGive(canBus.mutex);
   } catch (exception &ex) {
     console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
     return false;
@@ -214,19 +226,10 @@ bool CANBus::writePacket(uint16_t adr, uint64_t data) {
   return true;
 }
 
-void CANBus::task() {
-  CANPacket packet;
-
-  while (1) {
-    // Handle recieved message with CANBus
-    while (rxBuffer.isAvailable()) {
-      packet = rxBuffer.pop();
-
-      handle_rx_packet(packet);
-    }
-
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
-  }
+string CANBus::print_raw_packet(CANPacket packet) {
+  return fmt::format("C{}-{}-[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data: {:04x}, {:04x}, {:04x}, {:04x}\n", xPortGetCoreID(),
+                     esp_timer_get_time() / 1000000, availiblePackets(), getMaxPacketsBufferUsage(), packet.getId(), packet.getData_ui16(3),
+                     packet.getData_ui16(2), packet.getData_ui16(1), packet.getData_ui16(0));
 }
 
 int CANBus::handle_rx_packet(CANPacket packet) {
@@ -234,25 +237,28 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   int packetId = packet.getId();
   // Do something with packet
   switch (packetId) {
-  case AC_BASE_ADDR | 0x00: {
-    carState.Speed = (int)(packet.getData_ui16(0)) / 10;
-    carState.AccelerationDisplay = (int)packet.getData_i8(2);
-    carState.Deceleration = (int)(packet.getData_ui16(2)) / 10;
-    carState.Potentiometer = (int)(packet.getData_ui16(3)) / 10;
-    if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data:dummy={:4d}, speed={:4d}, decl={:4d}, accl={:4d}",
-                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId, carState.Speed, carState.Deceleration,
-                             carState.Acceleration, carState.Potentiometer)
-              << NL;
+  case AC_BASE_ADDR:
+    //   if (canBus.verboseModeCan)
+    //     console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data=0x{:x}", canBus.availiblePackets(),
+    //                            canBus.getMaxPacketsBufferUsage(), packetId | 0x01, packet.getData_ui64())
+    //             << NL;
+    break;
+  case DC_BASE_ADDR | 0x00: {
+    carState.Speed = (int)(packet.getData_ui16(3));
+    carState.AccelerationDisplay = (int)packet.getData_ui16(2);
+    carState.Deceleration = (int)(packet.getData_ui16(1));
+    carState.Potentiometer = (int)(packet.getData_ui16(0));
+    if (canBus.verboseModeCanIn)
+      console << print_raw_packet(packet);
+    // console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d}",
+    //                        canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.Speed,
+    //                        carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+    //<< NL;
   } break;
 
-  case AC_BASE_ADDR | 0x01:
-    break;
-  case DC_BASE_ADDR:
-    if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-data=0x{:x}", canBus.availiblePackets(),
-                             canBus.getMaxPacketsBufferUsage(), packetId, packet.getData_ui64())
-              << NL;
+  case DC_BASE_ADDR | 0x01:
+    if (canBus.verboseModeCanIn)
+      console << print_raw_packet(packet);
     break;
   case BMS_BASE_ADDR:
     // heartbeat packet.getData_ui32(0)
@@ -263,7 +269,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     carState.BatteryCurrent = (float)packet.getData_i32(1) / 1000.0;
     // Battery Voltage mV packet.getData_ui32(0)
     // Battery Current mA packet.getData_i32(1)
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", Uavg=" << carState.Uavg << ", BatVolt=" << carState.BatteryVoltage << ", BatCur=" << carState.BatteryCurrent
               << fmt::format(", raw: 0x{:08x}", packet.getData_ui64()) << NL;
     }
@@ -322,7 +328,6 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     if (verboseModeCan) {
       console << ", PrechargeState=" << PRECHARGE_STATE_str[(int)(carState.PrechargeState)] << NL;
     }
-
     // Precharge Timer info also available
     break;
   case BMS_BASE_ADDR | 0xF9:
@@ -334,9 +339,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     break;
 
   case BMS_BASE_ADDR | 0xFD:
-
     carState.BatteryErrors.clear();
-
     if (packet.getData_ui32(0) > 0) { // Saving CPU time in case there are no errors
       for (int i = 0; i < 13; i++) {
         if (packet.getData_b(i)) {
@@ -417,4 +420,18 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     }
   }
   return retValue;
+}
+
+void CANBus::task(void *pvParams) {
+  while (1) {
+    if (SystemInited) {
+      // handle recieved message with CANBus
+      xSemaphoreTakeT(canBus.mutex);
+      while (rxBuffer.isAvailable()) {
+        handle_rx_packet(rxBuffer.pop());
+      }
+      xSemaphoreGive(canBus.mutex);
+    }
+    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+  }
 }

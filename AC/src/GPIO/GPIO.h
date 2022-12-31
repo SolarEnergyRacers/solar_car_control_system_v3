@@ -5,18 +5,18 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_GPIO_H
 #define SOLAR_CAR_CONTROL_SYSTEM_GPIO_H
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <definitions.h>
 #include <driver/gpio.h>
 
-class GPInputOutput : public Abstract_task {
+class GPInputOutput : public AbstractTask {
 public:
   // RTOS task
   string getName(void) { return "GPIO"; };
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void);
+  void task(void * pvParams);
 
   // Class functions and members
   void register_gpio_interrupt(void);

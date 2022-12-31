@@ -37,7 +37,7 @@
 #include <CarControl.h>
 #include <Console.h>
 #include <DAC.h>
-//#include <ESP32Time.h>
+// #include <ESP32Time.h>
 #include <GPIO.h>
 #include <I2CBus.h>
 #include <OneWire.h>
@@ -83,13 +83,14 @@ void app_main(void) {
   console << "esp32dev + free RTOS\n";
   console << "Solar Energy Car Racers SER4 Controller: v" << VERSION << ", build time: " << __DATE__ << " " << __TIME__ << NL;
   console << "ARDUINO: " << ARDUINO << NL;
+  console << "SER4TYPE" << SER4TYPE << NL;
   console << "------------------------------------------------------------\n";
   // init arduino library
   initArduino();
   console << "------------------------------------------------------------\n";
   chip_info();
   console << "------------------------------------------------------------\n";
-
+  console << "Running on core " << xPortGetCoreID() << NL;
   console << "-gpio pin settings -----------------------------------------\n";
   msg = gpio.init();
   delay(200);
@@ -118,8 +119,10 @@ void app_main(void) {
   msg = canBus.create_task(15, 500, 8000);
   console << msg << NL;
   // engineerDisplay.print(msg + "\n");
-  canBus.verboseModeCan = true;
-  canBus.verboseModeCanDebug = true;
+  canBus.verboseModeCan = false;
+  canBus.verboseModeCanIn = false;
+  canBus.verboseModeCanOut = true;
+  canBus.verboseModeCanDebug = false;
 
   if (i2cBus.isDC()) {
     console << "-Drive Controller specific initialization ----------------\n";
@@ -134,7 +137,7 @@ void app_main(void) {
     msg = adc.create_task(6, 500, 8000);
     console << msg << NL;
     // engineerDisplay.print(msg + "\n");
-    adc.verboseModeADC = true;
+    adc.verboseModeADC = false;
   }
 
   msg = carControl.init();
@@ -151,5 +154,10 @@ void app_main(void) {
   } else {
     console << "Initialization ready as AuxiliaryController\n";
   }
+  console << fmt::format("- i2cBus.verboseModeI2C      = {}", i2cBus.verboseModeI2C) << NL;
+  console << fmt::format("- canBus.verboseModeCan      = {}", canBus.verboseModeCan) << NL;
+  console << fmt::format("- canBus.verboseModeCanDebug = {}", canBus.verboseModeCanDebug) << NL;
+  console << fmt::format("- carControl.verboseMode     = {}", carControl.verboseMode) << NL;
   console << "------------------------------------------------------------\n";
+  vTaskStartScheduler();
 }

@@ -41,10 +41,10 @@ def start(command="code", args=".", pos_left=10, pos_right=10, pos_width=40, pos
 
 width, height = pyautogui.size()
 
-start('code', '/home/ksc/work/ser4/solar_car_control_system_v3/AC/SER4_v3.code-workspace',
+start('code', '/home/ksc/work/ser4/solar_car_control_system_v3/AC',#/SER4_v3.code-workspace',
       10, 10, width//2-16, 1400)
 time.sleep(1)
-start('code', '/home/ksc/work/ser4/solar_car_control_system_v3/DC/SER4_v3.code-workspace',
+start('code', '/home/ksc/work/ser4/solar_car_control_system_v3/DC',#/SER4_v3.code-workspace',
       width//2, 10, width//2-20, 1400)
 
 # print('fiin.')

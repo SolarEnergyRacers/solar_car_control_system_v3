@@ -33,8 +33,7 @@
 // local includes
 #include <AbstractTask.h>
 #include <LocalFunctionsAndDevices.h>
-// local libs
-#include <AbstractTask.h>
+// local components
 #include <CANBus.h>
 #include <CarControl.h>
 #include <Console.h>
@@ -42,7 +41,6 @@
 #include <DriverDisplay.h>
 #include <EngineerDisplay.h>
 // #include <ESP32Time.h>
-#include <EngineerDisplay.h>
 #include <GPIO.h>
 #include <I2CBus.h>
 #include <OneWire.h>
@@ -67,7 +65,7 @@ CarState carState;
 Console console;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
-//OneWireBus oneWireBus;
+// OneWireBus oneWireBus;
 SPIBus spiBus;
 
 EngineerDisplay engineerDisplay;
@@ -114,6 +112,7 @@ void app_main(void) {
   // console << msg << NL;
   msg = i2cBus.init();
   console << msg << NL;
+  i2cBus.verboseModeI2C = false;
   delay(200);
 
   if (i2cBus.isDC()) {
@@ -124,15 +123,15 @@ void app_main(void) {
   // Engineer Display
   msg = engineerDisplay.init_t(1, 1, 10000, 300);
   console << msg << NL;
-  carControl.verboseMode = false;
+  engineerDisplay.verboseMode = false;
   console << "[  ] Create " << engineerDisplay.getName() << " ...";
   xTaskCreatePinnedToCore(engineerDisplayTask,             /* task function. */
                           engineerDisplay.getInfo(),       /* name of task. */
-                          engineerDisplay.stack_size,      /* stack size of task */
+                          engineerDisplay.getStackSize(),      /* stack size of task */
                           NULL,                            /* parameter of the task */
-                          engineerDisplay.priority,        /* priority of the task */
+                          engineerDisplay.getPriority(),        /* priority of the task */
                           engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
-                          engineerDisplay.core_id);        /* pin task to core id */
+                          engineerDisplay.getCoreId());        /* pin task to core id */
   console << " done." << NL;
   msg = carControl.report_task_init(&engineerDisplay);
   console << msg << NL;
@@ -147,11 +146,11 @@ void app_main(void) {
   console << "[  ] Create " << canBus.getName() << " task ...";
   xTaskCreatePinnedToCore(canBusTask,             /* task function. */
                           canBus.getInfo(),       /* name of task. */
-                          canBus.stack_size,      /* stack size of task */
+                          canBus.getStackSize(),      /* stack size of task */
                           NULL,                   /* parameter of the task */
-                          canBus.priority,        /* priority of the task */
+                          canBus.getPriority(),        /* priority of the task */
                           canBus.getTaskHandle(), /* task handle to keep track of created task */
-                          canBus.core_id);        /* pin task to core id */
+                          canBus.getCoreId());        /* pin task to core id */
   console << " done." << NL;
   msg = canBus.report_task_init(&canBus);
   console << msg << NL;
@@ -159,15 +158,15 @@ void app_main(void) {
   // Car Control AC
   msg = carControl.init_t(1, 10, 10000, 200);
   console << msg << NL;
-  carControl.verboseMode = false;
+  carControl.verboseMode = true;
   console << "[  ] Create " << carControl.getName() << " task ...";
   xTaskCreatePinnedToCore(carControlTask,             /* task function. */
                           carControl.getInfo(),       /* name of task. */
-                          carControl.stack_size,      /* stack size of task */
+                          carControl.getStackSize(),      /* stack size of task */
                           NULL,                       /* parameter of the task */
-                          carControl.priority,        /* priority of the task */
+                          carControl.getPriority(),        /* priority of the task */
                           carControl.getTaskHandle(), /* task handle to keep track of created task */
-                          carControl.core_id);        /* pin task to core id */
+                          carControl.getCoreId());        /* pin task to core id */
   console << " done." << NL;
   msg = carControl.report_task_init(&carControl);
   console << msg << NL;
@@ -175,7 +174,7 @@ void app_main(void) {
 
   //--let the bootscreen visible for a moment ------------------
   engineerDisplay.print(".\nWaiting for start of life display: ");
-  int waitAtConsoleView = 5;
+  int waitAtConsoleView = 3;
   while (waitAtConsoleView-- > 0) {
     engineerDisplay.print(to_string(waitAtConsoleView));
     delay(1000);
@@ -187,15 +186,16 @@ void app_main(void) {
   // Driver Display
   msg = driverDisplay.init_t(1, 1, 10000, 300);
   console << msg << NL;
+  driverDisplay.verboseMode = false;
   driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
   console << "[  ] Create " << driverDisplay.getName() << " task ...";
   xTaskCreatePinnedToCore(driverDisplayTask,             /* task function. */
                           driverDisplay.getInfo(),       /* name of task. */
-                          driverDisplay.stack_size,      /* stack size of task */
+                          driverDisplay.getStackSize(),      /* stack size of task */
                           NULL,                          /* parameter of the task */
-                          driverDisplay.priority,        /* priority of the task */
+                          driverDisplay.getPriority(),        /* priority of the task */
                           driverDisplay.getTaskHandle(), /* task handle to keep track of created task */
-                          driverDisplay.core_id);        /* pin task to core id */
+                          driverDisplay.getCoreId());        /* pin task to core id */
   console << " done." << NL;
   msg = carControl.report_task_init(&driverDisplay);
   console << msg << driverDisplay.get_DisplayStatus_text() << NL;

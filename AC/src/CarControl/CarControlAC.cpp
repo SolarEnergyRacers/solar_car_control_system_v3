@@ -276,13 +276,11 @@ void CarControl::task(void *pvParams) {
       if (carControl.verboseModeCarControlMax) {
         console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
       }
-      
+
       canBus.writePacket(AC_BASE_ADDR | 0x00, value);
       if (carControl.verboseMode)
-        console << fmt::format(
-                       "[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d},button12 = {:1x} ",
-                       canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.Speed,
-                       carState.Deceleration, carState.Acceleration, carState.Potentiometer, value)
+        console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:button12 = {:1x} ", canBus.availiblePackets(),
+                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, value)
                 << NL;
 
       // // one data row per second
@@ -299,8 +297,8 @@ void CarControl::task(void *pvParams) {
       //     }
       //   }
       // }
-      // sleep
+      // taskSuspend
     }
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+    taskSuspend();
   }
 }

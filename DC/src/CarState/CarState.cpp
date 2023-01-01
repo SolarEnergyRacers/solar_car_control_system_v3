@@ -156,9 +156,6 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Log file period [h].... " << LogFilePeriod << NL;
   ss << "Log file interval [ms]. " << LogInterval << NL;
 
-  // [TaskTimings]
-  ss << "Sleep time EIOExt ..... " << SleepTimeIOExt << NL;
-
   // [PID]
   ss << "Kp .................... " << Kp << NL;
   ss << "Ki .................... " << Ki << NL;
@@ -167,7 +164,6 @@ const string CarState::print(string msg, bool withColors) {
   // [Dynamic]
   ss << "Paddle damping ........ " << PaddleDamping << NL;
   ss << "Paddle offset ......... " << PaddleOffset << NL;
-  ss << "Paddle adjustment ..... " << PaddleAdjustCounter << NL;
   ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
   ss << "Const power invrease .. " << ConstPowerIncrease << NL;
 

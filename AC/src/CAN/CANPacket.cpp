@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "CANPacket.h"
+#include <CANPacket.h>
 
 CANPacket::CANPacket() {
   id = 0;

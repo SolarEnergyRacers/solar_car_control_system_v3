@@ -127,7 +127,6 @@ public:
 
     // init state flags
     // #SAFETY#: acceleration lock
-    PaddlesAdjusted = false;
     AccelerationLocked = true;
     GreenLight = false;
     // BEGIN prevent stupid compiler warnings "defined but not used"
@@ -145,18 +144,26 @@ public:
     // BEGIN prevent stupid compiler warnings "defined but not used"
   }
   ~CarState(){};
+  void init_values();
   bool initalize_config();
 
+  uint16_t LifeSign;
+  // Buttons
+  bool ButtonPlus;
+  bool ButtonMinus;
+  bool ButtonConstantModeOn;
+  bool ButtonConstantModeOFF;
+  bool ButtonConstant_v_P;
+
   // physical car data (measurement values)
-  int Potentiometer; // ADC potentiometer from switch board
-  int Speed;         // ADC
-  int Acceleration;  // ADC Steering Wheel
-  int Deceleration;  // ADC Steering Wheel
+  uint16_t Potentiometer; // ADC potentiometer from switch board
+  uint16_t Speed;         // ADC
+  uint8_t Acceleration;   // ADC Steering Wheel
+  uint8_t Deceleration;   // ADC Steering Wheel
   // #SAFETY#: acceleration lock
-  bool AccelerationLocked; // DSC lock
-  bool PaddlesAdjusted;    // did just padd adjustment: release lock if AccelerationDisplay==0
+  bool AccelerationLocked; // DAC lock
   int AccelerationDisplay; // Display Value (-99...+99)
-  //#SAFETY-END#
+  // #SAFETY-END#
 
   bool BatteryOn;      // IO-In
   bool PhotoVoltaicOn; // IO-in
@@ -221,15 +228,6 @@ public:
   std::map<string, int> idxOfPin;
   // std::map<int, Pin> pins; // pins by index
 
-  void init_values();
-
-  // tools
-  const string print(string msg, bool withColors = true);
-  const string printIOs(string msg, bool withColors = true, bool deltaOnly = false);
-  const string serialize(string msg = "");
-  const string csv(string msg = "", bool withHeader = false);
-  const string batteryErrorsAsString(bool verbose = false);
-
   // auxiliary variables - read from ser4config.ini
   // [Main]
   string LogFilename; // telemetry data: %stamp% get replaced by datetime stamp if period != 0
@@ -247,7 +245,6 @@ public:
   // [Dynamic]
   int PaddleDamping;                  // 0...99
   int PaddleOffset;                   // 0 ... 65535: offset when paddle recognize not 0 values
-  int PaddleAdjustCounter;            // about seconds
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode
   int ButtonControlModeIncreaseHeigh; // ButtonControlModeIncrease hight mode
@@ -262,6 +259,13 @@ public:
   // [Telemetry]
   int SendInterval;     // [ms]
   int MaxCachedRecords; // number of telemetry records hold in cache in case of trasmit errors
+
+  // tools
+  const string print(string msg, bool withColors = true);
+  const string printIOs(string msg, bool withColors = true, bool deltaOnly = false);
+  const string serialize(string msg = "");
+  const string csv(string msg = "", bool withHeader = false);
+  const string batteryErrorsAsString(bool verbose = false);
 };
 
 #endif // CARSTATE_H

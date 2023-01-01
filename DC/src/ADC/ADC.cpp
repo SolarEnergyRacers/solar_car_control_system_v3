@@ -14,21 +14,17 @@
 #include <Wire.h> // I2C
 
 #include <ADC.h>
+#include <AbstractTask.h>
 #include <CarState.h>
 #include <Console.h>
-#include <I2CBus.h>
-//#include <DAC.h>
-//#include <DriverDisplay.h>
-#include <Abstract_task.h>
 #include <Helper.h>
+#include <I2CBus.h>
 
 extern Console console;
 extern CarState carState;
 extern I2CBus i2cBus;
 extern ADC adc;
 extern bool adcInited;
-// extern DAC dac;
-// extern DriverDisplay driverDisplay;
 
 using namespace std;
 
@@ -80,7 +76,7 @@ int16_t ADC::read(Pin pin) {
   xSemaphoreTakeT(i2cBus.mutex);
   int16_t value = adsDevice.readADC(pin & 0xf);
   xSemaphoreGive(i2cBus.mutex);
-  return value;
+  return value < 0 ? 0 : value;
 }
 
 float ADC::get_multiplier() {
@@ -90,26 +86,24 @@ float ADC::get_multiplier() {
   return adsDevice.toVoltage(1);
 }
 
-void ADC::task() {
-  // polling loop
+void ADC::task(void *pvParams) {
   while (1) {
     // ADC0
     int motor_s = read(Pin::MOTOR_SPEED_PORT);
-    int potenti = read(Pin::SWITCH_POTENTIOMENTER_PORT);
+    int potenti = read(Pin::SWITCH_POTENTIOMETER_PORT);
     int stw_acc = read(Pin::STW_ACC_PORT);
     int stw_dec = read(Pin::STW_DEC_PORT);
 
-    if ((abs(MOTOR_SPEED - motor_s) > 2 || abs(SWITCH_POTENTIOMENTER - potenti) > 2 || abs(STW_ACC - stw_acc) > 2 ||
-         abs(STW_DEC - stw_dec) > 2)) {
+    if ((abs(motor_speed - motor_s) > 2 || abs(switch_potentiometer - potenti) > 2 || abs(stw_acc - stw_acc) > 2 ||
+         abs(stw_dec - stw_dec) > 2)) {
       if (verboseModeADC)
         console << fmt::format("ADC: speed={:3d} | acc={:5d} | dec={:5d} | pot {:5d}\n", motor_s, stw_acc, stw_dec, potenti);
 
-      MOTOR_SPEED = motor_s;
-      SWITCH_POTENTIOMENTER = potenti;
-      STW_ACC = stw_acc;
-      STW_DEC = stw_dec;
+      motor_speed = motor_s;
+      switch_potentiometer = potenti;
+      stw_acc = stw_acc;
+      stw_dec = stw_dec;
     }
-    // sleep
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+    taskSuspend();
   }
 }

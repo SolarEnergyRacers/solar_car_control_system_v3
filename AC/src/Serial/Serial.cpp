@@ -74,6 +74,6 @@ void Uart::task(void * pvParams) {
     //   // Serial2.print(char(Serial.read()));
     //   Serial2 << Serial.readString();
     // }
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+    taskSuspend();
   }
 }

@@ -9,14 +9,14 @@
 #include <map>
 #include <string>
 
-//#include <MCP23017.h>
+// #include <MCP23017.h>
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <definitions.h>
 
 const int MAX_ACCELERATION_DISPLAY_VALUE = 99; // absolute of minimal or maximal value for acceleration scaling
 
-class CarControl : public Abstract_task {
+class CarControl : public AbstractTask {
 
 public:
   // RTOS task
@@ -24,7 +24,7 @@ public:
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void);
+  void task(void *pvParams);
 
   // Class member and functions
   static void valueChangedHandler() { valueChangeRequest++; };
@@ -36,7 +36,6 @@ public:
   int calculate_displayvalue_acc_dec(int valueDec, int valueAcc);
   bool read_paddles();
   bool read_PLUS_MINUS();
-  void adjust_paddles(int second = 1);
   void reset_acceleration_values() { _set_dec_acc_values(0, 0, 0, 0, 0); }
   bool verboseMode = false;
   bool verboseModeCarControlMax = false;

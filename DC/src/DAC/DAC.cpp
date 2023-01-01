@@ -107,7 +107,7 @@ bool DAC::set_pot(uint8_t val, pot_chan channel) {
   bool success = true;
   // #SAFETY#: acceleration lock
   if (isLocked) {
-    if (!carState.PaddlesAdjusted || carState.AccelerationDisplay != 0)
+    if (carState.AccelerationDisplay != 0)
       return false;
 
     // release unlock state and take over into to car state

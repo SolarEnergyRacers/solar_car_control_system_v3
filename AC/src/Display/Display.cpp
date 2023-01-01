@@ -440,7 +440,7 @@ void Display::task(void *pvParams) {
       }
       break;
     case DISPLAY_STATUS::ENGINEER_HALTED:
-      sleep_polling_ms = 1500;
+      set_sleep_polling(1500);
 #if WithTaskSuspend == true
       vTaskSuspend(getTaskHandle());
 #endif
@@ -452,6 +452,6 @@ void Display::task(void *pvParams) {
 #if LIFESIGN_ON == true
     lifeSignCounter++;
 #endif
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+    taskSuspend();
   }
 }

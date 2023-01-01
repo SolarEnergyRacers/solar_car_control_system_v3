@@ -74,8 +74,6 @@ void GPInputOutput::task(void * pvParams) {
       console << "[INT] Number of interrupts: " << interrupt_counter << "\n";
       interrupt_counter = 0;
     }
-
-    // sleep for 1s
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+    taskSuspend();
   }
 }

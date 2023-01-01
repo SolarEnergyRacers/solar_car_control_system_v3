@@ -14,7 +14,7 @@
 
 #include <CarState.h>
 #include <Console.h>
-//#include <ADC.h>
+// #include <ADC.h>
 #include <Display.h>
 #include <EngineerDisplay.h>
 
@@ -66,7 +66,7 @@ DISPLAY_STATUS EngineerDisplay::display_task(int lifeSignCounter) {
   case DISPLAY_STATUS::ENGINEER_BACKGROUND:
     clear_screen(bgColor);
     draw_display_background();
-    sleep_polling_ms = 500;
+    set_sleep_polling(500);
     status = DISPLAY_STATUS::ENGINEER_RUNNING;
     break;
   // working state:

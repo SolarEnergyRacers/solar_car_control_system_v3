@@ -19,29 +19,27 @@
 
 extern CarState carState;
 extern Console console;
-extern CANBus canBus;
 extern I2CBus i2cBus;
+extern CANBus canBus;
+extern bool SystemInited;
 
 void onReceive(int packetSize) {
 
-  // xSemaphoreTakeT(canBus.mutex);
+  if (!SystemInited)
+    return;
+
   int packetId = CAN.packetId();
+  if(canBus.is_to_ignore_packet(packetId))
+    return;
 
-  if (packetId == DC_BASE_ADDR || packetId == AC_BASE_ADDR || canBus.isPacketToRenew(packetId)) {
+  canBus.setPacketTimeStamp(packetId, millis());
 
-    canBus.setPacketTimeStamp(packetId, millis());
-
+  if (CAN.available()) {
     uint64_t rxData = 0l;
-    if (CAN.available()) {
-      for (int i = 0; i < packetSize && i < 8; i++) {
-        rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
-      }
+    for (int i = 0; i < packetSize && i < 8; i++) {
+      rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
     }
-
-    CANPacket packet;
-    packet.setId(packetId);
-    packet.setData(rxData);
-    canBus.push(packet);
+    canBus.push(CANPacket(packetId, rxData));
   }
   // xSemaphoreGive(canBus.mutex);
 }
@@ -54,97 +52,7 @@ void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packet
 
 CANBus::CANBus() {
   packetsCountMax = 0;
-  // init max ages
-  max_ages[BMS_BASE_ADDR] = MAXAGE_BMU_HEARTBEAT;
-  max_ages[BMS_BASE_ADDR | 0x1] = MAXAGE_CMU_TEMP;     // CMU1
-  max_ages[BMS_BASE_ADDR | 0x4] = MAXAGE_CMU_TEMP;     // CMU2
-  max_ages[BMS_BASE_ADDR | 0x7] = MAXAGE_CMU_TEMP;     // CMU3
-  max_ages[BMS_BASE_ADDR | 0x2] = MAXAGE_CMU_VOLTAGES; // CMU1
-  max_ages[BMS_BASE_ADDR | 0x3] = MAXAGE_CMU_VOLTAGES; // CMU1
-  max_ages[BMS_BASE_ADDR | 0x5] = MAXAGE_CMU_VOLTAGES; // CMU2
-  max_ages[BMS_BASE_ADDR | 0x6] = MAXAGE_CMU_VOLTAGES; // CMU2
-  max_ages[BMS_BASE_ADDR | 0x8] = MAXAGE_CMU_VOLTAGES; // CMU3
-  max_ages[BMS_BASE_ADDR | 0x9] = MAXAGE_CMU_VOLTAGES; // CMU3
-  max_ages[BMS_BASE_ADDR | 0xF4] = MAXAGE_PACK_SOC;
-  max_ages[BMS_BASE_ADDR | 0xF5] = MAXAGE_BALANCE_SOC;
-  max_ages[BMS_BASE_ADDR | 0xF6] = MAXAGE_CHARGER_CONTROL;
-  max_ages[BMS_BASE_ADDR | 0xF7] = MAXAGE_PRECHARGE_STATUS;
-  max_ages[BMS_BASE_ADDR | 0xF8] = MAXAGE_MIN_MAX_U_CELL;
-  max_ages[BMS_BASE_ADDR | 0xF9] = MAXAGE_MIN_MAX_T_CELL;
-  max_ages[BMS_BASE_ADDR | 0xFA] = MAXAGE_PACK_VOLTAGE;
-  max_ages[BMS_BASE_ADDR | 0xFB] = MAXAGE_PACK_STATUS;
-  max_ages[BMS_BASE_ADDR | 0xFC] = MAXAGE_PACK_FAN_STATUS;
-  max_ages[BMS_BASE_ADDR | 0xFD] = MAXAGE_EXT_PACK_STATUS;
-
-  max_ages[MPPT1_BASE_ADDR] = MAXAGE_MPPT_INPUT;
-  max_ages[MPPT1_BASE_ADDR | 0x1] = MAXAGE_MPPT_OUTPUT;
-  max_ages[MPPT1_BASE_ADDR | 0x2] = MAXAGE_MPPT_TEMP;
-  max_ages[MPPT1_BASE_ADDR | 0x3] = MAXAGE_MPPT_AUX_POWER;
-  max_ages[MPPT1_BASE_ADDR | 0x4] = MAXAGE_MPPT_LIMITS;
-  max_ages[MPPT1_BASE_ADDR | 0x5] = MAXAGE_MPPT_STATUS;
-  max_ages[MPPT1_BASE_ADDR | 0x6] = MAXAGE_MPPT_POWER_CONN;
-
-  max_ages[MPPT2_BASE_ADDR] = MAXAGE_MPPT_INPUT;
-  max_ages[MPPT2_BASE_ADDR | 0x1] = MAXAGE_MPPT_OUTPUT;
-  max_ages[MPPT2_BASE_ADDR | 0x2] = MAXAGE_MPPT_TEMP;
-  max_ages[MPPT2_BASE_ADDR | 0x3] = MAXAGE_MPPT_AUX_POWER;
-  max_ages[MPPT2_BASE_ADDR | 0x4] = MAXAGE_MPPT_LIMITS;
-  max_ages[MPPT2_BASE_ADDR | 0x5] = MAXAGE_MPPT_STATUS;
-  max_ages[MPPT2_BASE_ADDR | 0x6] = MAXAGE_MPPT_POWER_CONN;
-
-  max_ages[MPPT3_BASE_ADDR] = MAXAGE_MPPT_INPUT;
-  max_ages[MPPT3_BASE_ADDR | 0x1] = MAXAGE_MPPT_OUTPUT;
-  max_ages[MPPT3_BASE_ADDR | 0x2] = MAXAGE_MPPT_TEMP;
-  max_ages[MPPT3_BASE_ADDR | 0x3] = MAXAGE_MPPT_AUX_POWER;
-  max_ages[MPPT3_BASE_ADDR | 0x4] = MAXAGE_MPPT_LIMITS;
-  max_ages[MPPT3_BASE_ADDR | 0x5] = MAXAGE_MPPT_STATUS;
-  max_ages[MPPT3_BASE_ADDR | 0x6] = MAXAGE_MPPT_POWER_CONN;
-
-  // init ages
-  ages[BMS_BASE_ADDR] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0x1] = INT32_MAX; // CMU1
-  ages[BMS_BASE_ADDR | 0x4] = INT32_MAX; // CMU2
-  ages[BMS_BASE_ADDR | 0x7] = INT32_MAX; // CMU3
-  ages[BMS_BASE_ADDR | 0x2] = INT32_MAX; // CMU1
-  ages[BMS_BASE_ADDR | 0x3] = INT32_MAX; // CMU1
-  ages[BMS_BASE_ADDR | 0x5] = INT32_MAX; // CMU2
-  ages[BMS_BASE_ADDR | 0x6] = INT32_MAX; // CMU2
-  ages[BMS_BASE_ADDR | 0x8] = INT32_MAX; // CMU3
-  ages[BMS_BASE_ADDR | 0x9] = INT32_MAX; // CMU3
-  ages[BMS_BASE_ADDR | 0xF4] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xF5] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xF6] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xF7] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xF8] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xF9] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xFA] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xFB] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xFC] = INT32_MAX;
-  ages[BMS_BASE_ADDR | 0xFD] = INT32_MAX;
-
-  ages[MPPT1_BASE_ADDR] = INT32_MAX;
-  ages[MPPT1_BASE_ADDR | 0x1] = INT32_MAX;
-  ages[MPPT1_BASE_ADDR | 0x2] = INT32_MAX;
-  ages[MPPT1_BASE_ADDR | 0x3] = INT32_MAX;
-  ages[MPPT1_BASE_ADDR | 0x4] = INT32_MAX;
-  ages[MPPT1_BASE_ADDR | 0x5] = INT32_MAX;
-  ages[MPPT1_BASE_ADDR | 0x6] = INT32_MAX;
-
-  ages[MPPT2_BASE_ADDR] = INT32_MAX;
-  ages[MPPT2_BASE_ADDR | 0x1] = INT32_MAX;
-  ages[MPPT2_BASE_ADDR | 0x2] = INT32_MAX;
-  ages[MPPT2_BASE_ADDR | 0x3] = INT32_MAX;
-  ages[MPPT2_BASE_ADDR | 0x4] = INT32_MAX;
-  ages[MPPT2_BASE_ADDR | 0x5] = INT32_MAX;
-  ages[MPPT2_BASE_ADDR | 0x6] = INT32_MAX;
-
-  ages[MPPT3_BASE_ADDR] = INT32_MAX;
-  ages[MPPT3_BASE_ADDR | 0x1] = INT32_MAX;
-  ages[MPPT3_BASE_ADDR | 0x2] = INT32_MAX;
-  ages[MPPT3_BASE_ADDR | 0x3] = INT32_MAX;
-  ages[MPPT3_BASE_ADDR | 0x4] = INT32_MAX;
-  ages[MPPT3_BASE_ADDR | 0x5] = INT32_MAX;
-  ages[MPPT3_BASE_ADDR | 0x6] = INT32_MAX;
+  init_ages();
 }
 
 string CANBus::re_init() {
@@ -159,26 +67,25 @@ string CANBus::init() {
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
-    xSemaphoreGive(mutex);
+    xSemaphoreGive(canBus.mutex);
     console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
     hasError = true;
   } else {
-    xSemaphoreGive(mutex);
+    xSemaphoreGive(canBus.mutex);
     console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   }
+  xSemaphoreTakeT(canBus.mutex);
   CAN.onReceive(onReceive);
-
+  xSemaphoreGive(canBus.mutex);
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
 
 void CANBus::exit() {
-  // Exit needs to be implemented for Task, here or in Abstract_task
-  xSemaphoreTakeT(mutex);
+  // Exit needs to be implemented for Task, here or in AbstractTask
+  xSemaphoreTakeT(canBus.mutex);
   CAN.end();
-  xSemaphoreGive(mutex);
+  xSemaphoreGive(canBus.mutex);
 }
-
-int CANBus::availiblePackets() { return rxBuffer.getSize(); }
 
 void CANBus::push(CANPacket packet) {
   rxBuffer.push(packet);
@@ -187,19 +94,23 @@ void CANBus::push(CANPacket packet) {
     packetsCountMax = availiblePackets();
 }
 
-CANPacket CANBus::pop() { return rxBuffer.pop(); }
-
-bool CANBus::writePacket(uint16_t adr, uint16_t data3, uint16_t data2, uint16_t data1, uint16_t data0) {
+bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, uint8_t data4) {
+  uint64_t data = ((uint64_t)data4) << 56 | ((uint64_t)data3) << 48 | ((uint64_t)data2) << 32 | ((uint64_t)data1) << 16 | ((uint64_t)data0) << 0;
+  if (canBus.verboseModeCanOut)
+    console << fmt::format("{:3x}: {:08x} <== {:02x} - {:02x} - {:02x} - {:01x} - {:01x}\t-\t", adr, data, data0, data1, data2, data2, data4);
+  return writePacket(adr, data);
+}
+bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3) {
   uint64_t data = ((uint64_t)data3) << 48 | ((uint64_t)data2) << 32 | ((uint64_t)data1) << 16 | ((uint64_t)data0) << 0;
   if (canBus.verboseModeCanOut)
-    console << fmt::format("{:3x}: {:08x} <== {:02x} - {:02x} - {:02x} - {:02x}\n", adr, data, data3, data2, data1, data0);
+    console << fmt::format("{:3x}: {:08x} <== {:02x} - {:02x} - {:02x} - {:02x}\t-\t", adr, data, data0, data1, data2, data3);
   return writePacket(adr, data);
 }
 
-bool CANBus::writePacket(uint16_t adr, uint32_t data1, uint32_t data0) {
+bool CANBus::writePacket(uint16_t adr, uint32_t data0, uint32_t data1) {
   uint64_t data = (uint64_t)data1 << 32 | (uint64_t)data0 << 0;
   if (canBus.verboseModeCanOut)
-    console << fmt::format("{:3x}: {:08x} <== {:04x} - {:04x}\n", adr, data, data1, data0);
+    console << fmt::format("{:3x}: {:08x} <== {:04x} - {:04x}\t-\t", adr, data, data0, data1);
   return writePacket(adr, data);
 }
 
@@ -227,210 +138,23 @@ bool CANBus::writePacket(uint16_t adr, uint64_t data) {
   return true;
 }
 
-void CANBus::task() {
-  CANPacket packet;
+string CANBus::print_raw_packet(CANPacket packet) {
+  return fmt::format("C{}-{}-[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data: {:04x}, {:04x}, {:04x}, {:04x}\n", xPortGetCoreID(),
+                     esp_timer_get_time() / 1000000, availiblePackets(), getMaxPacketsBufferUsage(), packet.getId(), packet.getData_ui16(3),
+                     packet.getData_ui16(2), packet.getData_ui16(1), packet.getData_ui16(0));
+}
 
+void CANBus::task(void *pvParams) {
   while (1) {
-    // Handle recieved message with CANBus
-    while (rxBuffer.isAvailable()) {
-      packet = rxBuffer.pop();
-
-      handle_rx_packet(packet);
-    }
-
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
-  }
-}
-
-int CANBus::handle_rx_packet(CANPacket packet) {
-  int retValue = 0;
-  int packetId = packet.getId();
-  // Do something with packet
-  switch (packetId) {
-  case AC_BASE_ADDR | 0x00: {
-    // carState.Speed = (int)(packet.getData_ui16(0));
-    // carState.AccelerationDisplay = (int)(packet.getData_ui16(1));
-    // carState.Deceleration = (int)(packet.getData_ui16(2));
-    // carState.Potentiometer = (int)(packet.getData_ui16(3));
-    // if (canBus.verboseModeCan)
-    //   console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d}",
-    //                          canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.Speed,
-    //                          carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-    //           << NL;
-    carState.DriverInfo = fmt::format("{}", packet.getData_ui64());
-    if (canBus.verboseModeCanIn)
-      console << fmt::format("B1 | B2:{:8x}\n", packet.getData_ui64());
-  } break;
-
-  case AC_BASE_ADDR | 0x01:
-    break;
-  case DC_BASE_ADDR:
-    if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data=0x{:x}", canBus.availiblePackets(),
-                             canBus.getMaxPacketsBufferUsage(), packetId | 0x01, packet.getData_ui64())
-              << NL;
-    break;
-  case BMS_BASE_ADDR:
-    // heartbeat packet.getData_ui32(0)
-    break;
-  case BMS_BASE_ADDR | 0xFA:
-    carState.BatteryVoltage = (float)packet.getData_ui32(0) / 1000.0;
-    carState.Uavg = carState.BatteryVoltage / 28.; // 28 cells in serie
-    carState.BatteryCurrent = (float)packet.getData_i32(1) / 1000.0;
-    // Battery Voltage mV packet.getData_ui32(0)
-    // Battery Current mA packet.getData_i32(1)
-    if (verboseModeCan) {
-      console << ", Uavg=" << carState.Uavg << ", BatVolt=" << carState.BatteryVoltage << ", BatCur=" << carState.BatteryCurrent
-              << fmt::format(", raw: 0x{:08x}", packet.getData_ui64()) << NL;
-    }
-    break;
-  case BMS_BASE_ADDR | 0xF8:
-    carState.Umin = packet.getData_ui16(0) / 1000.;
-    carState.Umax = packet.getData_ui16(1) / 1000.;
-    // Battery min Cell Voltage mV packet.getData_ui16(0)
-    // Battery max Cell Voltage mV packet.getData_ui16(1)
-    // CMU number with min Cell Voltage packet.getData_ui8(4)
-    // Cell number with min Voltage packet.getData_ui8(5)
-    // CMU number with max Cell Voltage packet.getData_ui8(6)
-    // Cell number with max Voltage packet.getData_ui8(7)
-    if (verboseModeCan) {
-      console << ", Umin=" << carState.Umin << ", Umax=" << carState.Umax << NL;
-    }
-    break;
-  case BMS_BASE_ADDR | 0xF7:
-    // Contactor 1 driver error packet.getData_b(0)
-    // Contactor 2 driver error packet.getData_b(1)
-    // Contactor 1 driver output status packet.getData_b(2)
-    // Contactor 2 driver output status packet.getData_b(3)
-    // 12V contactor supply OK packet.getData_b(4)
-    // Contactor 3 driver error packet.getData_b(5)
-    // Contactor 3 driver output status packet.getData_b(6)
-
-    // Precharge State packet.getData_ui8(1)
-    /*
-        0=Error
-        1=Idle
-        2=Measure
-        3=Precharge
-        4=Run
-        5=Enable Pack
-    */
-    switch (packet.getData_ui8(1)) {
-    case 0:
-      carState.PrechargeState = PRECHARGE_STATE::ERROR;
-      break;
-    case 1:
-      carState.PrechargeState = PRECHARGE_STATE::IDLE;
-      break;
-    case 2:
-      carState.PrechargeState = PRECHARGE_STATE::MEASURE;
-      break;
-    case 3:
-      carState.PrechargeState = PRECHARGE_STATE::PRECHARGE;
-      break;
-    case 4:
-      carState.PrechargeState = PRECHARGE_STATE::RUN;
-      break;
-    case 5:
-      carState.PrechargeState = PRECHARGE_STATE::ENABLE_PACK;
-      break;
-    }
-    if (verboseModeCan) {
-      console << ", PrechargeState=" << PRECHARGE_STATE_str[(int)(carState.PrechargeState)] << NL;
-    }
-
-    // Precharge Timer info also available
-    break;
-  case BMS_BASE_ADDR | 0xF9:
-    carState.Tmin = packet.getData_ui16(0) / 10.;
-    carState.Tmax = packet.getData_ui16(1) / 10.;
-    if (verboseModeCan) {
-      console << ", Bat Tmin=" << carState.Tmin << ", Bat Tmax=" << carState.Tmax << NL;
-    }
-    break;
-
-  case BMS_BASE_ADDR | 0xFD:
-
-    carState.BatteryErrors.clear();
-
-    if (packet.getData_ui32(0) > 0) { // Saving CPU time in case there are no errors
-      for (int i = 0; i < 13; i++) {
-        if (packet.getData_b(i)) {
-          carState.BatteryErrors.push_front(static_cast<BATTERY_ERROR>(i));
-          if (verboseModeCan) {
-            console << ", BatErrors=" << carState.batteryErrorsAsString(true) << NL;
-          }
-        }
+    if (SystemInited) {
+      // handle recieved message with CANBus
+      xSemaphoreTakeT(canBus.mutex);
+      while (rxBuffer.isAvailable()) {
+        handle_rx_packet(rxBuffer.pop());
       }
+      xSemaphoreGive(canBus.mutex);
     }
-
-    // Cell over voltage packet.getData_b(0)
-    // Cell under voltage packet.getData_b(1)
-    // Cell over Temp packet.getData_b(2)
-    // Measurement untrusted packet.getData_b(3)
-
-    // CMU Comm Timeout packet.getData_b(4)
-    // Vehicle Comm Timeout packet.getData_b(5)
-    // BMU in Setup Mode packet.getData_b(6)
-    // CMU CAN Power Status packet.getData_b(7)
-
-    // Pack isolation test fail packet.getData_b(8)
-    // SOC measurement invalid packet.getData_b(9)
-    // CAN 12V in low, about to shutdown packet.getData_b(10)
-    // Contactor Stuck/Not engaged packet.getData_b(11)
-
-    // Extra Cell present packet.getData_b(12)
-    break;
-
-  case MPPT1_BASE_ADDR | 0x1:
-    carState.Mppt1Current = packet.getData_f32(1);
-    carState.PhotoVoltaicCurrent = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
-
-    // MPPT1 Output Voltage V packet.getData_f32(0)
-    // MPPT1 Output Current A packet.getData_f32(1)
-    if (verboseModeCan) {
-      console << ", Mppt1Cur=" << carState.Mppt1Current << NL;
-    }
-
-    break;
-  case MPPT2_BASE_ADDR | 0x1:
-    carState.Mppt2Current = packet.getData_f32(1);
-    carState.PhotoVoltaicCurrent = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
-
-    // MPPT2 Output Voltage V packet.getData_f32(0)
-    // MPPT2 Output Current A packet.getData_f32(1)
-    if (verboseModeCan) {
-      console << ", Mppt2Cur=" << carState.Mppt2Current << NL;
-    }
-
-    break;
-  case MPPT3_BASE_ADDR | 0x1:
-    carState.Mppt3Current = packet.getData_f32(1);
-    carState.PhotoVoltaicCurrent = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
-
-    // MPPT3 Output Voltage V packet.getData_f32(0)
-    // MPPT3 Output Current A packet.getData_f32(1)
-    if (verboseModeCan) {
-      console << ", Mppt3Cur=" << carState.Mppt3Current << NL;
-    }
-    break;
-  case MPPT1_BASE_ADDR | 0x2:
-    carState.T1 = packet.getData_f32(0);
-    if (verboseModeCan) {
-      console << "T1=" << carState.T1 << NL;
-    }
-    break;
-  case MPPT2_BASE_ADDR | 0x2:
-    carState.T2 = packet.getData_f32(0);
-    if (verboseModeCan) {
-      console << "T2=" << carState.T2 << NL;
-    }
-    break;
-  case MPPT3_BASE_ADDR | 0x2:
-    carState.T3 = packet.getData_f32(0);
-    if (verboseModeCan) {
-      console << "T3=" << carState.T3 << NL;
-    }
+    taskSuspend();
   }
-  return retValue;
 }
+

@@ -21,6 +21,7 @@ public:
   ~DriverDisplay(){};
   //==== overwrites from base class ==== START
   string getName() { return "DriverDisplay"; };
+  bool verboseMode = false;
 
 private:
   // int x, int y, string label, string format, string unit, int textColor, int bgColor, int textSize
@@ -31,7 +32,7 @@ private:
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");
   DisplayValue<bool> ConstantModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
   DisplayValue<bool> EcoModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
-  
+
   DisplayValue<int> Speed = DisplayValue<int>(0, 0, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
   DisplayValue<int> Acceleration = DisplayValue<int>(0, -1, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
   DisplayValue<CONTROL_MODE> ControlMode = DisplayValue<CONTROL_MODE>(10, 158, "", "%s", "", ILI9341_YELLOW, ILI9341_BLACK, 1);
@@ -52,7 +53,7 @@ private:
   int speedLast = 1000;
   int accelerationLast = 1000;
   int targetValueLast = 1000;
- bool justInited = true;
+  bool justInited = true;
   //=======================================
 
   //==== Driver Display definitions ==== START

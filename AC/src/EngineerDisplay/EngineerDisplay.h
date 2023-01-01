@@ -9,8 +9,8 @@
 
 #include <Display.h>
 #include <DisplayValue.h>
-#include <Wire.h>
-//#include <AbstractTask.h>
+// #include <Wire.h>
+// #include <AbstractTask.h>
 
 class EngineerDisplay : public Display {
 public:
@@ -18,6 +18,7 @@ public:
   ~EngineerDisplay(){};
   //==== overwrites from base class ==== START
   string getName(void) { return "EngineerDisplay"; };
+  bool verboseMode = false;
 
 protected:
   //==== overwrites from base class ==== START

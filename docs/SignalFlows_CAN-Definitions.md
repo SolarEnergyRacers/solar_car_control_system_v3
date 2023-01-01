@@ -1,47 +1,50 @@
 # Signals and Media in SER4 V3
 
-Version 2022.10.18
+Version 2023.01.01
 
-## Communication AC - DC
+[github: issues](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/issues/1)
 
-| AC (auxiliary controller)        | Dir  | Type        | DC (drive controller)         |
-| -------------------------------- | ---- | ----------- | ----------------------------- |
-| HAL-paddle Acceleration          | >    | analog 0-5V | carStateDC ➡ MC               |
-| HAL-paddle Deceleration          | >    | analog 0-5V | carStateDC ➡ MC               |
-| Button Level Plus                | >    | binary 0/1  | carStateDC                    |
-| Button Level Minus               | >    | binary 0/1  | carStateDC                    |
-| carStateAC -> Display Speed      | <    | CAN         | current speed ⬅ MC            |
-| Console input PID parameters     | >    | CAN         | carConfigDC? carStateDC       |
-| Button Constant Mode on/off      | >    | CAN         | carStateDC                    |
-| Button Constant Mode speed/power | >    | CAN         | carStateDC                    |
-| Break pedal state                | <    | CAN         | carStateDC                    |
-| Step width Plus/Minus            | <    | CAN         | carStateDC ⬅ Switchboard Poti |
+## Communication between Parts
+### Communication AC - DC
 
-## Communication SwitchBoard - DC
+| AC (auxiliary controller)        | Dir | Type        | DC (drive controller)         |
+|----------------------------------|-----|-------------|-------------------------------|
+| HAL-paddle Acceleration          | >   | analog 0-5V | carStateDC ➡ MC               |
+| HAL-paddle Deceleration          | >   | analog 0-5V | carStateDC ➡ MC               |
+| Button Level Plus                | >   | binary 0/1  | carStateDC                    |
+| Button Level Minus               | >   | binary 0/1  | carStateDC                    |
+| carStateAC -> Display Speed      | <   | CAN         | current speed ⬅ MC            |
+| Console input PID parameters     | >   | CAN         | carConfigDC? carStateDC       |
+| Button Constant Mode on/off      | >   | CAN         | carStateDC                    |
+| Button Constant Mode speed/power | >   | CAN         | carStateDC                    |
+| Break pedal state                | <   | CAN         | carStateDC                    |
+| Step width Plus/Minus            | <   | CAN         | carStateDC ⬅ Switchboard Poti |
 
-| SwitchBoard | Dir  | Type | DC (drive controller) |
-| ----------- | ---- | ---- | --------------------- |
-| Potentiometer (step width?)          | >    | analog 0-5V | carStateDC ➡ MC |
+### Communication SwitchBoard - DC
 
-## Communication MC - DC
+| SwitchBoard                 | Dir | Type        | DC (drive controller) |
+|-----------------------------|-----|-------------|-----------------------|
+| Potentiometer (step width?) | >   | analog 0-5V | carStateDC ➡ MC       |
 
-| MC (motor controller) | Dir  | Type        | DC (drive controller) |
-| --------------------- | ---- | ----------- | --------------------- |
-| Acceleration          | >    | anlaog 0-5V |                       |
-| Deceleration          | >    | analog 0-5V |                       |
-| Speed                 | <    | analog 0-5V |                       |
+### Communication MC - DC
 
-## Communication BMS - MC
+| MC (motor controller) | Dir | Type        | DC (drive controller) |
+|-----------------------|-----|-------------|-----------------------|
+| Acceleration          | >   | anlaog 0-5V |                       |
+| Deceleration          | >   | analog 0-5V |                       |
+| Speed                 | <   | analog 0-5V |                       |
 
-| BMS (battery management system) | Dir  | Type | DC (drive controller) |
-| ------------------------------- | ---- | ---- | --------------------- |
-| (see c++)                       | >    | CAN  |                       |
+### Communication BMS - MC
 
-## Communication MPPT - MC
+| BMS (battery management system) | Dir | Type | DC (drive controller) |
+|---------------------------------|-----|------|-----------------------|
+| (see c++)                       | >   | CAN  |                       |
 
-| MPPT (maximum power point tracker) | Dir  | Type | DC (drive controller) |
-| ---------------------------------- | ---- | ---- | --------------------- |
-|                                    | >    | CAN  |                       |
+### Communication MPPT - MC
+
+| MPPT (maximum power point tracker) | Dir | Type | DC (drive controller) |
+|------------------------------------|-----|------|-----------------------|
+|                                    | >   | CAN  |                       |
 
 ## DC Data
 
@@ -68,7 +71,7 @@ Version 2022.10.18
 
 
 
-## Direct Signals
+### Direct Signals
 
 - Locking button for left/right/hazard warn indicators 
 - LEDs for left/right/hazard warn indicators 
@@ -78,57 +81,71 @@ Version 2022.10.18
 - Break pedal (to DC)
 
 
-https://github.com/SolarEnergyRacers/solar_car_control_system_v3/issues/1
-
 ## CAN Signals
 
 ### DC - Drive Controller
 
 Base Address: 0x660
 
-#### CAN id: 0x00    Speed Control
+#### CAN id: 0x00 - Speed Control
 
 Interval: ?ms
 
-* u_16[0]     Speed ADC value
-* u_8[3]      HAL-paddle Acceleration ADC value
-* u_8[4]      HAL-paddle Deceleration ADC value
-* b[32]       Button Lvl Plus
-* b[33]       Button Lvl Minus
-* b[34]       Button Lvl Const Mode Set
-* b[35]       Button Lvl Const Mode Reset
-* b[36]       Button Lvl Const Mode v/P
-* b[37]       Button Lvl Brake Pedal
+Format | IdxFmt | Index8 | Meaning
+-------|--------|--------|----------------------------------
+u_16   | [0]    | 0,1    | LifeSign
+u_16   | [1]    | 2,3    | Speed ADC value
+u_16   | [2]    | 4,5    | Potentiometer value
+u_8    | [6]    | 6      | HAL-paddle Acceleration ADC value
+u_8    | [7]    | 7      | HAL-paddle Deceleration ADC value
 
-#### CAN id: 0x01    PID 1
+#### CAN id: 0x01 - Buttons
 
 Interval: ?ms
 
-* f_32[0]:    Kp
-* f_32[1]:    Ki
+Format | IdxFmt | Index8 | Meaning
+-------|--------|--------|----------------------------
+b      | [0]    | 0      | Button Lvl Plus
+b      | [1]    | 0      | Button Lvl Minus
+b      | [2]    | 0      | Button Lvl Const Mode Set
+b      | [3]    | 0      | Button Lvl Const Mode Reset
+b      | [4]    | 0      | Button Lvl Const Mode v/P
+b      | [5]    | 0      | Button Lvl Brake Pedal
 
-#### CAN id: 0x02    PID 2
+#### CAN id: 0x02 - PID
 
 Interval: ?ms
 
-* f_32[2]:    Kd
+Format | IdxFmt | Index8 | Meaning
+-------|--------|--------|-------------------------
+f_16   | [0]    | 0,1    | Kp [float as value*1000]
+f_16   | [1]    | 2,3    | Ki [float as value*1000]
+f_16   | [2]    | 4,5    | Kd [float as value*1000]
 
 ### AC - Auxiliary Controller
 
 Base Address: 0x630
 
-#### CAN id: 0x00    Display Data
+#### CAN id: 0x00 - Display Data
 
 Interval: ?ms
 
-* f_32[0]     Speed km/h
+Format | IdxFmt | Index8 | Meaning
+-------|--------|--------|-----------------------------------------
+u_16   | [0]    | 0,1    | LifeSign
+f_16   | [1]    | 2,3    | Target Power DAC value [0-65535]
+f_16   | [2]    | 4,5    | Target Speed DAC value [0-65535]
+b      | [48]   | 6      | Constant Mode On [0] / Off [1]
+b      | [49]   | 6      | Constant Mode Type Speed [0] / Power [1]
+b | [50] | 6 | Reserve Button 1 
+b | [51] | 6 | Reserve Button 2 
 
-#### CAN id: 0x01    SET PID Params 1
+#### CAN id: 0x01 - SET PID Params
 
-* f_32[0]:    Kp
-* f_32[1]:    Ki
+Interval: ?ms
 
-#### CAN id: 0x02    SET PID Params 2
-
-* f_32[0]:    Kd
-
+Format | IdxFmt | Index8 | Meaning
+-------|--------|--------|-------------------------
+f_16   | [0]    | 0,1    | Kp [float as value*1000]
+f_16   | [1]    | 2,3    | Ki [float as value*1000]
+f_16   | [2]    | 4,5    | Kd [float as value*1000]

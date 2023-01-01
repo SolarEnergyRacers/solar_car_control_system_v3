@@ -24,8 +24,6 @@ using namespace std;
 
 extern Console console;
 
-void AbstractTask::sleep() { vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS); };
-
 // string AbstractTask::create_task(TaskFunction_t workerTask, int priority, uint32_t sleep_polling, int stack_size, const BaseType_t
 // xCoreID) {
 //   // console << "[  ] Create " << getName() << " as prio-" << priority << "-task (sleep_polling=" << sleep_polling
@@ -46,7 +44,7 @@ string AbstractTask::init_t(int core_id, int priority, int stack_size, int sleep
   this->core_id = core_id;
   this->priority = priority;
   this->stack_size = stack_size;
-  this->sleep_polling_ms = sleep_polling_ms;
+  set_sleep_polling(sleep_polling_ms);
   return init();
 }
 
@@ -61,7 +59,7 @@ string AbstractTask::report_task_init() { return report_task_init(this); };
 
 string AbstractTask::report_task_init(AbstractTask *task) {
   stringstream ss;
-  ss << "[ok] " << task->getName() << " started as prio-" << task->priority << "-task (sleep=" << task->sleep_polling_ms
+  ss << "[ok] " << task->getName() << " started as prio-" << task->priority << "-task (taskSuspend=" << task->sleep_polling * portTICK_PERIOD_MS
      << "ms, stack=" << task->stack_size << ") try core " << task->core_id << " real core" << xPortGetCoreID();
   return ss.str();
 }

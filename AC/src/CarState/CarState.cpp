@@ -77,7 +77,6 @@ bool CarState::initalize_config() {
   //   // [Dynamic]
   //   PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
   //   PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
-  //   PaddleAdjustCounter = cf.get("Dynamic", "PaddleAdjustCounter", 18);
   //   ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
   //   ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
   //   ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
@@ -166,7 +165,6 @@ const string CarState::print(string msg, bool withColors) {
   // [Dynamic]
   ss << "Paddle damping ........ " << PaddleDamping << NL;
   ss << "Paddle offset ......... " << PaddleOffset << NL;
-  ss << "Paddle adjustment ..... " << PaddleAdjustCounter << NL;
   ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
   ss << "Const power invrease .. " << ConstPowerIncrease << NL;
 

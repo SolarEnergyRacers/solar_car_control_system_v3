@@ -24,7 +24,7 @@ public:
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void * pvParams);
+  void task(void *pvParams);
 
   // Class member and functions
   static void valueChangedHandler() { valueChangeRequest++; };

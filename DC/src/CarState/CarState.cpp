@@ -14,7 +14,6 @@
 // #include <ESP32Time.h>
 #include <Helper.h>
 // #include <IOExt.h>
-// #include <Indicator.h>
 // #include <RTC.h>
 // #include <SDCard.h>
 #include <definitions.h>
@@ -78,7 +77,6 @@ bool CarState::initalize_config() {
   //   // [Dynamic]
   //   PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
   //   PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
-  //   PaddleAdjustCounter = cf.get("Dynamic", "PaddleAdjustCounter", 18);
   //   ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
   //   ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
   //   ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);

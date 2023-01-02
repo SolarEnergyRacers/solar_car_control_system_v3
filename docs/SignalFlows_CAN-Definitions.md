@@ -94,34 +94,49 @@ Interval: ?ms
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------------
 u_16   | [0]    | 0,1    | LifeSign
-u_16   | [1]    | 2,3    | Speed ADC value
 u_16   | [2]    | 4,5    | Potentiometer value
-u_8    | [6]    | 6      | HAL-paddle Acceleration ADC value
-u_8    | [7]    | 7      | HAL-paddle Deceleration ADC value
+u_16   | [6]    | 6      | HAL-paddle Acceleration ADC value
+u_16   | [7]    | 7      | HAL-paddle Deceleration ADC value
 
-#### CAN id: 0x01 - Buttons
+#### CAN id: 0x01 - Speed, Acceleration, buttons
 
 Interval: ?ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------
-b      | [0]    | 0      | Button Lvl Plus
-b      | [1]    | 0      | Button Lvl Minus
-b      | [2]    | 0      | Button Lvl Const Mode Set
-b      | [3]    | 0      | Button Lvl Const Mode Reset
-b      | [4]    | 0      | Button Lvl Const Mode v/P
-b      | [5]    | 0      | Button Lvl Brake Pedal
+i_8    | [0]    | 0      | Display Acceleration 
+u_8    | [1]    | 1      | Display Speed 
+u_16   | [1]    | 2,3    |
+u_16   | [2]    | 4,5    |
+b      | [48]   | 6      | Button Lvl Plus
+b      | [49]   | 6      | Button Lvl Minus
+b      | [50]   | 6      | Button Lvl Const Mode Set
+b      | [51]   | 6      | Button Lvl Const Mode Reset
+b      | [52]   | 6      | Button Lvl Const Mode v/P
+b      | [53]   | 6      | Button Lvl Brake Pedal
+
+#### CAN id: 0x02 - Motor, Bat, PV
+
+Interval: ?ms
+
+Format | IdxFmt | Index8 | Meaning
+-------|--------|--------|-----------------------
+u_16   | [1]    | 0,1    | Motor current
+u_16   | [2]    | 2,3    | Battery voltage
+u_16   | [3]    | 4,5    | PV voltage
+b      | [48]   | 6      | Motor On [1] / Off [0]
+b      | [49]   | 6      | Bat On [1] / Off [0]
+b      | [51]   | 6      | PV On [1] / Off [0]
 
 #### CAN id: 0x02 - PID
 
 Interval: ?ms
 
 Format | IdxFmt | Index8 | Meaning
--------|--------|--------|-------------------------
-u_16   | [0] | 0,1 | Speed ADC value          
-f_16 | [1] | 2,3 | Kp [float as value*1000] 
-f_16   | [2]    | 4,5  | Ki [float as value*1000]
-f_16   | [3]   | 6,7  | Kd [float as value*1000]
+-------|--------|--------|--------------------------
+f_16   | [1]    | 0,1    | Kp [float as value\*1000]
+f_16   | [2]    | 2,3    | Ki [float as value\*1000]
+f_16   | [3]    | 4,5    | Kd [float as value\*1000]
 
 ### AC - Auxiliary Controller
 
@@ -138,8 +153,8 @@ f_16   | [1]    | 2,3    | Target Power DAC value [0-65535]
 f_16   | [2]    | 4,5    | Target Speed DAC value [0-65535]
 b      | [48]   | 6      | Constant Mode On [0] / Off [1]
 b      | [49]   | 6      | Constant Mode Type Speed [0] / Power [1]
-b | [50] | 6 | Reserve Button 1 
-b | [51] | 6 | Reserve Button 2 
+b      | [50]   | 6      | Reserve Button 1
+b      | [51]   | 6      | Reserve Button 2
 
 #### CAN id: 0x01 - SET PID Params
 

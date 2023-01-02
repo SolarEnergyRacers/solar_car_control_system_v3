@@ -154,9 +154,6 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Log file period [h].... " << LogFilePeriod << NL;
   ss << "Log file interval [ms]. " << LogInterval << NL;
 
-  // [TaskTimings]
-  ss << "Sleep time EIOExt ..... " << SleepTimeIOExt << NL;
-
   // [PID]
   ss << "Kp .................... " << Kp << NL;
   ss << "Ki .................... " << Ki << NL;

@@ -251,16 +251,14 @@ void CarControl::task(void *pvParams) {
     if (SystemInited) {
       // console << "CarControl Task running on core " << xPortGetCoreID() << NL;
 
-      // // read values from ADC/IO
-      // // carState.getPin(PinGreenLightOut)->value = carState.GreenLight ? 1 : 0;
-
       // handle changed INPUT pins
-      // // bool someThingChanged = false;
-      // //   someThingChanged |= read_paddles();
-      // //   someThingChanged |= read_PLUS_MINUS();
-      // //   someThingChanged |= read_speed();
-      // //   someThingChanged |= read_potentiometer();
-      // //   // someThingChanged |= read_reference_cell_data();
+      // bool someThingChanged = false;
+      // someThingChanged |= read_paddles();
+      // someThingChanged |= read_PLUS_MINUS();
+      // someThingChanged |= read_speed();
+      // someThingChanged |= read_potentiometer();
+      // someThingChanged |= read_reference_cell_data();
+      // someThingChanged |= read_break_pedal();
 
       int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
       int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);

@@ -42,7 +42,10 @@ public:
   int availiblePackets() { return rxBuffer.getSize(); }
   int getMaxPacketsBufferUsage() { return packetsCountMax; };
 
+  // optimize with: https://learn.microsoft.com/en-us/cpp/cpp/functions-with-variable-argument-lists-cpp?view=msvc-170
+  bool writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7);
   bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, uint8_t data4);
+  bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, int8_t data4);
   bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3);
   bool writePacket(uint16_t adr, uint32_t data0, uint32_t data1);
   bool writePacket(uint16_t adr, uint64_t data);
@@ -50,6 +53,7 @@ public:
   SemaphoreHandle_t mutex;
   bool verboseModeCan = false;
   bool verboseModeCanIn = false;
+  bool verboseModeCanInNative = false;
   bool verboseModeCanOut = false;
   bool verboseModeCanDebug = false;
 };

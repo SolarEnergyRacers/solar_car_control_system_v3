@@ -74,10 +74,10 @@ void CarControl::_handleValueChanged() {
   // TODO
 }
 
-// bool CarControl::read_reference_cell_data() {
-//   carState.ReferenceSolarCell = adc.REFERENCE_CELL; // TODO
-//   return true;
-// }
+bool CarControl::read_reference_cell_data() {
+  carState.ReferenceSolarCell = 0; // adc.REFERENCE_CELL; // TODO: no free ADC available
+  return true;
+}
 
 bool CarControl::read_potentiometer() {
   int value = adc.switch_potentiometer;
@@ -101,22 +101,12 @@ bool CarControl::read_speed() {
   return false;
 }
 
-int CarControl::calculate_displayvalue_acc_dec(int valueDec, int valueAcc) {
-  int16_t valueDecNorm = 0;
-  int16_t valueAccNorm = 0;
-  int valueDisplay = 0;
-  valueDecNorm = CarControl::_normalize(0, MAX_ACCELERATION_DISPLAY_VALUE, ads_min_dec, ads_max_dec, valueDec);
-  if (valueDecNorm > 0) {
-    valueDisplay = -valueDecNorm;
+int CarControl::calculate_acceleration_display(int valueDec, int valueAcc) {
+  if (valueDec > 0) {
+    return -_transform(0, MAX_ACCELERATION_DISPLAY_VALUE, 0, UINT16_MAX, valueDec);
   } else {
-    valueAccNorm = CarControl::_normalize(0, MAX_ACCELERATION_DISPLAY_VALUE, ads_min_acc, ads_max_acc, valueAcc);
-    if (valueAccNorm > 0) {
-      valueDisplay = valueAccNorm;
-    } else {
-      valueDisplay = 0;
-    }
+    return _transform(0, MAX_ACCELERATION_DISPLAY_VALUE, 0, UINT16_MAX, valueAcc);
   }
-  return valueDisplay;
 }
 
 bool CarControl::read_PLUS_MINUS() {
@@ -160,8 +150,8 @@ bool CarControl::read_PLUS_MINUS() {
 
   int valueDisplay = valueDec > 0 ? -valueDec : valueAcc;
   // prepare and write motor acceleration and recuperation values to DigiPot
-  int valueDecPot = 0;
-  int valueAccPot = 0;
+  int valueDecPot;
+  int valueAccPot;
   if (valueDisplay < 0) {
     valueDecPot = -(int)(((float)valueDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
     valueAccPot = 0;
@@ -183,7 +173,6 @@ bool CarControl::read_PLUS_MINUS() {
 }
 
 bool CarControl::read_paddles() {
-  bool hasChanged = false;
   if (carState.BreakPedal) {
     // #SAFETY#: on break pedal -> deccelerate
     //_set_dec_acc_values(DAC_MAX, 0, ADC_MAX, 0, -64);
@@ -194,65 +183,75 @@ bool CarControl::read_paddles() {
     }
     return true;
   }
-  int16_t valueDec = adc.stw_dec;
-  int16_t valueAcc = adc.stw_acc;
-  carState.Deceleration = adc.stw_dec;
-  carState.Acceleration = adc.stw_acc;
+  carState.Deceleration = _normalize_0_UINT16(ads_min_dec, ads_max_dec, adc.stw_dec);
+  carState.Acceleration = _normalize_0_UINT16(ads_min_acc, ads_max_acc, adc.stw_acc);
+
   // check if change is in damping
-  // if (valueAcc != 0 && valueDec != 0)
-  //   if (abs(accelLast - valueAcc) < carState.PaddleDamping && abs(recupLast - valueDec) < carState.PaddleDamping)
-  //     return false;
+  // if (abs(accelLast - carState.Acceleration) < carState.PaddleDamping && abs(recupLast - carState.Deceleration) <
+  // carState.PaddleDamping)
+  //   return false;
+
+  accelLast = carState.Acceleration;
+  recupLast = carState.Deceleration;
 
   // #SAFETY#: Reset constant mode on deceleration paddel touched
-  if (valueDec > carState.PaddleDamping) {
+  if (carState.Deceleration > carState.PaddleDamping) {
     carState.ConstantModeOn = false;
   }
 
-  int valueDisplay = calculate_displayvalue_acc_dec(valueDec, valueAcc);
-  // prepare and write motor acceleration and recuperation values to DigiPot
-  int valueDecPot = 0;
-  int valueAccPot = 0;
-  if (valueDisplay < 0) {
-    valueDecPot = -(int)(((float)valueDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
-    valueAccPot = 0;
-  } else {
-    valueDecPot = 0;
-    valueAccPot = (int)(((float)valueDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
-  }
+  carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
 
-  if (valueDisplayLast != valueDisplay) {
-    hasChanged = true;
+  // console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
+  //                        adc.stw_dec, carState.AccelerationDisplay);
+
+  if (valueDisplayLast != carState.AccelerationDisplay) {
+    valueDisplayLast = carState.AccelerationDisplay;
+    if (carControl.verboseMode)
+      console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
+                             adc.stw_dec, carState.AccelerationDisplay);
+    return true;
   }
-  _set_dec_acc_values(valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
-  if (carControl.verboseMode && hasChanged) {
-    console << fmt::format(
-        "paddle mode            : valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", valueDecPot,
-        valueAccPot, valueDec, valueAcc, valueDisplay);
+  return false;
+}
+
+void CarControl::_set_DAC() {
+  if (carState.ConstantModeOn && carState.Deceleration == 0 && carState.Acceleration == 0)
+    return;
+  // prepare and write motor acceleration and recuperation values to DigiPot
+  int setpoint = (int)(((float)carState.AccelerationDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
+  int valueDecPot = carState.AccelerationDisplay < 0 ? -setpoint : 0;
+  int valueAccPot = carState.AccelerationDisplay < 0 ? 0 : setpoint;
+  dac.set_pot(valueDecPot, DAC::pot_chan::POT_CHAN1);
+  dac.set_pot(valueAccPot, DAC::pot_chan::POT_CHAN0);
+
+  if (carControl.verboseMode) {
+    console << fmt::format("paddle mode: valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n",
+                           valueDecPot, valueAccPot, carState.Deceleration, carState.Acceleration, carState.AccelerationDisplay);
   }
-  return hasChanged;
 }
 
 void CarControl::_set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t valueDec, int16_t valueAcc, int valueDisplay) {
-  // // if (carState.ConstantModeOn && valueDec == 0 && valueAcc == 0)
-  // //   return;
-  // dac.set_pot(valueDecPot, DAC::pot_chan::POT_CHAN1);
-  // dac.set_pot(valueAccPot, DAC::pot_chan::POT_CHAN0);
-  // carState.Deceleration = valueDec;
-  // carState.Acceleration = valueAcc;
-  carState.AccelerationDisplay = valueDisplay;
+  if (carState.ConstantModeOn && valueDec == 0 && valueAcc == 0)
+    return;
+  dac.set_pot(valueDecPot, DAC::pot_chan::POT_CHAN1);
+  dac.set_pot(valueAccPot, DAC::pot_chan::POT_CHAN0);
   valueDisplayLast = valueDisplay;
 }
 
-int CarControl::_normalize(int minDisplayValue, int maxDisplayValue, int minValue, int maxValue, int value) {
-  float displArea = maxDisplayValue - minDisplayValue;
-  float valueArea = maxValue - minValue;
-  if (value < minValue)
-    value = minValue;
-  if (value > maxValue)
-    value = maxValue;
-  float retValue = (value - minValue) * displArea / valueArea;
+unsigned int CarControl::_normalize_0_UINT16(int minOriginValue, int maxOriginValue, int value) {
+  float k = UINT16_MAX / (maxOriginValue - minOriginValue);
+  value = value < minOriginValue ? minOriginValue : value;
+  value = value > UINT16_MAX ? UINT16_MAX : value;
+  return (unsigned int)round((value - minOriginValue) * k);
+}
 
-  return round(retValue);
+// 0, MAX_ACCELERATION_DISPLAY_VALUE, 0, UINT16_MAX, valueDec
+int CarControl::_transform(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value) {
+  float k = (float)(maxViewValue - minViewValue) / (maxOriginValue - minOriginValue);
+  value = value < minOriginValue ? minOriginValue : value > maxOriginValue ? maxOriginValue : value;
+  // console << "k=" << k << ", value - minOriginValue=" << (value - minOriginValue) << ", value=" << ((value - minOriginValue) * k)
+  //         << ", value'=" << round((value - minOriginValue) * k) << NL;
+  return (int)round((value - minOriginValue) * k);
 }
 
 volatile int CarControl::valueChangeRequest = 0;
@@ -264,46 +263,59 @@ void CarControl::task(void *pvParams) {
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
 
-      // handle changed INPUT pins
       bool someThingChanged = false;
-      someThingChanged |= read_paddles();
-      someThingChanged |= read_PLUS_MINUS();
-      // someThingChanged |= read_reference_cell_data();
+      if (read_paddles()) {
+        _set_DAC();
+        someThingChanged = true;
+      }
+      if (read_PLUS_MINUS()) {
+        _set_DAC();
+        someThingChanged = true;
+      }
+      someThingChanged |= read_reference_cell_data();
       someThingChanged |= read_speed();
       someThingChanged |= read_potentiometer();
       carState.LifeSign++;
+
       canBus.writePacket(DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer, carState.Acceleration, carState.Deceleration);
-      //canBus.writePacket(DC_BASE_ADDR | 0x02, carState.Speed, 0x1002, 0x1003, 0x10024);
-      // canBus.writePacket(DC_BASE_ADDR | 0x00, 0x1234, 0x5678, 0x9abc, 0xdef0);
-      // canBus.writePacket(DC_BASE_ADDR | 0x01, 0x6677, 0x4455, 0x2233, 0xaa11);
-      // canBus.writePacket(DC_BASE_ADDR | 0x01, counter);
-      // if (carControl.verboseModeCarControlMax)
-      //   console << fmt::format(
-      //                  "{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data: lifeSign={:4x}, speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d},
-      //                  ", counter, canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
-      //                  carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-      //           << NL;
-      // counter++;
-      // canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration,
-      // carState.Potentiometer); if (carControl.verboseModeCan)
-      //   console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
-      //                          canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,
-      //                          carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-      //           << NL;
-      // one data row per second
-      // if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-      //   // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
-      //   //   sdCard.write(record);
-      //   //   millisNextStampCsv = millis() + carState.LogInterval;
-      //   // }
-      //   if (carControl.verboseModeCarControlMax) {
-      //     string record = carState.csv();
-      //     if (millis() > millisNextStampSnd) {
-      //       console << "d: " + record << NL;
-      //       millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-      //     }
-      //   }
-      // }
+      canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.ButtonPlus, carState.ButtonMinus,
+                         carState.ButtonConstantModeOn, carState.ButtonConstantModeOFF, carState.ButtonConstant_v_P, carState.BreakPedal,
+                         false, false);
+      // canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, true, true, true, false, true, false, false,
+      // false);
+      //  canBus.writePacket(DC_BASE_ADDR | 0x02, carState.Speed, 0x1002, 0x1003, 0x10024);
+      //  canBus.writePacket(DC_BASE_ADDR | 0x00, 0x1234, 0x5678, 0x9abc, 0xdef0);
+      //  canBus.writePacket(DC_BASE_ADDR | 0x01, 0x6677, 0x4455, 0x2233, 0xaa11);
+      //  canBus.writePacket(DC_BASE_ADDR | 0x01, counter);
+      //  if (carControl.verboseModeCarControlMax)
+      //    console << fmt::format(
+      //                   "{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data: lifeSign={:4x}, speed={:5d}, decl={:5d}, accl={:5d},
+      //                   poti={:5d},
+      //                   ", counter, canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00,
+      //                   carState.LifeSign, carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+      //            << NL;
+      //  counter++;
+      //  canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration,
+      //  carState.Potentiometer); 
+      //  if (carControl.verboseModeCan)
+      //    console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
+      //                           canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,
+      //                           carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+      //            << NL;
+      //  one data row per second
+      //  if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
+      //    // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
+      //    //   sdCard.write(record);
+      //    //   millisNextStampCsv = millis() + carState.LogInterval;
+      //    // }
+      //    if (carControl.verboseModeCarControlMax) {
+      //      string record = carState.csv();
+      //      if (millis() > millisNextStampSnd) {
+      //        console << "d: " + record << NL;
+      //        millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+      //      }
+      //    }
+      //  }
     }
     taskSuspend();
   }

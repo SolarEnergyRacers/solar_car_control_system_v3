@@ -121,12 +121,12 @@ void CANBus::init_ages() {
 int CANBus::handle_rx_packet(CANPacket packet) {
   int retValue = 0;
   int packetId = packet.getId();
-  if (canBus.verboseModeCanIn)
+  if (canBus.verboseModeCanInNative)
     console << print_raw_packet("R", packet) << NL;
   // Do something with packet
   switch (packetId) {
 
-  case DC_BASE_ADDR | 0x00: {
+  case DC_BASE_ADDR | 0x00:
     carState.LifeSign = packet.getData_ui16(3);
     carState.Potentiometer = packet.getData_ui16(2);
     carState.Acceleration = packet.getData_ui16(1);
@@ -138,22 +138,30 @@ int CANBus::handle_rx_packet(CANPacket packet) {
                              carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
               << NL;
     // carState.Speed = packet.getData_ui16(2);
-  } break;
+    break;
 
   case DC_BASE_ADDR | 0x01:
-    carState.ButtonPlus = packet.getData_b(0);
-    carState.ButtonMinus = packet.getData_b(1);
-    carState.ButtonConstantModeOn = packet.getData_b(2);
-    carState.ButtonConstantModeOFF = packet.getData_b(3);
-    carState.ButtonConstant_v_P = packet.getData_b(4);
-    carState.BreakPedal = packet.getData_b(5);
+    carState.AccelerationDisplay = packet.getData_i8(0);
+    carState.Speed = packet.getData_ui8(1);
+    carState.ButtonPlus = packet.getData_b(48);
+    carState.ButtonMinus = packet.getData_b(49);
+    carState.ButtonConstantModeOn = packet.getData_b(50);
+    carState.ButtonConstantModeOFF = packet.getData_b(51);
+    carState.ButtonConstant_v_P = packet.getData_b(52);
+    carState.BreakPedal = packet.getData_b(53);
+    {
+      bool dummy54 = packet.getData_b(54);
+      bool dummy55 = packet.getData_b(55);
+    }
     if (canBus.verboseModeCanIn)
-      console
-          << fmt::format(
-                 "[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:bPlus={}, bMinus={}, bConstOn={}, bConstOff={}, bConstPV={}, breakPedal={}",
-                 canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.ButtonPlus, carState.ButtonMinus,
-                 carState.ButtonConstantModeOn, carState.ButtonConstantModeOFF, carState.ButtonConstant_v_P, carState.BreakPedal)
-          << NL;
+      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:speed={:3d}, accelDispl={:3d}, bPlus={}, bMinus={}, "
+                             "bConstOn={}, bConstOff={}, bConstPV={}, breakPedal={}",
+                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.Speed,
+                             carState.AccelerationDisplay, carState.ButtonPlus, carState.ButtonMinus, carState.ButtonConstantModeOn,
+                             carState.ButtonConstantModeOFF, carState.ButtonConstant_v_P, carState.BreakPedal)
+              << NL;
+    break;
+  case DC_BASE_ADDR | 0x02:
     break;
   case BMS_BASE_ADDR:
     // heartbeat packet.getData_ui32(0)

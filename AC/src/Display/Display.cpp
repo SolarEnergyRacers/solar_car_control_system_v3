@@ -99,8 +99,8 @@ string Display::_setup() {
     tft.setCursor(0, 0);
     tft.setTextSize(1);
     tft.fillScreen(bgColor);
-    tft.setTextColor(ILI9341_BLUE);
-    tft.setScrollMargins(0, height);
+    // tft.setTextColor(ILI9341_BLUE);
+    // tft.setScrollMargins(0, height);
     xSemaphoreGive(spiBus.mutex);
 
     printf("     ILI9341_RDMADCTL:   0x%x\n", rdmadctl);
@@ -120,8 +120,10 @@ string Display::_setup() {
 }
 
 void Display::clear_screen(int bgColor) {
-  console << "clear_screen(" << bgColor << ")" << NL;
   xSemaphoreTakeT(spiBus.mutex);
+  tft.setRotation(0);
+  tft.fillScreen(bgColor);
+  tft.setRotation(1);
   tft.fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
 }

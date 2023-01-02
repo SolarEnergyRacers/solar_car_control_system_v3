@@ -123,8 +123,10 @@ void app_main(void) {
   msg = canBus.init_t(0, 1, 10000, 200);
   console << msg << NL;
   canBus.verboseModeCan = false;
-  canBus.verboseModeCanIn = true;
-  canBus.verboseModeCanOut = true;
+  canBus.verboseModeCanIn = false;
+  canBus.verboseModeCanInNative = false;
+  canBus.verboseModeCanOut = false;
+  canBus.verboseModeCanOutNative = true;
   canBus.verboseModeCanDebug = false;
   console << "[  ] Create " << canBus.getName() << " task ...";
   xTaskCreatePinnedToCore(canBusTask,             /* task function. */
@@ -140,8 +142,8 @@ void app_main(void) {
   // Car Control AC
   msg = carControl.init_t(1, 10, 10000, 200);
   console << msg << NL;
-  carControl.verboseMode = true;
-  carControl.verboseModeCarControlMax = true;
+  carControl.verboseMode = false;
+  carControl.verboseModeCarControlMax = false;
   console << "[  ] Create " << carControl.getName() << " task ...";
   xTaskCreatePinnedToCore(carControlTask,             /* task function. */
                           carControl.getInfo(),       /* name of task. */
@@ -156,13 +158,13 @@ void app_main(void) {
   // DAC
   msg = dac.init();
   console << msg << NL;
-  dac.verboseModeDAC = true;
+  dac.verboseModeDAC = false;
   // ADC
   msg = adc.init_t(1, 10, 10000, 300);
   console << msg << NL;
   adc.verboseMode = false;
-  adc.verboseModeADC = true;
-  adc.verboseModeADCMax = true;
+  adc.verboseModeADC = false;
+  adc.verboseModeADCMax = false;
   console << "[  ] Create " << carControl.getName() << " task ...";
   xTaskCreatePinnedToCore(adcTask,             /* task function. */
                           adc.getInfo(),       /* name of task. */

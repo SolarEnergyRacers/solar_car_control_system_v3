@@ -156,13 +156,13 @@ public:
   bool ButtonConstant_v_P;
 
   // physical car data (measurement values)
+  uint8_t Speed;          // ADC
   uint16_t Potentiometer; // ADC potentiometer from switch board
-  uint16_t Speed;         // ADC
-  uint16_t Acceleration;   // ADC Steering Wheel
-  uint16_t Deceleration;   // ADC Steering Wheel
+  uint16_t Acceleration;  // ADC Steering Wheel
+  uint16_t Deceleration;  // ADC Steering Wheel
   // #SAFETY#: acceleration lock
-  bool AccelerationLocked; // DAC lock
-  uint8_t AccelerationDisplay; // Display Value (-99...+99)
+  bool AccelerationLocked;    // DAC lock
+  int8_t AccelerationDisplay; // Display Value (-99...+99)
   // #SAFETY-END#
 
   bool BatteryOn;      // IO-In
@@ -243,7 +243,7 @@ public:
   double Kd; // differential
 
   // [Dynamic]
-  int PaddleDamping;                  // 0...99
+  int PaddleDamping = 10;             // 0...99
   int PaddleOffset;                   // 0 ... 65535: offset when paddle recognize not 0 values
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode

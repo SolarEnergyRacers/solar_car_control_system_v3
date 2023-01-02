@@ -42,7 +42,7 @@ private:
   string _setup(void);
 
 protected:
-  int bgColor;
+  int bgColor = 0x0;
 
 public:
   virtual ~Display(){};

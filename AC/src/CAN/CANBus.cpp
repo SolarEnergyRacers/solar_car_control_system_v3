@@ -94,6 +94,18 @@ void CANBus::push(CANPacket packet) {
     packetsCountMax = availiblePackets();
 }
 
+bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
+                         bool b7) {
+  uint8_t boolByte = ((uint8_t)b7) << 7 | ((uint8_t)b6) << 6 | ((uint8_t)b5) << 5 | ((uint8_t)b4) << 4 | ((uint8_t)b3) << 3 |
+                     ((uint8_t)b2) << 2 | ((uint8_t)b1) << 1 | ((uint8_t)b0) << 0;
+  uint64_t data = ((uint64_t)boolByte) << 48 | ((uint64_t)data1) << 8 | ((int64_t)data0) << 0;
+  return writePacket(adr, data);
+}
+bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, int8_t data4) {
+  uint64_t data =
+      ((uint64_t)data0) << 48 | ((uint64_t)data1) << 32 | ((uint64_t)data2) << 16 | ((uint64_t)data3) << 8 | ((int64_t)data4) << 0;
+  return writePacket(adr, data);
+}
 bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, uint8_t data4) {
   uint64_t data =
       ((uint64_t)data0) << 48 | ((uint64_t)data1) << 32 | ((uint64_t)data2) << 16 | ((uint64_t)data3) << 8 | ((uint64_t)data4) << 0;

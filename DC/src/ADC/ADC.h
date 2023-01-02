@@ -35,16 +35,16 @@ public:
     STW_DEC_PORT = 0x03,
   };
   // ADC native values
-  int16_t motor_speed;
-  int16_t switch_potentiometer;
-  int16_t stw_acc;
-  int16_t stw_dec;
+  int16_t motor_speed = 0;
+  int16_t switch_potentiometer = 0;
+  int16_t stw_acc = 0;
+  int16_t stw_dec = 0;
 
   int16_t read(Pin pin);
   float get_multiplier();
   bool verboseMode = false;
   bool verboseModeADC = false;
-  bool verboseModeCarControlMax = false;
+  bool verboseModeADCMax = false;
 };
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_ADC_H

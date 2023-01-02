@@ -249,40 +249,33 @@ void CarControl::task(void *pvParams) {
   // polling loop
   while (1) {
     if (SystemInited) {
-      console << "CarControl Task running on core " << xPortGetCoreID() << NL;
+      // console << "CarControl Task running on core " << xPortGetCoreID() << NL;
 
       // // read values from ADC/IO
       // // carState.getPin(PinGreenLightOut)->value = carState.GreenLight ? 1 : 0;
 
-      // // update OUTPUT pins
-      // // ioExt.writeAllPins(PinHandleMode::FORCED);
-
-      // // handle changed INPUT pins
+      // handle changed INPUT pins
       // // bool someThingChanged = false;
-      // // if (carState.ControlMode == CONTROL_MODE::PADDLES)
-      // //   someThingChanged |= read_pChanges not staged for commit:addles();
-      // // else if (!carState.ConstantModeOn)
-      // //   someThingChanged |= read_PLUS_MINUS();
-      // // if (i2cBus.isDC()) {
       // //   someThingChanged |= read_paddles();
+      // //   someThingChanged |= read_PLUS_MINUS();
       // //   someThingChanged |= read_speed();
       // //   someThingChanged |= read_potentiometer();
       // //   // someThingChanged |= read_reference_cell_data();
-      // // }
 
       int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
       int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);
       uint64_t value = button1pressed << 1 | button2pressed;
-      if (carControl.verboseModeCarControlMax) {
-        console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
+      if (value != 0) {
+        if (carControl.verboseModeCarControlMax) {
+          console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
+        }
+
+        canBus.writePacket(AC_BASE_ADDR | 0x00, value);
+        if (carControl.verboseMode)
+          console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:button12 = {:1x} ", canBus.availiblePackets(),
+                                 canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, value)
+                  << NL;
       }
-
-      canBus.writePacket(AC_BASE_ADDR | 0x00, value);
-      if (carControl.verboseMode)
-        console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:button12 = {:1x} ", canBus.availiblePackets(),
-                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, value)
-                << NL;
-
       // // one data row per second
       // if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       //   // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

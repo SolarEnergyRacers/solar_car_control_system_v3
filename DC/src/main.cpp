@@ -161,8 +161,8 @@ void app_main(void) {
   msg = adc.init_t(1, 10, 10000, 300);
   console << msg << NL;
   adc.verboseMode = false;
-  adc.verboseModeADC = false;
-  adc.verboseModeCarControlMax = true;
+  adc.verboseModeADC = true;
+  adc.verboseModeADCMax = true;
   console << "[  ] Create " << carControl.getName() << " task ...";
   xTaskCreatePinnedToCore(adcTask,             /* task function. */
                           adc.getInfo(),       /* name of task. */

@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <vector>
 
-#include "CANPacket.h"
-#include "definitions.h"
+#include <CANPacket.h>
+#include <definitions.h>
 
 class CANRxBuffer {
 private:

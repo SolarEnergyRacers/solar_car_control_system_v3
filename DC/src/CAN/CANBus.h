@@ -28,7 +28,7 @@ private:
 
   void init_ages();
   int handle_rx_packet(CANPacket packet);
-  string print_raw_packet(CANPacket packet);
+  string print_raw_packet(string msg, CANPacket packet);
 
 public:
   CANBus();

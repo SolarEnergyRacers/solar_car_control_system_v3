@@ -158,11 +158,11 @@ public:
   // physical car data (measurement values)
   uint16_t Potentiometer; // ADC potentiometer from switch board
   uint16_t Speed;         // ADC
-  uint8_t Acceleration;   // ADC Steering Wheel
-  uint8_t Deceleration;   // ADC Steering Wheel
+  uint16_t Acceleration;   // ADC Steering Wheel
+  uint16_t Deceleration;   // ADC Steering Wheel
   // #SAFETY#: acceleration lock
   bool AccelerationLocked; // DAC lock
-  int AccelerationDisplay; // Display Value (-99...+99)
+  uint8_t AccelerationDisplay; // Display Value (-99...+99)
   // #SAFETY-END#
 
   bool BatteryOn;      // IO-In

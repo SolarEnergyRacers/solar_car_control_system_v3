@@ -85,7 +85,7 @@ Version 2023.01.01
 
 ### DC - Drive Controller
 
-Base Address: 0x660
+DC_BASE_ADDR: **0x660**
 
 #### CAN id: 0x00 - Speed Control
 
@@ -118,13 +118,14 @@ Interval: ?ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|-------------------------
-f_16   | [0]    | 0,1    | Kp [float as value*1000]
-f_16   | [1]    | 2,3    | Ki [float as value*1000]
-f_16   | [2]    | 4,5    | Kd [float as value*1000]
+u_16   | [0] | 0,1 | Speed ADC value          
+f_16 | [1] | 2,3 | Kp [float as value*1000] 
+f_16   | [2]    | 4,5  | Ki [float as value*1000]
+f_16   | [3]   | 6,7  | Kd [float as value*1000]
 
 ### AC - Auxiliary Controller
 
-Base Address: 0x630
+AC_BASE_ADDR: **0x630**
 
 #### CAN id: 0x00 - Display Data
 

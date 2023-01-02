@@ -25,6 +25,7 @@ extern CarState carState;
 extern I2CBus i2cBus;
 extern ADC adc;
 extern bool adcInited;
+extern bool SystemInited;
 
 using namespace std;
 
@@ -88,21 +89,22 @@ float ADC::get_multiplier() {
 
 void ADC::task(void *pvParams) {
   while (1) {
-    // ADC0
-    int motor_s = read(Pin::MOTOR_SPEED_PORT);
-    int potenti = read(Pin::SWITCH_POTENTIOMETER_PORT);
-    int stw_acc = read(Pin::STW_ACC_PORT);
-    int stw_dec = read(Pin::STW_DEC_PORT);
+    if (SystemInited) {
+      // ADC0
+      int mot = read(Pin::MOTOR_SPEED_PORT);
+      int pot = read(Pin::SWITCH_POTENTIOMETER_PORT);
+      int acc = read(Pin::STW_ACC_PORT);
+      int dec = read(Pin::STW_DEC_PORT);
 
-    if ((abs(motor_speed - motor_s) > 2 || abs(switch_potentiometer - potenti) > 2 || abs(stw_acc - stw_acc) > 2 ||
-         abs(stw_dec - stw_dec) > 2)) {
-      if (verboseModeADC)
-        console << fmt::format("ADC: speed={:3d} | acc={:5d} | dec={:5d} | pot {:5d}\n", motor_s, stw_acc, stw_dec, potenti);
+      if (abs(motor_speed - mot) > 2 || abs(switch_potentiometer - pot) > 2 || abs(stw_acc - acc) > 2 || abs(stw_dec - dec) > 2) {
+        if (adc.verboseModeADC)
+          console << fmt::format("ADC: speed={:4x} | acc={:4x} | dec={:4x} | poti= {:4x}\n", mot, acc, dec, pot);
 
-      motor_speed = motor_s;
-      switch_potentiometer = potenti;
-      stw_acc = stw_acc;
-      stw_dec = stw_dec;
+        motor_speed = mot;
+        switch_potentiometer = pot;
+        stw_acc = acc;
+        stw_dec = dec;
+      }
     }
     taskSuspend();
   }

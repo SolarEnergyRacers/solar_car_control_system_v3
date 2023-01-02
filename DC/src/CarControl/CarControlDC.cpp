@@ -256,7 +256,6 @@ int CarControl::_normalize(int minDisplayValue, int maxDisplayValue, int minValu
 }
 
 volatile int CarControl::valueChangeRequest = 0;
-uint64_t counter = 0xff00l;
 void CarControl::task(void *pvParams) {
   // polling loop
   while (1) {
@@ -273,18 +272,18 @@ void CarControl::task(void *pvParams) {
       someThingChanged |= read_speed();
       someThingChanged |= read_potentiometer();
       carState.LifeSign++;
-      canBus.writePacket(DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Speed, carState.Potentiometer, carState.Acceleration,
-                         carState.Deceleration);
+      canBus.writePacket(DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer, carState.Acceleration, carState.Deceleration);
+      //canBus.writePacket(DC_BASE_ADDR | 0x02, carState.Speed, 0x1002, 0x1003, 0x10024);
       // canBus.writePacket(DC_BASE_ADDR | 0x00, 0x1234, 0x5678, 0x9abc, 0xdef0);
       // canBus.writePacket(DC_BASE_ADDR | 0x01, 0x6677, 0x4455, 0x2233, 0xaa11);
       // canBus.writePacket(DC_BASE_ADDR | 0x01, counter);
-      if (carControl.verboseModeCarControlMax)
-        console << fmt::format(
-                       "{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data: lifeSign={:4x}, speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d}, ",
-                       counter, canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
-                       carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-                << NL;
-      counter++;
+      // if (carControl.verboseModeCarControlMax)
+      //   console << fmt::format(
+      //                  "{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data: lifeSign={:4x}, speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d},
+      //                  ", counter, canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
+      //                  carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+      //           << NL;
+      // counter++;
       // canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration,
       // carState.Potentiometer); if (carControl.verboseModeCan)
       //   console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",

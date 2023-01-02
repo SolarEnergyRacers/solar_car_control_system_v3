@@ -141,7 +141,7 @@ void app_main(void) {
   console << msg << NL;
   canBus.verboseModeCan = false;
   canBus.verboseModeCanIn = true;
-  canBus.verboseModeCanOut = false;
+  canBus.verboseModeCanOut = true;
   canBus.verboseModeCanDebug = false;
   console << "[  ] Create " << canBus.getName() << " task ...";
   xTaskCreatePinnedToCore(canBusTask,             /* task function. */

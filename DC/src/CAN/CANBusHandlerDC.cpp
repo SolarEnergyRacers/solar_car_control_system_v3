@@ -121,6 +121,8 @@ void CANBus::init_ages() {
 int CANBus::handle_rx_packet(CANPacket packet) {
   int retValue = 0;
   int packetId = packet.getId();
+   if (canBus.verboseModeCanIn)
+    console << print_raw_packet("R", packet) << NL;
   // Do something with packet
   switch (packetId) {
   case AC_BASE_ADDR | 0x00: {
@@ -141,10 +143,6 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   case AC_BASE_ADDR | 0x01:
     break;
   case DC_BASE_ADDR:
-    if (canBus.verboseModeCan)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data=0x{:x}", canBus.availiblePackets(),
-                             canBus.getMaxPacketsBufferUsage(), packetId | 0x01, packet.getData_ui64())
-              << NL;
     break;
   case BMS_BASE_ADDR:
     // heartbeat packet.getData_ui32(0)

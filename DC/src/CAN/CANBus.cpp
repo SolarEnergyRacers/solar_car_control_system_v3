@@ -29,7 +29,7 @@ void onReceive(int packetSize) {
     return;
 
   int packetId = CAN.packetId();
-  if(canBus.is_to_ignore_packet(packetId))
+  if (canBus.is_to_ignore_packet(packetId))
     return;
 
   canBus.setPacketTimeStamp(packetId, millis());
@@ -95,30 +95,25 @@ void CANBus::push(CANPacket packet) {
 }
 
 bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, uint8_t data4) {
-  uint64_t data = ((uint64_t)data4) << 56 | ((uint64_t)data3) << 48 | ((uint64_t)data2) << 32 | ((uint64_t)data1) << 16 | ((uint64_t)data0) << 0;
-  if (canBus.verboseModeCanOut)
-    console << fmt::format("{:3x}: {:08x} <== {:02x} - {:02x} - {:02x} - {:01x} - {:01x}\t-\t", adr, data, data0, data1, data2, data2, data4);
+  uint64_t data =
+      ((uint64_t)data0) << 48 | ((uint64_t)data1) << 32 | ((uint64_t)data2) << 16 | ((uint64_t)data3) << 8 | ((uint64_t)data4) << 0;
   return writePacket(adr, data);
 }
 bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3) {
-  uint64_t data = ((uint64_t)data3) << 48 | ((uint64_t)data2) << 32 | ((uint64_t)data1) << 16 | ((uint64_t)data0) << 0;
-  if (canBus.verboseModeCanOut)
-    console << fmt::format("{:3x}: {:08x} <== {:02x} - {:02x} - {:02x} - {:02x}\t-\t", adr, data, data0, data1, data2, data3);
+  uint64_t data = ((uint64_t)data0) << 48 | ((uint64_t)data1) << 32 | ((uint64_t)data2) << 16 | ((uint64_t)data3) << 0;
   return writePacket(adr, data);
 }
 
 bool CANBus::writePacket(uint16_t adr, uint32_t data0, uint32_t data1) {
-  uint64_t data = (uint64_t)data1 << 32 | (uint64_t)data0 << 0;
-  if (canBus.verboseModeCanOut)
-    console << fmt::format("{:3x}: {:08x} <== {:04x} - {:04x}\t-\t", adr, data, data0, data1);
+  uint64_t data = (uint64_t)data0 << 32 | (uint64_t)data1 << 0;
   return writePacket(adr, data);
 }
 
 bool CANBus::writePacket(uint16_t adr, uint64_t data) {
   CANPacket packet = CANPacket(adr, data);
-  if (canBus.verboseModeCanOut)
-    console << fmt::format("{:3x}: {:08x} <== {:08x}\n", adr, data, data);
   try {
+    if (canBus.verboseModeCanOut)
+      console << print_raw_packet("S", packet) << NL;
     xSemaphoreTakeT(mutex);
     CAN.beginPacket(adr);
     CAN.write(packet.getData_ui8(0));
@@ -138,10 +133,12 @@ bool CANBus::writePacket(uint16_t adr, uint64_t data) {
   return true;
 }
 
-string CANBus::print_raw_packet(CANPacket packet) {
-  return fmt::format("C{}-{}-[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data: {:04x}, {:04x}, {:04x}, {:04x}\n", xPortGetCoreID(),
-                     esp_timer_get_time() / 1000000, availiblePackets(), getMaxPacketsBufferUsage(), packet.getId(), packet.getData_ui16(3),
-                     packet.getData_ui16(2), packet.getData_ui16(1), packet.getData_ui16(0));
+string CANBus::print_raw_packet(string msg, CANPacket packet) {
+  return fmt::format("C{}-{}-[{:02d}|{:02d}] {} CAN.PacketId=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
+                     "{:02x} - {:02x} - {:02x}",
+                     xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePackets(), getMaxPacketsBufferUsage(), msg, packet.getId(),
+                     packet.getData_ui64(), packet.getData_ui8(7), packet.getData_ui8(6), packet.getData_ui8(5), packet.getData_ui8(4),
+                     packet.getData_ui8(3), packet.getData_ui8(2), packet.getData_ui8(1), packet.getData_ui8(0));
 }
 
 void CANBus::task(void *pvParams) {
@@ -157,4 +154,3 @@ void CANBus::task(void *pvParams) {
     taskSuspend();
   }
 }
-

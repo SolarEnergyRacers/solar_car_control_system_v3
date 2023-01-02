@@ -121,22 +121,23 @@ void CANBus::init_ages() {
 int CANBus::handle_rx_packet(CANPacket packet) {
   int retValue = 0;
   int packetId = packet.getId();
+  if (canBus.verboseModeCanIn)
+    console << print_raw_packet("R", packet) << NL;
   // Do something with packet
   switch (packetId) {
 
   case DC_BASE_ADDR | 0x00: {
-    carState.LifeSign = packet.getData_ui16(0);
-    carState.Speed = packet.getData_ui16(1);
+    carState.LifeSign = packet.getData_ui16(3);
     carState.Potentiometer = packet.getData_ui16(2);
-    carState.Acceleration = packet.getData_ui8(6);
-    carState.Deceleration = packet.getData_ui8(7);
+    carState.Acceleration = packet.getData_ui16(1);
+    carState.Deceleration = packet.getData_ui16(0);
     carState.AccelerationDisplay = (int)(carState.Acceleration / 256); // TODO: remove it
     if (canBus.verboseModeCanIn)
-      console << print_raw_packet(packet);
-    // console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d}",
-    //                        canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.Speed,
-    //                        carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-    //<< NL;
+      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:lifeSign={:4x}, speed={:4x}, decl={:4x}, accl={:4x}, poti={:4x}",
+                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.LifeSign,
+                             carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+              << NL;
+    // carState.Speed = packet.getData_ui16(2);
   } break;
 
   case DC_BASE_ADDR | 0x01:
@@ -147,7 +148,12 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     carState.ButtonConstant_v_P = packet.getData_b(4);
     carState.BreakPedal = packet.getData_b(5);
     if (canBus.verboseModeCanIn)
-      console << print_raw_packet(packet);
+      console
+          << fmt::format(
+                 "[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:bPlus={}, bMinus={}, bConstOn={}, bConstOff={}, bConstPV={}, breakPedal={}",
+                 canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.ButtonPlus, carState.ButtonMinus,
+                 carState.ButtonConstantModeOn, carState.ButtonConstantModeOFF, carState.ButtonConstant_v_P, carState.BreakPedal)
+          << NL;
     break;
   case BMS_BASE_ADDR:
     // heartbeat packet.getData_ui32(0)

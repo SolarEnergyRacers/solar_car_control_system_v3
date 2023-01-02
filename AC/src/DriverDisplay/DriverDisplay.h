@@ -21,6 +21,7 @@ public:
   ~DriverDisplay(){};
   //==== overwrites from base class ==== START
   string getName() { return "DriverDisplay"; };
+  bool verboseMode = false;
 
 private:
   // int x, int y, string label, string format, string unit, int textColor, int bgColor, int textSize
@@ -31,7 +32,6 @@ private:
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");
   DisplayValue<bool> ConstantModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
   DisplayValue<bool> EcoModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
-  DisplayValue<INDICATOR> Indicator = DisplayValue<INDICATOR>(0, 0, ",", "", "");
 
   DisplayValue<int> Speed = DisplayValue<int>(0, 0, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
   DisplayValue<int> Acceleration = DisplayValue<int>(0, -1, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
@@ -53,7 +53,6 @@ private:
   int speedLast = 1000;
   int accelerationLast = 1000;
   int targetValueLast = 1000;
-  bool blinkOn = true;
   bool justInited = true;
   //=======================================
 
@@ -122,13 +121,6 @@ private:
   const int driveDirectionY = 178;
   const int driveDirectionTextSize = 2;
 
-  // turn indicator arrows
-  const int indicatorLeftX = 10;
-  const int indicatorY = 92;
-  const int indicatorRightX = 310;
-  const int indicatorWidth = 30;
-  const int indicatorHeight = 20;
-
   const int lightX = 252;
   const int lightY = 198;
 
@@ -146,7 +138,7 @@ private:
 
 protected:
   DISPLAY_STATUS display_setup() override;
-  DISPLAY_STATUS task(int lifeSignCounter) override;
+  DISPLAY_STATUS display_task(int lifeSignCounter) override;
   //==== overwrites from base class ==== END
 
 private:
@@ -173,7 +165,6 @@ private:
   void write_acceleration();
   void write_target_value();
 
-  void show_indicator();
   void show_light();
 
   void speedCheck(int speed);

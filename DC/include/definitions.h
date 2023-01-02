@@ -4,6 +4,7 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
+#define SER4TYPE "DC"
 //#define VERSION "$GIT_BRANCH_$GIT_COMMIT_HASH"
 #define VERSION "3.0.0"
 
@@ -87,12 +88,12 @@
 #define CAN_RX (gpio_num_t)26
 #define CAN_SPEED 125E3 // CAN Speed 125 kb/s
 //#define CAN_SPEED 500E3 // CAN Speed 500 kb/s
-#define AC_BASE_ADDR 0x777
-#define DC_BASE_ADDR 0x778
 #define BMS_BASE_ADDR 0x700
 #define MPPT1_BASE_ADDR 0x600
 #define MPPT2_BASE_ADDR 0x610
 #define MPPT3_BASE_ADDR 0x620
+#define AC_BASE_ADDR 0x630
+#define DC_BASE_ADDR 0x660
 #define CAN_RX_BUFFER_SIZE 20
 #define CAN_TASK_WAIT 50
 

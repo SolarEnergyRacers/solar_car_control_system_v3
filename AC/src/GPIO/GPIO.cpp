@@ -34,6 +34,9 @@ string GPInputOutput::init() {
   pinMode(SPI_CS_TFT, OUTPUT);
   pinMode(SPI_RST, OUTPUT);
 
+  pinMode(ESP32_AC_BUTTON_1, INPUT);
+  pinMode(ESP32_AC_BUTTON_2, INPUT);
+
   digitalWrite(SPI_CS_TFT, HIGH);
   digitalWrite(SPI_CS_SDCARD, HIGH);
 
@@ -60,7 +63,7 @@ void GPInputOutput::register_gpio_interrupt() {
 volatile int GPInputOutput::interrupt_counter = 0;
 // portMUX_TYPE GPInputOutput::mutex = portMUX_INITIALIZER_UNLOCKED;
 
-void GPInputOutput::task() {
+void GPInputOutput::task(void * pvParams) {
 
   // polling loop
   while (1) {
@@ -71,8 +74,6 @@ void GPInputOutput::task() {
       console << "[INT] Number of interrupts: " << interrupt_counter << "\n";
       interrupt_counter = 0;
     }
-
-    // sleep for 1s
-    vTaskDelay(sleep_polling_ms / portTICK_PERIOD_MS);
+    taskSuspend();
   }
 }

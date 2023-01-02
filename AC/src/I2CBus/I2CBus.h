@@ -44,7 +44,7 @@ public:
   bool hasDAC() { return devices[_DAC_]; }
   bool hasADC() { return devices[_ADC_]; }
   bool isAC() { return !isDC(); }
-  bool isDC() { return devices[_ADC_] && devices[_DAC_] && devices[_ExtIO_]; }
+  bool isDC() { return hasADC() && hasDAC() && hasExtIO(); }
   bool verboseModeI2C = false;
 };
 

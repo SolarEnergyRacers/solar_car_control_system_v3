@@ -6,7 +6,7 @@ build
 # exclude vscode config directory
 .vscode
 # exclude generated config
-sdkconfig
+# sdkconfig
 # include/LocalFunctionsAndDevices.h
 extras/automation/geckodriver-v0.29.1-linux64.tar.gz
 extras/automation/geckodriver
@@ -17,6 +17,6 @@ extras/automation/loginGuest.html
 extras/automation/geckodriver.exe
 extras/automation/config.yaml
 src/sdkconfig.h
-sdkconfig.esp32dev
+# sdkconfig.esp32dev
 build/**
 platformio-device-monitor-*.log

@@ -49,3 +49,4 @@
 - ![Connetor board](docs/MOSFET_Sheet_1_2022-11-20.svg)
 - ![DC schema](docs/DC_Sheet_1_2022-11-20.svg)
 - ![Switch Board](docs/SwitchBoard_2022-11-20.svg)
+

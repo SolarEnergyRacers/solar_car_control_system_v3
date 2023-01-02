@@ -14,7 +14,6 @@
 // #include <ESP32Time.h>
 #include <Helper.h>
 // #include <IOExt.h>
-// #include <Indicator.h>
 // #include <RTC.h>
 // #include <SDCard.h>
 #include <definitions.h>
@@ -78,7 +77,6 @@ bool CarState::initalize_config() {
   //   // [Dynamic]
   //   PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
   //   PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
-  //   PaddleAdjustCounter = cf.get("Dynamic", "PaddleAdjustCounter", 18);
   //   ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
   //   ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
   //   ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
@@ -156,9 +154,6 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Log file period [h].... " << LogFilePeriod << NL;
   ss << "Log file interval [ms]. " << LogInterval << NL;
 
-  // [TaskTimings]
-  ss << "Sleep time EIOExt ..... " << SleepTimeIOExt << NL;
-
   // [PID]
   ss << "Kp .................... " << Kp << NL;
   ss << "Ki .................... " << Ki << NL;
@@ -167,7 +162,6 @@ const string CarState::print(string msg, bool withColors) {
   // [Dynamic]
   ss << "Paddle damping ........ " << PaddleDamping << NL;
   ss << "Paddle offset ......... " << PaddleOffset << NL;
-  ss << "Paddle adjustment ..... " << PaddleAdjustCounter << NL;
   ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
   ss << "Const power invrease .. " << ConstPowerIncrease << NL;
 

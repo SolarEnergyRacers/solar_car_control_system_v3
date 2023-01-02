@@ -9,8 +9,8 @@
 
 #include <Display.h>
 #include <DisplayValue.h>
-#include <Wire.h>
-//#include <Abstract_task.h>
+// #include <Wire.h>
+// #include <AbstractTask.h>
 
 class EngineerDisplay : public Display {
 public:
@@ -18,11 +18,12 @@ public:
   ~EngineerDisplay(){};
   //==== overwrites from base class ==== START
   string getName(void) { return "EngineerDisplay"; };
+  bool verboseMode = false;
 
 protected:
   //==== overwrites from base class ==== START
   DISPLAY_STATUS display_setup() override;
-  DISPLAY_STATUS task(int lifeSignCounter) override;
+  DISPLAY_STATUS display_task(int lifeSignCounter) override;
   //==== overwrites from base class ==== END
 
 private:

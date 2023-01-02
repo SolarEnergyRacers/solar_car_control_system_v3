@@ -32,10 +32,6 @@
 *.app
 
 # local device settings fior development and test
-XX/include/LocalFunctionsAndDevices.h
-
-# tenmporary used folder for mini prove of concepts
-XY/**
-XX/XX.code-workspace
-
-.gitignore
+AC/include/LocalFunctionsAndDevices.h
+AC/sdkconfig.old
+AC/sdkconfig.esp32dev.old

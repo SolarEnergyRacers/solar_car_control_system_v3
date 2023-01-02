@@ -2,10 +2,9 @@
 	"folders": [
 		{
 			"path": "."
-		}
-		,
+		},
 		{
-			"path": "~/.platformio"
+			"path": "../../../../.platformio"
 		}
 	],
 	"settings": {}

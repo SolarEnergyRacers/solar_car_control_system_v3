@@ -7,10 +7,10 @@
 
 #define ILI9341 // (320x240)
 
-//#include <ADS1X15.h>
+// #include <ADS1X15.h>
 #include <Adafruit_ILI9341.h> // placed here for display colors in other moduls
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <CarState.h>
 #include <LocalFunctionsAndDevices.h>
 
@@ -25,20 +25,16 @@ template <typename Enumeration> auto as_integer(Enumeration const value) -> type
   return static_cast<typename std::underlying_type<Enumeration>::type>(value);
 }
 
-class Display : public Abstract_task {
+class Display : public AbstractTask {
 public:
   // RTOS task
   virtual string getName(void);
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void);
+  void task(void *pvParams);
 
 private:
-  //==== Display definitions ==== START
-
-  //==== Display definitions ==== END
-
   void lifeSign();
   void setupScrollArea(uint16_t TFA, uint16_t BFA);
   void scrollAddress(uint16_t VSP);
@@ -46,7 +42,7 @@ private:
   string _setup(void);
 
 protected:
-  int bgColor;
+  int bgColor = 0x0;
 
 public:
   virtual ~Display(){};
@@ -72,7 +68,7 @@ protected:
   int width;
   // handler called for inherited classes
   virtual DISPLAY_STATUS display_setup() { return DISPLAY_STATUS::ENGINEER_HALTED; };
-  virtual DISPLAY_STATUS task(int lifeSignCounter) { return DISPLAY_STATUS::ENGINEER_HALTED; };
+  virtual DISPLAY_STATUS display_task(int lifeSignCounter) { return DISPLAY_STATUS::ENGINEER_HALTED; };
 
   // workers
   float write_float(int x, int y, float valueLast, float value, int textSize, int color);

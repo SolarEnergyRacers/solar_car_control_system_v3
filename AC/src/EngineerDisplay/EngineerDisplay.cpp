@@ -8,13 +8,13 @@
 #include <Adafruit_ILI9341.h> // display
 #include <SPIBus.h>
 
-#include <Abstract_task.h>
+#include <AbstractTask.h>
 #include <LocalFunctionsAndDevices.h>
 #include <definitions.h>
 
 #include <CarState.h>
 #include <Console.h>
-//#include <ADC.h>
+// #include <ADC.h>
 #include <Display.h>
 #include <EngineerDisplay.h>
 
@@ -53,7 +53,7 @@ void EngineerDisplay::draw_display_background() {
 
 // void EngineerDisplay::print(string msg) { Display::print(msg); }
 
-DISPLAY_STATUS EngineerDisplay::task(int lifeSignCounter) {
+DISPLAY_STATUS EngineerDisplay::display_task(int lifeSignCounter) {
   DISPLAY_STATUS status = carState.displayStatus;
   switch (carState.displayStatus) {
     // initializing states:
@@ -66,7 +66,7 @@ DISPLAY_STATUS EngineerDisplay::task(int lifeSignCounter) {
   case DISPLAY_STATUS::ENGINEER_BACKGROUND:
     clear_screen(bgColor);
     draw_display_background();
-    sleep_polling_ms = 500;
+    set_sleep_polling(500);
     status = DISPLAY_STATUS::ENGINEER_RUNNING;
     break;
   // working state:

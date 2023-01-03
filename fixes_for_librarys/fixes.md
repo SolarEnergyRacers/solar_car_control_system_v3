@@ -8,7 +8,13 @@ platform: espressif32@5.2.0
 
 `pio run -t nobuild -t upload`
 
-### Rebuild all everytime
+### Rebuild all every time Error
+
+#### Error
+
+All sources and libraries are built every time the compile or compile, upload, monitor is executed.
+
+#### Files affeced
 
 .platformio/penv/lib/python3.8/site-packages/platformio/builder/main.py:
 
@@ -30,7 +36,37 @@ env.SConsignFile(
 
 ## AC + DC
 
+### Conflict concerning `#define B1 1`
+
+#### Error Message
+
+???
+
+#### Files affeced
+
+- File1: `.platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h`
+- File2: `.pio/libdeps/esp32dev/fmt/include/fmt/core.h`
+
+#### FIX
+
+Change in `.pio/libdeps/esp32dev/fmt/include/fmt/core.h` at line 1120ff
+
+```c++
+// marker line:
+template <bool B = false> constexpr auto count() -> size_t { return B ? 1 : 0; }
+// CHANGE_KSC: Conflict with #define B1 1 in .platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h
+template <bool BOOL1, bool BOOL2, bool... Tail> constexpr auto count() -> size_t {
+  return (BOOL1 ? 1 : 0) + count<BOOL2, Tail...>();
+}
+```
+
 ### esp32-hal-gpio.c
+
+#### Error Message
+
+???
+
+#### Files affeced
 
 ```bash
 /home/ksc/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.c: In function '__pinMode':
@@ -39,30 +75,20 @@ env.SConsignFile(
 
 [issues57](https://github.com/maximkulkin/esp32-homekit-camera/issues/57)
 
-FIX:  
+#### FIX 
 
 - There is a setting on latest ESP-IDF you need to enable for this project. I’m afk now, but you should be able to find it somewhere in component configs -> device configurations -> rtc something. Just enable it and it will compile.
 - It is in `Component config > driver configurations > RTCI0 configuration`: \[*] Support array `rtc_gpio_desc` for ESP32
 
-### .pio/libdeps/esp32dev/fmt/include/fmt/core.h
-
-Conflict with #define B1 1 in .platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h
-
-Change in core.h at line 1120ff
-
-FIX:
-
-```c++
-template <bool B = false> constexpr auto count() -> size_t { return B ? 1 : 0; }
-// CHANGE_KSC: Conflict with #define B1 1 in .platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h
-template <bool BOOL1, bool BOOL2, bool... Tail> constexpr auto count() -> size_t {
-  return (BOOL1 ? 1 : 0) + count<BOOL2, Tail...>();
-}
-```
-
 ### rtc.h
 
-FIX:
+#### Error Message
+
+???
+
+#### Files affected
+
+#### FIX
 
 Comment `#define MHZ (1000000)` to avoid conflict in ???
 
@@ -74,7 +100,29 @@ Comment `#define MHZ (1000000)` to avoid conflict in ???
   void disableWorkstation();
 ```
 
-### .platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src/ESPmDNS.cpp
+### ESPmDNS
+
+#### Error Message
+
+???
+
+#### Files affected
+
+- `.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src/ESPmDNS.h`
+
+- `.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src/ESPmDNS.cpp` 
+
+#### FIX
+
+Change in `.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src/ESPmDNS.h`:
+
+```c++
+  //KSC void enableWorkstation(wifi_interface_t interface=ESP_IF_WIFI_STA);
+  void enableWorkstation(wifi_interface_t interface);
+  void disableWorkstation();
+```
+
+Change in `.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src/ESPmDNS.cpp`:
 
 ```c++
 IPAddress MDNSResponder::queryHost(char *host, uint32_t timeout){
@@ -97,9 +145,19 @@ IPAddress MDNSResponder::queryHost(char *host, uint32_t timeout){
 
 ### ssl_client.cpp
 
+#### Error Message
+
+???
+
+#### Files affected
+
+- `.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src/ssl_client.cpp`
+
+#### FIX
+
 - [Fix with PR](https://github.com/gravitech-engineer/AIS_IoT_4G/pull/8)
 
-`.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src/ssl_client.cpp`
+Change in `.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src/ssl_client.cpp`:
 
 ```c++
 //KSC #ifndef MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED
@@ -108,7 +166,13 @@ IPAddress MDNSResponder::queryHost(char *host, uint32_t timeout){
 #endif
 ```
 
-### Several made with pio menuconfig
+### Several things made with pio menuconfig
+
+#### Error Message
+
+Please call `idf.py menuconfig` then go to Component config -> mbedTLS -> TLS Key Exchange Methods -> Enable pre-shared-key ciphersuites and then check `Enable PSK based cyphersuite modes`. Save and Quit."
+
+#### Files affected
 
 ```make
 /home/ksc/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src/ssl_client.cpp:24:4: warning: #warning "Please call `idf.py menuconfig` then go to Component config -> mbedTLS -> TLS Key Exchange Methods -> Enable pre-shared-key ciphersuites and then check `Enable PSK based cyphersuite modes`. Save and Quit." [-Wcpp]

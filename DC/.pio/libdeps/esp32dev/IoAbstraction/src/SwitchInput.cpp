@@ -98,7 +98,7 @@ void KeyboardItem::checkAndTrigger(uint8_t buttonState){
 			}
 		}
 		else if (getState() == BUTTON_HELD && repeatInterval != NO_REPEAT && notify.callback != nullptr) {
-			counter = counter + (acceleration >> 2) + 1;
+			counter = counter + (acceleration >> SWITCHES_ACCELERATION_DIVISOR) + 1;
 			if (counter > repeatInterval) {
 				acceleration = min(255, acceleration + 1);
 				trigger(true);
@@ -177,7 +177,7 @@ bool SwitchInput::addSwitchListener(pinid_t pin, SwitchListener* listener, uint8
 bool SwitchInput::internalAddSwitch(pinid_t pin, bool invertLogic) {
 	if (ioDevice == nullptr) initialise(internalDigitalIo(), true);
 
-	ioDevicePinMode(ioDevice, pin, isPullupLogic(invertLogic) ? INPUT_PULLUP : INPUT);
+	ioDevice->pinMode(pin, isPullupLogic(invertLogic) ? INPUT_PULLUP : INPUT);
 
     if (isInterruptDriven()) {
 		registerInterrupt(pin);
@@ -240,12 +240,12 @@ void SwitchInput::setEncoder(uint8_t slot, RotaryEncoder* enc) {
 bool SwitchInput::runLoop() {
 	bool needAnotherGo = false;
 
-	lastSyncStatus = ioDeviceSync(ioDevice);
+	lastSyncStatus = ioDevice->sync();
 
 	for (bsize_t i = 0; i < keys.count(); ++i) {
 		// get the pins current state
 		auto key = keys.itemAtIndex(i);
-		uint8_t pinState = ioDeviceDigitalRead(ioDevice, key->getPin());
+		uint8_t pinState = ioDevice->digitalRead(key->getPin());
 		if(isPullupLogic(key->isLogicInverted())) {
 			pinState = !pinState;
 		}
@@ -354,14 +354,14 @@ void HardwareRotaryEncoder::initialise(pinid_t pinA, pinid_t pinB, HWAcceleratio
 	this->encoderType = encoderType;
 
 	// set the pin directions to input with pull ups enabled
-	ioDevicePinMode(switches.getIoAbstraction(), pinA, INPUT_PULLUP);
-	ioDevicePinMode(switches.getIoAbstraction(), pinB, INPUT_PULLUP);
+	switches.getIoAbstraction()->pinMode(pinA, INPUT_PULLUP);
+	switches.getIoAbstraction()->pinMode(pinB, INPUT_PULLUP);
 
 	// read back the initial values.
-    bool lastSyncOK = ioDeviceSync(switches.getIoAbstraction());
+    bool lastSyncOK = switches.getIoAbstraction()->sync();
 	bitWrite(flags, LAST_SYNC_STATUS, lastSyncOK);
-	this->aLast = ioDeviceDigitalRead(switches.getIoAbstraction(), pinA);
-	this->cleanFromB = ioDeviceDigitalRead(switches.getIoAbstraction(), pinB);
+	this->aLast = switches.getIoAbstraction()->digitalRead(pinA);
+	this->cleanFromB = switches.getIoAbstraction()->digitalRead(pinB);
 
 	if(!switches.isEncoderPollingEnabled()) {
 		registerInterrupt(pinA);
@@ -419,23 +419,20 @@ int HardwareRotaryEncoder::amountFromChange(unsigned long change) {
 }
 
 void HardwareRotaryEncoder::encoderChanged() {
-	bool lastSyncStatus = ioDeviceSync(switches.getIoAbstraction());
+	bool lastSyncStatus = switches.getIoAbstraction()->sync();
     bitWrite(flags, LAST_SYNC_STATUS, lastSyncStatus);
 
-	uint8_t a = ioDeviceDigitalRead(switches.getIoAbstraction(), pinA);
-	uint8_t b = ioDeviceDigitalRead(switches.getIoAbstraction(), pinB);
+	uint8_t a = switches.getIoAbstraction()->digitalRead(pinA);
+	uint8_t b = switches.getIoAbstraction()->digitalRead(pinB);
 
 	if(encoderType == QUARTER_CYCLE){
 		if((a != aLast) || (b != cleanFromB)) {
 			aLast = a;
 			if((a != aLast) || (b != cleanFromB)) {
 				cleanFromB = b;
-				if((a || cleanFromB) || (a == 0 && b == 0)) {	
-					unsigned long timeNow = micros();
-					int amt = amountFromChange(timeNow - lastChange);
-					increment((int8_t)(a != b ? -amt : amt));
-					lastChange = timeNow;
-				}
+				if((a || cleanFromB) || (a == 0 && b == 0)) {
+                    handleChangeRaw(a && b);
+                }
 			}
 		}		
 	}
@@ -444,15 +441,34 @@ void HardwareRotaryEncoder::encoderChanged() {
 			aLast = a;
 			if(b != cleanFromB) {
 				cleanFromB = b;
-				if(a) {	
-					unsigned long timeNow = micros();
-					int amt = amountFromChange(timeNow - lastChange);
-					increment((int8_t)(a != b ? -amt : amt));
-					lastChange = timeNow;
+				if(a) {
+                    handleChangeRaw(b);
 				}
 			}
 		}	
 	}
+}
+
+void HardwareRotaryEncoder::handleChangeRaw(bool increase) {
+    // was the last direction up?
+    bool lastDirectionUp = bitRead(flags, LAST_ENCODER_DIRECTION_UP);
+
+    // get the amount of change and direction. Also keep a copy of the time until later for acceleration purposes
+    unsigned long timeNow = micros();
+    unsigned long deltaMillis = timeNow - lastChange;
+    int amt = amountFromChange(deltaMillis);
+
+    // update the last change time now to ensure always set
+    lastChange = timeNow;
+
+    // direction changes within the reject change threshold would not result in an encoder change, part of the debounce
+    // logic to prevent spurious updates. Within this period direction must be the both now and previously.
+    //serlogF4(SER_DEBUG, "delta ", deltaMillis, increase, lastDirectionUp);
+    if(deltaMillis < REJECT_DIRECTION_CHANGE_THRESHOLD && increase != lastDirectionUp) return;
+
+    // now we make the change and register the last change direction (as we accepted it)
+    increment((int8_t) (increase ? amt : -amt));
+    bitWrite(flags, LAST_ENCODER_DIRECTION_UP, increase);
 }
 
 EncoderUpDownButtons::EncoderUpDownButtons(pinid_t pinUp, pinid_t pinDown, EncoderCallbackFn callback, uint8_t speed)

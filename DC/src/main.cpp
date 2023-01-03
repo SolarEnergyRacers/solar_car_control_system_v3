@@ -45,6 +45,7 @@
 #endif
 #include <GPIO.h>
 #include <I2CBus.h>
+#include <IOExt.h>
 #include <OneWire.h>
 #include <OneWireBus.h>
 #include <SPIBus.h>
@@ -72,7 +73,8 @@ Console console;
 DAC dac;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
-OneWireBus oneWireBus;
+IOExt ioExt;
+//OneWireBus oneWireBus;
 SPIBus spiBus;
 Uart uart; // SERIAL
 
@@ -80,6 +82,7 @@ static void adcTask(void *pvParams) { adc.task(pvParams); }
 static void canBusTask(void *pvParams) { canBus.task(pvParams); }
 static void carControlTask(void *pvParams) { carControl.task(pvParams); }
 static void cmdHandlerTask(void *pvParams) { cmdHandler.task(pvParams); }
+static void ioExtTask(void *pvParams) { ioExt.task(pvParams); }
 
 void app_main(void) {
   string msg;
@@ -110,8 +113,8 @@ void app_main(void) {
   console << "-- init bus systems ----------------------------------------" << NL;
   msg = spiBus.init();
   console << msg << NL;
-  msg = oneWireBus.init();
-  console << msg << NL;
+  // msg = oneWireBus.init();
+  // console << msg << NL;
   msg = i2cBus.init();
   console << msg << NL;
   i2cBus.verboseModeI2C = false;
@@ -135,7 +138,7 @@ void app_main(void) {
                           canBus.getTaskHandle(), /* task handle to keep track of created task */
                           canBus.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = canBus.report_task_init(&canBus);
+  msg = canBus.report_task_init();
   console << msg << NL;
 #if COMMANDHANDLER_ON
   // CMD Handler
@@ -150,7 +153,7 @@ void app_main(void) {
                           cmdHandler.getTaskHandle(), /* task handle to keep track of created task */
                           cmdHandler.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = cmdHandler.report_task_init(&cmdHandler);
+  msg = cmdHandler.report_task_init();
   console << msg << NL;
 #endif
   // Car Control AC
@@ -167,18 +170,35 @@ void app_main(void) {
                           carControl.getTaskHandle(), /* task handle to keep track of created task */
                           carControl.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = carControl.report_task_init(&carControl);
+  msg = carControl.report_task_init();
   console << msg << NL;
   // DAC
   msg = dac.init();
   console << msg << NL;
   dac.verboseModeDAC = false;
+  // IOExt
+  msg = ioExt.init_t(1, 10, 10000, 300);
+  console << msg << NL;
+  ioExt.verboseModeDIn = false;
+  ioExt.verboseModeDInHandler = false;
+  ioExt.verboseModeDOut = false;
+  console << "[  ] Create " << ioExt.getName() << " task ...";
+  xTaskCreatePinnedToCore(ioExtTask,             /* task function. */
+                          ioExt.getInfo(),       /* name of task. */
+                          ioExt.getStackSize(),  /* stack size of task */
+                          NULL,                /* parameter of the task */
+                          ioExt.getPriority(),   /* priority of the task */
+                          ioExt.getTaskHandle(), /* task handle to keep track of created task */
+                          ioExt.getCoreId());    /* pin task to core id */
+  console << " done." << NL;
+  msg = ioExt.report_task_init();
+  console << msg << NL;
   // ADC
   msg = adc.init_t(1, 10, 10000, 300);
   console << msg << NL;
   adc.verboseModeADC = false;
   adc.verboseModeADCDebug = false;
-  console << "[  ] Create " << carControl.getName() << " task ...";
+  console << "[  ] Create " << adc.getName() << " task ...";
   xTaskCreatePinnedToCore(adcTask,             /* task function. */
                           adc.getInfo(),       /* name of task. */
                           adc.getStackSize(),  /* stack size of task */
@@ -187,7 +207,7 @@ void app_main(void) {
                           adc.getTaskHandle(), /* task handle to keep track of created task */
                           adc.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = adc.report_task_init(&adc);
+  msg = adc.report_task_init();
   console << msg << NL;
 
   // Driver Display
@@ -203,6 +223,9 @@ void app_main(void) {
   console << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
   console << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
   console << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  console << fmt::format("- canBus.verboseModeDIn         = {}", ioExt.verboseModeDIn) << NL;
+  console << fmt::format("- canBus.verboseModeDInHandler  = {}", ioExt.verboseModeDInHandler) << NL;
+  console << fmt::format("- canBus.verboseModeDOut        = {}", ioExt.verboseModeDOut) << NL;
   console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
   console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
   console << "------------------------------------------------------------" << NL;

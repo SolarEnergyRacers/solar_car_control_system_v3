@@ -13,23 +13,21 @@
 #include <Console.h>
 // #include <ESP32Time.h>
 #include <Helper.h>
-// #include <IOExt.h>
+#include <IOExt.h>
 // #include <RTC.h>
-// #include <SDCard.h>
 #include <definitions.h>
 
 using namespace std;
 
 extern CarState carState;
 extern Console console;
-// extern SDCard sdCard;
-// extern IOExt ioExt;
+extern IOExt ioExt;
 // extern RTC rtc;
 // extern ESP32Time esp32time;
 
 int CarState::getIdx(string pinName) { return idxOfPin.find(pinName)->second; }
-// CarStatePin *CarState::getPin(int devNr, int pinNr) { return &(carState.pins[IOExt::getIdx(devNr, pinNr)]); }
-// CarStatePin *CarState::getPin(int port) { return &(carState.pins[IOExt::getIdx(port)]); }
+CarStatePin *CarState::getPin(int devNr, int pinNr) { return &(carState.pins[IOExt::getIdx(devNr, pinNr)]); }
+CarStatePin *CarState::getPin(int port) { return &(carState.pins[IOExt::getIdx(port)]); }
 CarStatePin *CarState::getPin(string pinName) { return &(carState.pins[carState.getIdx(pinName)]); }
 
 void CarState::init_values() {
@@ -46,10 +44,9 @@ void CarState::init_values() {
   SdCardDetect = false;
 
   // values set by control elements or CarControl
-  Indicator = INDICATOR::OFF;
   DriveDirection = DRIVE_DIRECTION::FORWARD;
   ConstantMode = CONSTANT_MODE::SPEED;
-  ConstantModeOn = false; //#SAFETY#: deceleration unlock const mode
+  ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
   TargetSpeed = 0;
   TargetPower = 0;
   DriverInfo = "Acceleration\nstill locked!";
@@ -138,7 +135,6 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Green Light ........... " << GreenLight << NL;
   ss << "Fan ................... " << Fan << NL;
   ss << "------------------------" << NL;
-  ss << "Indicator ............. " << INDICATOR_str[(int)(Indicator)] << NL;
   ss << "Constant Mode On ...... " << BOOL_str[(int)(ConstantModeOn)] << NL;
   ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << NL;
   ss << "Target Speed .......... " << TargetSpeed << NL;
@@ -216,7 +212,6 @@ const string CarState::serialize(string msg) {
   cJSON_AddNumberToObject(dynData, "tmin", floor(Tmin * 1000.0 + .5) / 1000.0);
   cJSON_AddNumberToObject(dynData, "tmax", floor(Tmax * 1000.0 + .5) / 1000.0);
 
-  cJSON_AddStringToObject(dynData, "indicator", INDICATOR_str[(int)(Indicator)]);
   cJSON_AddStringToObject(dynData, "driveDirection", DRIVE_DIRECTION_str[(int)(DriveDirection)]);
   cJSON_AddStringToObject(dynData, "constantModeOn", BOOL_str[(int)(ConstantModeOn)]);
 
@@ -275,7 +270,6 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "Tmin, ";
     ss << "Tmax, ";
 
-    ss << "indicator, ";
     ss << "driveDirection, ";
     ss << "controlMode";
     ss << "constantModeOn, ";
@@ -331,7 +325,6 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << floor(Tmin * 1000.0 + .5) / 1000.0 << ", ";
   ss << floor(Tmax * 1000.0 + .5) / 1000.0 << ", ";
 
-  ss << INDICATOR_str[(int)(Indicator)] << ", ";
   ss << DRIVE_DIRECTION_str[(int)(DriveDirection)] << ", ";
   ss << CONTROL_MODE_str[(int)(ControlMode)] << ", ";
   ss << CONSTANT_MODE_str[(int)(ConstantMode)] << ", ";
@@ -361,7 +354,7 @@ const string CarState::printIOs(string msg, bool withColors, bool deltaOnly) {
   string highLightColorOut = "";
   string highLightColorChg = "";
   if (withColors) {
-    normalColor = "\033[0;39m";
+    normalColor = "\033[0;39m";       // white
     highLightColorOut = "\033[1;31m"; // red
     highLightColorChg = "\033[1;36m"; // blue
   }
@@ -371,32 +364,32 @@ const string CarState::printIOs(string msg, bool withColors, bool deltaOnly) {
 
   bool hasDelta = false;
   for (int devNr = 0; devNr < MCP23017_NUM_DEVICES; devNr++) {
-    ss << devNr << ": ";
-    // for (int pinNr = 0; pinNr < MCP23017_NUM_PORTS; pinNr++) {
-    //   int idx = IOExt::getIdx(devNr, pinNr);
-    //   CarStatePin *pin = carState.getPin(devNr, pinNr);
-    //   if (pin->mode == OUTPUT) {
-    //     if (pin->value != pin->oldValue) {
-    //       hasDelta = true;
-    //       ss << highLightColorChg << pin->value << normalColor;
-    //     } else {
-    //       ss << highLightColorOut << pin->value << normalColor;
-    //     }
-    //   } else {
-    //     if (pin->value != pin->oldValue) {
-    //       hasDelta = true;
-    //       ss << highLightColorChg << pin->value << normalColor;
-    //     } else {
-    //       ss << pin->value;
-    //     }
-    //   }
-    //   if (idx < MCP23017_NUM_DEVICES * MCP23017_NUM_PORTS - 1) {
-    //     if ((idx + 1) % 8 == 0)
-    //       ss << " | ";
-    //     else if ((idx + 1) % 4 == 0)
-    //       ss << "-";
-    //   }
-    // }
+    ss << "devNr " << devNr << ": ";
+    for (int pinNr = 0; pinNr < MCP23017_NUM_PORTS; pinNr++) {
+      CarStatePin *pin = carState.getPin(devNr, pinNr);
+      if (pin->mode == OUTPUT) {
+        if (pin->value != pin->oldValue) {
+          hasDelta = true;
+          ss << highLightColorChg << pin->value << normalColor;
+        } else {
+          ss << highLightColorOut << pin->value << normalColor;
+        }
+      } else {
+        if (pin->value != pin->oldValue) {
+          hasDelta = true;
+          ss << highLightColorChg << pin->value << normalColor;
+        } else {
+          ss << pin->value;
+        }
+      }
+      int idx = IOExt::getIdx(devNr, pinNr);
+      if (idx < MCP23017_NUM_DEVICES * MCP23017_NUM_PORTS - 1) {
+        if ((idx + 1) % 8 == 0)
+          ss << " | ";
+        else if ((idx + 1) % 4 == 0)
+          ss << "-";
+      }
+    }
   }
 
   // ss << NL;

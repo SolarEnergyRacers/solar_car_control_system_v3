@@ -52,8 +52,7 @@ private:
 
   void _set_DAC();
   void _set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t valueDec, int16_t valueAcc, int valueDisplay);
-  void _handle_indicator();
-
+  
   static volatile int valueChangeRequest;
   bool isInValueChangedHandler = false;
   void _handleValueChanged();

@@ -132,7 +132,7 @@ void app_main(void) {
                           engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
                           engineerDisplay.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = carControl.report_task_init(&engineerDisplay);
+  msg = carControl.report_task_init();
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
   // CAN Bus
@@ -151,7 +151,7 @@ void app_main(void) {
                           canBus.getTaskHandle(), /* task handle to keep track of created task */
                           canBus.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = canBus.report_task_init(&canBus);
+  msg = canBus.report_task_init();
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
 #if COMMANDHANDLER_ON
@@ -167,7 +167,7 @@ void app_main(void) {
                           cmdHandler.getTaskHandle(), /* task handle to keep track of created task */
                           cmdHandler.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = cmdHandler.report_task_init(&cmdHandler);
+  msg = cmdHandler.report_task_init();
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
 #endif
@@ -185,7 +185,7 @@ void app_main(void) {
                           carControl.getTaskHandle(), /* task handle to keep track of created task */
                           carControl.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = carControl.report_task_init(&carControl);
+  msg = carControl.report_task_init();
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
 
@@ -214,7 +214,7 @@ void app_main(void) {
                           driverDisplay.getTaskHandle(), /* task handle to keep track of created task */
                           driverDisplay.getCoreId());    /* pin task to core id */
   console << " done." << NL;
-  msg = carControl.report_task_init(&driverDisplay);
+  msg = carControl.report_task_init();
   console << msg << driverDisplay.get_DisplayStatus_text() << NL;
   engineerDisplay.print(msg + "\n");
   delay(1000);

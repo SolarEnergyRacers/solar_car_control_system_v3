@@ -43,7 +43,7 @@ public:
                     "\t  [I]                 - verbose CAN in native packages\n"
                     "\t  [o]                 - verbose CAN out\n"
                     "\t  [O]                 - verbose CAN out native packages\n"
-                    "\tO _ _ _ _ _ _ _ _ _ _ set CanControl verbose mode\n"
+                    "\tO _ _ _ _ _ _ _ _ _ _ set CarControl verbose mode\n"
                     "\t  [o]                 - verbose\n"
                     "\t  [O]                 - verbose debug\n"
                     "\tT [yyyy mm dd hh MM]  get/set RTC date and time\n"

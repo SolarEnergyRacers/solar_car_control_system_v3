@@ -35,6 +35,7 @@ public:
   bool read_paddles();
   bool read_PLUS_MINUS();
   void reset_acceleration_values() { _set_dec_acc_values(0, 0, 0, 0, 0); }
+  bool read_nextScreenButton();
   bool verboseMode = false;
   bool verboseModeDebug = false;
 

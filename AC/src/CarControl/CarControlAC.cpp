@@ -239,6 +239,29 @@ int CarControl::_transform(int minViewValue, int maxViewValue, int minOriginValu
   return (int)round((value - minOriginValue) * k);
 }
 
+bool CarControl::read_nextScreenButton() {
+  if (!SystemInited)
+    return false;
+
+  int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
+  if (!button1pressed)
+    return false;
+
+  switch (carState.displayStatus) {
+  case DISPLAY_STATUS::ENGINEER_RUNNING:
+    carState.displayStatus = DISPLAY_STATUS::DRIVER_SETUP;
+    console << "Switch Next Screen toggle: switch from eng --> driver\n";
+    break;
+  case DISPLAY_STATUS::DRIVER_RUNNING:
+    carState.displayStatus = DISPLAY_STATUS::ENGINEER_SETUP;
+    console << "Switch Next Screen toggle: switch from driver --> engineer\n";
+    break;
+  default:
+    break;
+  }
+  return true;
+}
+
 volatile int CarControl::valueChangeRequest = 0;
 
 void CarControl::task(void *pvParams) {
@@ -247,13 +270,15 @@ void CarControl::task(void *pvParams) {
       // console << "CarControl Task running on core " << xPortGetCoreID() << NL;
 
       // handle changed INPUT pins
-      // bool someThingChanged = false;
+      bool someThingChanged = false;
       // someThingChanged |= read_paddles();
       // someThingChanged |= read_PLUS_MINUS();
       // someThingChanged |= read_speed();
       // someThingChanged |= read_potentiometer();
       // someThingChanged |= read_reference_cell_data();
       // someThingChanged |= read_break_pedal();
+
+      someThingChanged |= read_nextScreenButton();
 
       int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
       int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);

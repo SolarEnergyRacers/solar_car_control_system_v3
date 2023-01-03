@@ -24,6 +24,7 @@
 
 #include <Wire.h> // I2C
 
+#include <ADC.h>
 #include <CANBus.h>
 #include <CarControl.h>
 #if CARSPEED_ON
@@ -34,21 +35,24 @@
 #include <CarStatePin.h>
 #include <CmdHandler.h>
 #include <Console.h>
+#include <DAC.h>
 #include <Helper.h>
 #include <I2CBus.h>
-// #include <IOExt.h>
-// #include <IOExtHandler.h>
+#include <IOExt.h>
+#include <IOExtHandler.h>
 // #include <RTC.h>
 #include <System.h>
 
+extern ADC adc;
 extern CANBus can;
 extern I2CBus i2cBus;
-extern I2CBus i2cBus;
+extern IOExt ioExt;
 extern CarState carState;
 extern CANBus canBus;
 // extern CarSpeed carSpeed;
 extern CarControl carControl;
 extern Console console;
+extern DAC dac;
 #if RTC_ON
 extern RTC rtc;
 extern ESP32Time esp32time;
@@ -126,33 +130,38 @@ void CmdHandler::task(void *pvParams) {
           // memory_info();
           break;
         case 'I':
-          // console << "Received: '" << input << "' --> ";
-          // if (input[1] == 's') {
-          //   //console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
-          //   i2cBus.scan_i2c_devices();
-          // } else if (input[1] == 'i') {
-          //   ioExt.verboseModeDigitalIn = !ioExt.verboseModeDigitalIn;
-          //   console << "set verboseModeDigitalIn: " << ioExt.verboseModeDigitalIn << NL;
-          // } else if (input[1] == 'o') {
-          //   ioExt.verboseModeDigitalOut = !ioExt.verboseModeDigitalOut;
-          //   console << "set verboseModeDigitalOut: " << ioExt.verboseModeDigitalOut << NL;
-          // } else if (input[1] == 'a') {
-          //   adc.verboseModeADC = !adc.verboseModeADC;
-          //   console << "set verboseModeADC: " << adc.verboseModeADC << NL;
-          // } else if (input[1] == 'd') {
-          //   dac.verboseModeDAC = !dac.verboseModeDAC;
-          //   console << "set verboseModeDAC: " << dac.verboseModeDAC << NL;
-          // } else if (input[1] == 'c') {
-          //   carControl.verboseMode = !carControl.verboseMode;
-          //   console << "set verboseMode for acc-/dec-controls: " << carControl.verboseMode << NL;
-          // } else if (input[1] == 'R') {
-          //   console << ioExt.re_init() << NL;
-          //   msg = ioExt.re_init();
-          //   console << msg << NL;
-          // } else {
-          //   ioExt.readAllPins();
-          //   console << carState.printIOs("", true, false) << NL;
-          // }
+          console << "Received: '" << input << "' --> ";
+          if (input[1] == 's') {
+            // console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
+            i2cBus.scan_i2c_devices();
+          } else if (input[1] == 'i') {
+            ioExt.verboseModeDIn = !ioExt.verboseModeDIn;
+            console << "set verboseModeDIn: " << ioExt.verboseModeDIn << NL;
+          } else if (input[1] == 'o') {
+            ioExt.verboseModeDOut = !ioExt.verboseModeDOut;
+            console << "set verboseModeDOut: " << ioExt.verboseModeDOut << NL;
+          } else if (input[1] == 'h') {
+            ioExt.verboseModeDInHandler = !ioExt.verboseModeDInHandler;
+            ioExt.readAndHandlePins(PinHandleMode::FORCED);
+            console << "set verboseModeDInHandler: " << ioExt.verboseModeDInHandler << NL;
+          } else if (input[1] == 'a') {
+            adc.verboseModeADC = !adc.verboseModeADC;
+            console << "set verboseModeADC: " << adc.verboseModeADC << NL;
+          } else if (input[1] == 'd') {
+            dac.verboseModeDAC = !dac.verboseModeDAC;
+            console << "set verboseModeDAC: " << dac.verboseModeDAC << NL;
+          } else if (input[1] == 'c') {
+            carControl.verboseMode = !carControl.verboseMode;
+            console << "set verboseMode for acc-/dec-controls: " << carControl.verboseMode << NL;
+          } else if (input[1] == 'R') {
+            console << ioExt.re_init() << NL;
+            msg = ioExt.re_init();
+            console << msg << NL;
+          } else {
+            console << "Read all IOs:" << NL;
+            ioExt.readAllPins();
+            console << carState.printIOs("", true, false) << NL;
+          }
           break;
         // -------------- chase car commands
         case 'C':

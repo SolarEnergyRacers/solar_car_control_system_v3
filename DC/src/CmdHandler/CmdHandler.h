@@ -27,6 +27,7 @@ public:
                     "\tI _ _ _ _ _ _ _ _ _ _ read and show IOs\n"
                     "\t  [s]                 - scan and show I2C devices\n"
                     "\t  [i|o]               - show in|out continuously\n"
+                    "\t  [h]                 - show in handler results\n"
                     "\t  [a|d]               - show ADC|DAC continuously\n"
                     "\t  [c]                 - show controls acc/dec continuously\n"
                     "\t  [R]                 - reinit\n"

@@ -98,10 +98,11 @@ string Display::_setup() {
 
     tft.setCursor(0, 0);
     tft.setTextSize(1);
-    tft.fillScreen(bgColor);
-    // tft.setTextColor(ILI9341_BLUE);
+    //tft.fillScreen(bgColor);
+    tft.setTextColor(ILI9341_BLACK);
     // tft.setScrollMargins(0, height);
     xSemaphoreGive(spiBus.mutex);
+    //clear_screen(bgColor);
 
     printf("     ILI9341_RDMADCTL:   0x%x\n", rdmadctl);
     printf("     ILI9341_RDPIXFMT:   0x%x\n", rdpixfmt);
@@ -124,7 +125,7 @@ void Display::clear_screen(int bgColor) {
   tft.setRotation(0);
   tft.fillScreen(bgColor);
   tft.setRotation(1);
-  tft.fillScreen(bgColor);
+  //tft.fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -394,11 +395,7 @@ void Display::lifeSign() {
 
 void Display::drawCentreString(const string &buf, int x, int y) { return; }
 
-// -------------
-// FreeRTOS TASK
-// -------------
 void Display::task(void *pvParams) {
-  // polling loop
   while (1) {
     switch (carState.displayStatus) {
     // initializing states:

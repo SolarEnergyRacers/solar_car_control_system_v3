@@ -14,7 +14,7 @@
 
 class EngineerDisplay : public Display {
 public:
-  EngineerDisplay() { bgColor = ILI9341_ORANGE; };
+  EngineerDisplay() { bgColor = ILI9341_LIGHTGREY; };
   ~EngineerDisplay(){};
   //==== overwrites from base class ==== START
   string getName(void) { return "EngineerDisplay"; };

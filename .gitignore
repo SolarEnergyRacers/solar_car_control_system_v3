@@ -32,6 +32,10 @@
 *.app
 
 # local device settings fior development and test
-AC/include/LocalFunctionsAndDevices.h
 AC/sdkconfig.old
 AC/sdkconfig.esp32dev.old
+
+**/build/**
+**/examples/**
+**/.vscode
+

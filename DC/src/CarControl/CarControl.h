@@ -38,7 +38,7 @@ public:
   bool read_PLUS_MINUS();
   void reset_acceleration_values() { _set_dec_acc_values(0, 0, 0, 0, 0); }
   bool verboseMode = false;
-  bool verboseModeCarControlMax = false;
+  bool verboseModeDebug = false;
 
 private:
   int ads_min_dec = 4800;

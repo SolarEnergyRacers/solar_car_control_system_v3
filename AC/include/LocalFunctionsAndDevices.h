@@ -2,8 +2,7 @@
 #ifndef LocalFunctionsAndDevices_H
 #define LocalFunctionsAndDevices_H
 
-#define CARCONTROL_ON true     // central car control task
-#define CARSPEED_ON true       // car pid speed controller
+#define CARSPEED_ON false      // car pid speed controller
 #define COMMANDHANDLER_ON true // command input and deploy
 #define DS_ON false            // 1-Wire Digital Thermometer (DS18B20)
 #define INT_ON false           // interrupt for I/O Expander (MCP23014)

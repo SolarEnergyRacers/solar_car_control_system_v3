@@ -36,11 +36,14 @@
 // local components
 #include <CANBus.h>
 #include <CarControl.h>
+#include <CmdHandler.h>
 #include <Console.h>
 #include <Display.h>
 #include <DriverDisplay.h>
 #include <EngineerDisplay.h>
-// #include <ESP32Time.h>
+#if RTC_ON
+#include <ESP32Time.h>
+#endif
 #include <GPIO.h>
 #include <I2CBus.h>
 #include <OneWire.h>
@@ -62,17 +65,19 @@ uint64_t life_sign = 0;
 CANBus canBus;
 CarControl carControl;
 CarState carState;
+CmdHandler cmdHandler;
 Console console;
+DriverDisplay driverDisplay;
+EngineerDisplay engineerDisplay;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
-// OneWireBus oneWireBus;
+OneWireBus oneWireBus;
 SPIBus spiBus;
-
-EngineerDisplay engineerDisplay;
-DriverDisplay driverDisplay;
+Uart uart; // SERIAL
 
 static void canBusTask(void *pvParams) { canBus.task(pvParams); }
 static void carControlTask(void *pvParams) { carControl.task(pvParams); }
+static void cmdHandlerTask(void *pvParams) { cmdHandler.task(pvParams); }
 static void engineerDisplayTask(void *pvParams) { engineerDisplay.task(pvParams); }
 static void driverDisplayTask(void *pvParams) { driverDisplay.task(pvParams); }
 
@@ -82,7 +87,6 @@ void app_main(void) {
 
 #if SERIAL_RADIO_ON
   // init console IO and radio console
-  Uart uart; // SERIAL
   msg = uart.init();
   console << msg << NL;
 #endif
@@ -115,11 +119,6 @@ void app_main(void) {
   i2cBus.verboseModeI2C = false;
   delay(200);
 
-  if (i2cBus.isDC()) {
-    console << "-- Drive Controller recognized -" << NL;
-  } else {
-    console << "-- Auxiliary Controller recognized -" << NL;
-  }
   // Engineer Display
   msg = engineerDisplay.init_t(1, 1, 10000, 300);
   console << msg << NL;
@@ -127,11 +126,11 @@ void app_main(void) {
   console << "[  ] Create " << engineerDisplay.getName() << " ...";
   xTaskCreatePinnedToCore(engineerDisplayTask,             /* task function. */
                           engineerDisplay.getInfo(),       /* name of task. */
-                          engineerDisplay.getStackSize(),      /* stack size of task */
+                          engineerDisplay.getStackSize(),  /* stack size of task */
                           NULL,                            /* parameter of the task */
-                          engineerDisplay.getPriority(),        /* priority of the task */
+                          engineerDisplay.getPriority(),   /* priority of the task */
                           engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
-                          engineerDisplay.getCoreId());        /* pin task to core id */
+                          engineerDisplay.getCoreId());    /* pin task to core id */
   console << " done." << NL;
   msg = carControl.report_task_init(&engineerDisplay);
   console << msg << NL;
@@ -139,35 +138,52 @@ void app_main(void) {
   // CAN Bus
   msg = canBus.init_t(0, 1, 10000, 200);
   console << msg << NL;
-  canBus.verboseModeCan = false;
-  canBus.verboseModeCanIn = true;
-  canBus.verboseModeCanInNative = true;
+  canBus.verboseModeCanIn = false;
+  canBus.verboseModeCanInNative = false;
   canBus.verboseModeCanOut = false;
-  canBus.verboseModeCanDebug = false;
+  canBus.verboseModeCanOutNative = false;
   console << "[  ] Create " << canBus.getName() << " task ...";
   xTaskCreatePinnedToCore(canBusTask,             /* task function. */
                           canBus.getInfo(),       /* name of task. */
-                          canBus.getStackSize(),      /* stack size of task */
+                          canBus.getStackSize(),  /* stack size of task */
                           NULL,                   /* parameter of the task */
-                          canBus.getPriority(),        /* priority of the task */
+                          canBus.getPriority(),   /* priority of the task */
                           canBus.getTaskHandle(), /* task handle to keep track of created task */
-                          canBus.getCoreId());        /* pin task to core id */
+                          canBus.getCoreId());    /* pin task to core id */
   console << " done." << NL;
   msg = canBus.report_task_init(&canBus);
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
+#if COMMANDHANDLER_ON
+  // CMD Handler
+  msg = cmdHandler.init_t(0, 1, 10000, 200);
+  console << msg << NL;
+  console << "[  ] Create " << cmdHandler.getName() << " task ...";
+  xTaskCreatePinnedToCore(cmdHandlerTask,             /* task function. */
+                          cmdHandler.getInfo(),       /* name of task. */
+                          cmdHandler.getStackSize(),  /* stack size of task */
+                          NULL,                       /* parameter of the task */
+                          cmdHandler.getPriority(),   /* priority of the task */
+                          cmdHandler.getTaskHandle(), /* task handle to keep track of created task */
+                          cmdHandler.getCoreId());    /* pin task to core id */
+  console << " done." << NL;
+  msg = cmdHandler.report_task_init(&cmdHandler);
+  console << msg << NL;
+  engineerDisplay.print(msg + "\n");
+#endif
   // Car Control AC
   msg = carControl.init_t(1, 10, 10000, 200);
   console << msg << NL;
-  carControl.verboseMode = true;
+  carControl.verboseMode = false;
+  carControl.verboseModeDebug = false;
   console << "[  ] Create " << carControl.getName() << " task ...";
   xTaskCreatePinnedToCore(carControlTask,             /* task function. */
                           carControl.getInfo(),       /* name of task. */
-                          carControl.getStackSize(),      /* stack size of task */
+                          carControl.getStackSize(),  /* stack size of task */
                           NULL,                       /* parameter of the task */
-                          carControl.getPriority(),        /* priority of the task */
+                          carControl.getPriority(),   /* priority of the task */
                           carControl.getTaskHandle(), /* task handle to keep track of created task */
-                          carControl.getCoreId());        /* pin task to core id */
+                          carControl.getCoreId());    /* pin task to core id */
   console << " done." << NL;
   msg = carControl.report_task_init(&carControl);
   console << msg << NL;
@@ -192,11 +208,11 @@ void app_main(void) {
   console << "[  ] Create " << driverDisplay.getName() << " task ...";
   xTaskCreatePinnedToCore(driverDisplayTask,             /* task function. */
                           driverDisplay.getInfo(),       /* name of task. */
-                          driverDisplay.getStackSize(),      /* stack size of task */
+                          driverDisplay.getStackSize(),  /* stack size of task */
                           NULL,                          /* parameter of the task */
-                          driverDisplay.getPriority(),        /* priority of the task */
+                          driverDisplay.getPriority(),   /* priority of the task */
                           driverDisplay.getTaskHandle(), /* task handle to keep track of created task */
-                          driverDisplay.getCoreId());        /* pin task to core id */
+                          driverDisplay.getCoreId());    /* pin task to core id */
   console << " done." << NL;
   msg = carControl.report_task_init(&driverDisplay);
   console << msg << driverDisplay.get_DisplayStatus_text() << NL;
@@ -209,10 +225,13 @@ void app_main(void) {
   } else {
     console << "Initialization ready as AuxiliaryController" << NL;
   }
-  console << fmt::format("- i2cBus.verboseModeI2C      = {}", i2cBus.verboseModeI2C) << NL;
-  console << fmt::format("- canBus.verboseModeCan      = {}", canBus.verboseModeCan) << NL;
-  console << fmt::format("- canBus.verboseModeCanDebug = {}", canBus.verboseModeCanDebug) << NL;
-  console << fmt::format("- carControl.verboseMode     = {}", carControl.verboseMode) << NL;
+  console << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
+  console << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
+  console << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
+  console << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
+  console << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
+  console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
   console << "------------------------------------------------------------" << NL;
   SystemInited = true;
 }

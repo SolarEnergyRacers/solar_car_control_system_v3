@@ -20,14 +20,10 @@
 // #include <ConfigFile.h>
 #include <Console.h>
 #include <DAC.h>
-// #include <DriverDisplay.h>
-// #include <EngineerDisplay.h>
 #include <Helper.h>
 #include <I2CBus.h>
 // #include <IOExt.h>
-// #include <Indicator.h>
 // #include <MCP23017.h>
-// #include <SDCard.h>
 
 extern ADC adc;
 extern CANBus canBus;
@@ -36,12 +32,9 @@ extern CarControl carControl;
 extern CarState carState;
 extern Console console;
 extern DAC dac;
-// extern DriverDisplay driverDisplay;
-// extern EngineerDisplay engineerDisplay;
 extern I2CBus i2cBus;
-// extern Indicator indicator;
 // extern IOExt ioExt;
-// extern SDCard sdCard;
+
 extern bool SystemInited;
 
 using namespace std;
@@ -255,8 +248,8 @@ int CarControl::_transform(int minViewValue, int maxViewValue, int minOriginValu
 }
 
 volatile int CarControl::valueChangeRequest = 0;
+
 void CarControl::task(void *pvParams) {
-  // polling loop
   while (1) {
     if (SystemInited) {
       // read values from ADC/IO
@@ -297,7 +290,7 @@ void CarControl::task(void *pvParams) {
       //  counter++;
       //  canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration,
       //  carState.Potentiometer); 
-      //  if (carControl.verboseModeCan)
+      //  if (carControl.verboseMode)
       //    console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
       //                           canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,
       //                           carState.Deceleration, carState.Acceleration, carState.Potentiometer)

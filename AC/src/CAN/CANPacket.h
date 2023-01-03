@@ -1,3 +1,6 @@
+#ifndef SOLAR_CAR_CONTROL_SYSTEM_CANPACKET_H
+#define SOLAR_CAR_CONTROL_SYSTEM_CANPACKET_H
+
 #include <Arduino.h>
 
 typedef union {
@@ -53,3 +56,5 @@ public:
 
   float getData_f32(uint8_t index);
 };
+
+#endif // SOLAR_CAR_CONTROL_SYSTEM_CANPACKET_H

@@ -186,7 +186,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     // Cell number with min Voltage packet.getData_ui8(5)
     // CMU number with max Cell Voltage packet.getData_ui8(6)
     // Cell number with max Voltage packet.getData_ui8(7)
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", Umin=" << carState.Umin << ", Umax=" << carState.Umax << NL;
     }
     break;
@@ -228,15 +228,16 @@ int CANBus::handle_rx_packet(CANPacket packet) {
       carState.PrechargeState = PRECHARGE_STATE::ENABLE_PACK;
       break;
     }
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", PrechargeState=" << PRECHARGE_STATE_str[(int)(carState.PrechargeState)] << NL;
     }
+
     // Precharge Timer info also available
     break;
   case BMS_BASE_ADDR | 0xF9:
     carState.Tmin = packet.getData_ui16(0) / 10.;
     carState.Tmax = packet.getData_ui16(1) / 10.;
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", Bat Tmin=" << carState.Tmin << ", Bat Tmax=" << carState.Tmax << NL;
     }
     break;
@@ -247,7 +248,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
       for (int i = 0; i < 13; i++) {
         if (packet.getData_b(i)) {
           carState.BatteryErrors.push_front(static_cast<BATTERY_ERROR>(i));
-          if (verboseModeCan) {
+          if (verboseModeCanIn) {
             console << ", BatErrors=" << carState.batteryErrorsAsString(true) << NL;
           }
         }
@@ -278,7 +279,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
 
     // MPPT1 Output Voltage V packet.getData_f32(0)
     // MPPT1 Output Current A packet.getData_f32(1)
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", Mppt1Cur=" << carState.Mppt1Current << NL;
     }
 
@@ -289,7 +290,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
 
     // MPPT2 Output Voltage V packet.getData_f32(0)
     // MPPT2 Output Current A packet.getData_f32(1)
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", Mppt2Cur=" << carState.Mppt2Current << NL;
     }
 
@@ -300,25 +301,25 @@ int CANBus::handle_rx_packet(CANPacket packet) {
 
     // MPPT3 Output Voltage V packet.getData_f32(0)
     // MPPT3 Output Current A packet.getData_f32(1)
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << ", Mppt3Cur=" << carState.Mppt3Current << NL;
     }
     break;
   case MPPT1_BASE_ADDR | 0x2:
     carState.T1 = packet.getData_f32(0);
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << "T1=" << carState.T1 << NL;
     }
     break;
   case MPPT2_BASE_ADDR | 0x2:
     carState.T2 = packet.getData_f32(0);
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << "T2=" << carState.T2 << NL;
     }
     break;
   case MPPT3_BASE_ADDR | 0x2:
     carState.T3 = packet.getData_f32(0);
-    if (verboseModeCan) {
+    if (verboseModeCanIn) {
       console << "T3=" << carState.T3 << NL;
     }
   }

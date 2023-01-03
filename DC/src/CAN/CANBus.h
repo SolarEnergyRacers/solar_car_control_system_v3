@@ -1,6 +1,9 @@
 //
 // CAN Bus
 //
+#ifndef SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
+#define SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
+
 
 #include <map>
 
@@ -51,10 +54,9 @@ public:
   bool writePacket(uint16_t adr, uint64_t data);
 
   SemaphoreHandle_t mutex;
-  bool verboseModeCan = false;
   bool verboseModeCanIn = false;
   bool verboseModeCanInNative = false;
   bool verboseModeCanOut = false;
   bool verboseModeCanOutNative = false;
-  bool verboseModeCanDebug = false;
 };
+#endif //SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H

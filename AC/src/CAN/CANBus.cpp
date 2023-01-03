@@ -98,7 +98,7 @@ bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, boo
                          bool b7) {
   uint8_t boolByte = ((uint8_t)b7) << 7 | ((uint8_t)b6) << 6 | ((uint8_t)b5) << 5 | ((uint8_t)b4) << 4 | ((uint8_t)b3) << 3 |
                      ((uint8_t)b2) << 2 | ((uint8_t)b1) << 1 | ((uint8_t)b0) << 0;
-  uint64_t data = ((uint64_t)boolByte) << 48 | ((uint64_t)data1) << 8 | ((int64_t)data0) << 0;
+  uint64_t data = ((uint64_t)boolByte) << 48 | ((uint64_t)data0) << 8 | ((int64_t)data1 & 0x00000000000000ff) << 0;
   return writePacket(adr, data);
 }
 bool CANBus::writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, int8_t data4) {
@@ -124,7 +124,7 @@ bool CANBus::writePacket(uint16_t adr, uint32_t data0, uint32_t data1) {
 bool CANBus::writePacket(uint16_t adr, uint64_t data) {
   CANPacket packet = CANPacket(adr, data);
   try {
-    if (canBus.verboseModeCanOut)
+    if (canBus.verboseModeCanOutNative)
       console << print_raw_packet("S", packet) << NL;
     xSemaphoreTakeT(mutex);
     CAN.beginPacket(adr);

@@ -138,7 +138,7 @@ private:
 
 protected:
   DISPLAY_STATUS display_setup() override;
-  DISPLAY_STATUS display_task(int lifeSignCounter) override;
+  DISPLAY_STATUS display_task() override;
   //==== overwrites from base class ==== END
 
 private:

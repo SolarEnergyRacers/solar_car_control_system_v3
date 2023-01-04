@@ -353,7 +353,7 @@ void DriverDisplay::write_driver_info() {
   }
 }
 
-DISPLAY_STATUS DriverDisplay::display_task(int lifeSignCounter) {
+DISPLAY_STATUS DriverDisplay::display_task() {
   DISPLAY_STATUS status = carState.displayStatus;
   switch (carState.displayStatus) {
   // initializing states:

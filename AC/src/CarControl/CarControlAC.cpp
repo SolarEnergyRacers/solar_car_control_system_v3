@@ -262,6 +262,24 @@ bool CarControl::read_nextScreenButton() {
   return true;
 }
 
+bool CarControl::read_ConstantModeButton() {
+  if (!SystemInited)
+    return false;
+
+  int button1pressed = !digitalRead(ESP32_AC_BUTTON_2);
+  if (!button1pressed)
+    return false;
+
+  if (carState.ConstantMode == CONSTANT_MODE::POWER) {
+    carState.ConstantMode = CONSTANT_MODE::SPEED;
+  } else {
+    carState.ConstantMode = CONSTANT_MODE::POWER;
+  }
+  carState.TargetSpeed = carState.Speed;                                       // unit: km/h
+  carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
+  return true; 
+}
+
 volatile int CarControl::valueChangeRequest = 0;
 
 void CarControl::task(void *pvParams) {
@@ -279,16 +297,17 @@ void CarControl::task(void *pvParams) {
       // someThingChanged |= read_break_pedal();
 
       someThingChanged |= read_nextScreenButton();
+      someThingChanged |= read_ConstantModeButton();
 
       int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
       int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);
-      uint64_t value = button1pressed << 1 | button2pressed;
+      uint16_t value = button1pressed << 1 | button2pressed;
       if (value != 0) {
         if (carControl.verboseModeDebug) {
           console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
         }
 
-        canBus.writePacket(AC_BASE_ADDR | 0x00, value);
+        canBus.writePacket(AC_BASE_ADDR | 0x00, carState.LifeSign, value);
         if (carControl.verboseMode)
           console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:button12 = {:1x} ", canBus.availiblePackets(),
                                  canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, value)

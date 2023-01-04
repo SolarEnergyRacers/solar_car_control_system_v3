@@ -53,7 +53,7 @@ void EngineerDisplay::draw_display_background() {
 
 // void EngineerDisplay::print(string msg) { Display::print(msg); }
 
-DISPLAY_STATUS EngineerDisplay::display_task(int lifeSignCounter) {
+DISPLAY_STATUS EngineerDisplay::display_task() {
   DISPLAY_STATUS status = carState.displayStatus;
   switch (carState.displayStatus) {
     // initializing states:

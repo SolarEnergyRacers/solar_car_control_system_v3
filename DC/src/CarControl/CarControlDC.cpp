@@ -108,12 +108,12 @@ bool CarControl::read_PLUS_MINUS() {
     _set_dec_acc_values(DAC_MAX, 0, ADC_MAX, 0, -64);
     return true;
   }
-
   bool plusButton = false;  // ioExt.getPort(carState.getPin(PinIncrease)->port) == 0;  // currently pressed?
   bool minusButton = false; // ioExt.getPort(carState.getPin(PinDecrease)->port) == 0; // currently pressed?
   if (!plusButton && !minusButton)
     return false;
 
+  carState.ConstantModeOn = true;
   int8_t acceleration; // -99 ... +99
   if (carState.Deceleration > 0) {
     acceleration = -carState.Deceleration;
@@ -289,7 +289,7 @@ void CarControl::task(void *pvParams) {
       //            << NL;
       //  counter++;
       //  canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration,
-      //  carState.Potentiometer); 
+      //  carState.Potentiometer);
       //  if (carControl.verboseMode)
       //    console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
       //                           canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,

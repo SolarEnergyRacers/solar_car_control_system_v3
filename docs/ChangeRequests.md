@@ -15,6 +15,10 @@
   *done with version:* 
 - [ ] Motor current missing
   *done with version:* 
+- [ ] Where the radio is connected?
+  *done with version:* 
+- [ ] Schematic: 1VMC but board print: 5VMC?
+  *done with version:* 
 
 ### DC Board
 

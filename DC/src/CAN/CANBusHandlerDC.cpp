@@ -126,18 +126,14 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   // Do something with packet
   switch (packetId) {
   case AC_BASE_ADDR | 0x00: {
-    // carState.Speed = (int)(packet.getData_ui16(0));
-    // carState.AccelerationDisplay = (int)(packet.getData_ui16(1));
-    // carState.Deceleration = (int)(packet.getData_ui16(2));
-    // carState.Potentiometer = (int)(packet.getData_ui16(3));
-    // if (canBus.verboseModeCanIn)
-    //   console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:speed={:5d}, decl={:5d}, accl={:5d}, poti={:5d}",
-    //                          canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.Speed,
-    //                          carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-    //           << NL;
-    carState.DriverInfo = fmt::format("{}", packet.getData_ui64());
-    if (canBus.verboseModeCanIn && packet.getData_ui64() != 0)
-      console << fmt::format("B1 | B2:{:8x}\n", packet.getData_ui64());
+    // TODO: temporarly
+    carState.LifeSign = packet.getData_ui16(1);
+    uint16_t buttonConstantMode = packet.getData_ui16(0);
+    if (buttonConstantMode > 0)
+      carState.ConstantMode = (carState.ConstantMode == CONSTANT_MODE::POWER) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+    if (canBus.verboseModeCanIn && packet.getData_ui16(0) > 0)
+      console << fmt::format("LifeSign= {:4x}, carState.ConstantMode={}\n", carState.LifeSign,
+                             CONSTANT_MODE_str[(int)(carState.ConstantMode)]);
   } break;
 
   case AC_BASE_ADDR | 0x01:

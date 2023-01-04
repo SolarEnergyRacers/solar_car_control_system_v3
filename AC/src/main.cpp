@@ -60,6 +60,7 @@ void app_main(void);
 using namespace std;
 
 bool SystemInited = false;
+bool SystemJustInited = true;
 uint64_t life_sign = 0;
 
 CANBus canBus;

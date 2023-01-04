@@ -68,7 +68,7 @@ protected:
   int width;
   // handler called for inherited classes
   virtual DISPLAY_STATUS display_setup() { return DISPLAY_STATUS::ENGINEER_HALTED; };
-  virtual DISPLAY_STATUS display_task(int lifeSignCounter) { return DISPLAY_STATUS::ENGINEER_HALTED; };
+  virtual DISPLAY_STATUS display_task() { return DISPLAY_STATUS::ENGINEER_HALTED; };
 
   // workers
   float write_float(int x, int y, float valueLast, float value, int textSize, int color);

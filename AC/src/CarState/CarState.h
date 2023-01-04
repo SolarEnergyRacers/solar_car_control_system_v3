@@ -20,9 +20,6 @@ using namespace std;
 // public structures and structure texts
 static const char *BOOL_str[] = {"false", "true"};
 
-enum class INDICATOR { OFF, LEFT, RIGHT, WARN };
-static const char *INDICATOR_str[] = {"OFF", "LEFT", "RIGHT", "HAZARD FLASH"};
-
 enum class INFO_TYPE { INFO, STATUS, WARN, ERROR };
 static const char *INFO_TYPE_str[] = {"INFO", "STATUS", "WARN", "ERROR"};
 
@@ -112,7 +109,6 @@ public:
     PhotoVoltaicCurrent = 0;
     MotorCurrent = 0;
 
-    Indicator = INDICATOR::OFF;
     DriveDirection = DRIVE_DIRECTION::FORWARD;
     ConstantMode = CONSTANT_MODE::SPEED;
 
@@ -131,7 +127,6 @@ public:
     GreenLight = false;
     // BEGIN prevent stupid compiler warnings "defined but not used"
     (void)BOOL_str;
-    (void)INDICATOR_str;
     (void)INFO_TYPE_str;
     (void)SPEED_ARROW_str;
     (void)CONSTANT_MODE_str;
@@ -204,8 +199,6 @@ public:
   CONSTANT_MODE ConstantMode;
   bool ConstantModeOn; // #SAFETY#: deceleration unlock const mode
   CONTROL_MODE ControlMode;
-  INDICATOR Indicator;
-  bool IndicatorBlink;
   bool SdCardDetect;
 
   float TargetSpeed;

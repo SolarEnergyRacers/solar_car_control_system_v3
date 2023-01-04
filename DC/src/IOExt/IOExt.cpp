@@ -163,21 +163,17 @@ bool IOExt::readAndHandlePins(PinHandleMode mode) {
   for (CarStatePin &pin : carState.pins) {
     if (pin.mode != OUTPUT) {
       unsigned long timestamp = millis();
-      if (ioExt.verboseModeDIn)
-        // console << fmt::format("Get bool -- 0x{:02x}: {} --> {}, inited: {}  <-- {:15s} \t({})\t -> handle ({}ms)\n", pin.port,
-        //                        pin.oldValue, pin.value, pin.inited, pin.name, millis(), timestamp - pin.timestamp);
-        if (pin.handlerFunction != NULL && (pin.oldValue != pin.value || !pin.inited || mode == PinHandleMode::FORCED)) {
-          console << ":";
-          if (ioExt.verboseModeDIn)
-            console << fmt::format("Get BOOL -- 0x{:02x}: {} --> {}, inited: {}  <-- {:18s} \t({})\t -> handle ({}ms)\n", pin.port,
-                                   pin.oldValue, pin.value, pin.inited, pin.name, millis(), timestamp - pin.timestamp);
-          pinHandlerList.push_back(pin.handlerFunction);
-          pin.inited = true;
-          if (pin.oldValue != pin.value)
-            hasChanges = true;
-          pin.oldValue = pin.value;
-          pin.timestamp = timestamp;
-        }
+      if (pin.handlerFunction != NULL && (pin.oldValue != pin.value || !pin.inited || mode == PinHandleMode::FORCED)) {
+        if (ioExt.verboseModeDIn)
+          console << fmt::format("Get BOOL -- 0x{:02x}: {} --> {}, inited: {}  <-- {:18s} \t({})\t -> handle ({}ms)\n", pin.port,
+                                 pin.oldValue, pin.value, pin.inited, pin.name, millis(), timestamp - pin.timestamp);
+        pinHandlerList.push_back(pin.handlerFunction);
+        pin.inited = true;
+        if (pin.oldValue != pin.value)
+          hasChanges = true;
+        pin.oldValue = pin.value;
+        pin.timestamp = timestamp;
+      }
     }
   }
   // avoid multi registration:

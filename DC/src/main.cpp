@@ -123,7 +123,7 @@ void app_main(void) {
   // Engineer Display
   // NOT available on DC
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, 200);
+  msg = canBus.init_t(0, 1, 10000, 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -142,7 +142,7 @@ void app_main(void) {
   console << msg << NL;
 #if COMMANDHANDLER_ON
   // CMD Handler
-  msg = cmdHandler.init_t(0, 1, 10000, 200);
+  msg = cmdHandler.init_t(1, 1, 10000, 200);
   console << msg << NL;
   console << "[  ] Create " << cmdHandler.getName() << " task ...";
   xTaskCreatePinnedToCore(cmdHandlerTask,             /* task function. */
@@ -157,7 +157,7 @@ void app_main(void) {
   console << msg << NL;
 #endif
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, 200);
+  msg = carControl.init_t(1, 10, 10000, 100);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -177,7 +177,7 @@ void app_main(void) {
   console << msg << NL;
   dac.verboseModeDAC = false;
   // IOExt
-  msg = ioExt.init_t(1, 10, 10000, 300);
+  msg = ioExt.init_t(1, 10, 10000, 100);
   console << msg << NL;
   ioExt.verboseModeDIn = false;
   ioExt.verboseModeDInHandler = false;
@@ -194,7 +194,7 @@ void app_main(void) {
   msg = ioExt.report_task_init();
   console << msg << NL;
   // ADC
-  msg = adc.init_t(1, 10, 10000, 300);
+  msg = adc.init_t(1, 12, 10000, 100);
   console << msg << NL;
   adc.verboseModeADC = false;
   adc.verboseModeADCDebug = false;

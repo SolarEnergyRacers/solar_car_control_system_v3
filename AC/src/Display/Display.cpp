@@ -371,13 +371,14 @@ int Display::write_nat_999(int x, int y, int valueLast, int value, int textSize,
   return value;
 }
 
-#include <CarControl.h>       // TODO: remove
-extern CarControl carControl; // TODO: remove
-unsigned long secondsLast = 0;
+// unsigned long deziSecondsLast = 0;
 bool lifeSignState = true;
+uint64_t lifeSignLast = 0;
 void Display::lifeSign() {
-  if (carControl.verboseModeDebug)
-    console << fmt::format("LifeSign= {:4x}, constMode={:7s}\n", carState.LifeSign, CONSTANT_MODE_str[(int)(carState.ConstantMode)]);
+  if (lifeSignLast == carState.LifeSign)
+    return;
+  lifeSignLast = carState.LifeSign;  
+
   if (SystemJustInited) {
     carState.DriverInfo = "ok.";
     SystemJustInited = false;
@@ -386,14 +387,14 @@ void Display::lifeSign() {
   // if (!sdCard.isReadyForLog()) {
   //   color = ILI9341_RED;
   // }
-  unsigned long seconds = millis() / 1000;
-  if (secondsLast < seconds) {
-    secondsLast = seconds;
-    xSemaphoreTakeT(spiBus.mutex);
-    tft.fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
-    xSemaphoreGive(spiBus.mutex);
-    lifeSignState = !lifeSignState;
-  }
+  // unsigned long deziSeconds = millis() / 100;
+  // if (deziSecondsLast + 1 > deziSeconds)
+  //  return;
+  // deziSecondsLast = deziSeconds;
+  xSemaphoreTakeT(spiBus.mutex);
+  tft.fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
+  xSemaphoreGive(spiBus.mutex);
+  lifeSignState = !lifeSignState;
 }
 
 void Display::drawCentreString(const string &buf, int x, int y) { return; }

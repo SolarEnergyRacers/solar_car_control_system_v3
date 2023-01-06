@@ -125,6 +125,11 @@ void Display::clear_screen(int bgColor) {
   xSemaphoreGive(spiBus.mutex);
 }
 
+int Display::getPixelWidthOfText(int textSize, string t1) {
+  int l1 = t1.length() * textSize * 6;
+  return l1;
+}
+
 int Display::getPixelWidthOfTexts(int textSize, string t1, string t2) {
   int l1 = t1.length() * textSize * 6;
   int l2 = t2.length() * textSize * 6;
@@ -377,7 +382,7 @@ uint64_t lifeSignLast = 0;
 void Display::lifeSign() {
   if (lifeSignLast == carState.LifeSign)
     return;
-  lifeSignLast = carState.LifeSign;  
+  lifeSignLast = carState.LifeSign;
 
   if (SystemJustInited) {
     carState.DriverInfo = "ok.";

@@ -229,7 +229,7 @@ void CmdHandler::task(void *pvParams) {
           if (count == 0) {
             time_t theTime = time(NULL);
             struct tm t = *localtime(&theTime);
-            console << "Received: '" << input << "' --> DateTime: " << asctime(&t) << NL;
+            console << "Received: '" << input.c_str() << "' --> DateTime: " << asctime(&t) << NL;
           } else {
             int yy = atof(arr[0].c_str());
             int mm = atof(arr[1].c_str());
@@ -244,7 +244,7 @@ void CmdHandler::task(void *pvParams) {
             esp32time.setTime(ss, MM, hh, dd, mm, yy);
             time_t theTime = time(NULL);
             struct tm t = *localtime(&theTime);
-            console << "Received: '" << input << "' --> Set dateTime to: " << asctime(&t) << NL;
+            console << "Received: '" << input.c_str() << "' --> Set dateTime to: " << asctime(&t) << NL;
           }
 #else
           console << "RTC deactivated\n";
@@ -252,7 +252,7 @@ void CmdHandler::task(void *pvParams) {
         } break;
         case 'K':
 #if CARSPEED_ON
-          console << "Received: '" << input << "' --> ";
+          console << "Received: '" << input.c_str() << "' --> ";
           if (input[1] == 'v') {
             carSpeed.verboseModePID = !carSpeed.verboseModePID;
           } else {
@@ -275,46 +275,41 @@ void CmdHandler::task(void *pvParams) {
           break;
         //-------- DRIVER INFO COMMANDS --------------------
         case 's':
-          if (input[1] == 'u') {
+          if (input[1] == '+')
             carState.SpeedArrow = SPEED_ARROW::INCREASE;
-          } else if (input[1] == 'd') {
+          else if (input[1] == '-')
             carState.SpeedArrow = SPEED_ARROW::DECREASE;
-          } else if (input[1] == 'o') {
+          else
             carState.SpeedArrow = SPEED_ARROW::OFF;
-          }
-          console << "Received: '" << input << "' -->  carState.SpeedArrow=" << SPEED_ARROW_str[(int)(carState.SpeedArrow)] << NL;
+          console << "Received: '" << input.c_str() << "' -->  carState.SpeedArrow=" << SPEED_ARROW_str[(int)(carState.SpeedArrow)] << NL;
           break;
         case ':':
           carState.DriverInfoType = INFO_TYPE::INFO;
           carState.DriverInfo = &input[1];
-          console << "Received: '" << input << "' -->  carState.DriverInfo " << INFO_TYPE_str[(int)carState.DriverInfoType] << ": "
+          console << "Received: '" << input.c_str() << "' -->  carState.DriverInfo " << INFO_TYPE_str[(int)carState.DriverInfoType] << ": "
                   << carState.DriverInfo << NL;
           break;
         case '!':
           carState.DriverInfoType = INFO_TYPE::WARN;
           carState.DriverInfo = &input[1];
-          console << "Received: '" << input << "' -->  carState.DriverInfo " << INFO_TYPE_str[(int)carState.DriverInfoType] << ": "
+          console << "Received: '" << input.c_str() << "' -->  carState.DriverInfo " << INFO_TYPE_str[(int)carState.DriverInfoType] << ": "
                   << carState.DriverInfo << NL;
           break;
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
-          if (input[2] == '-') {
-            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
-          } else if (input[2] == 's') {
-            carState.ConstantMode = CONSTANT_MODE::SPEED;
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
-          } else if (input[2] == 'p') {
-            carState.ConstantMode = CONSTANT_MODE::POWER;
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+          if (input[1] == '-') {
+            carState.ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
+          } else if (input[1] == 's') {
+            carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
+          } else if (input[1] == 'p') {
+            carState.ConstantMode = CONSTANT_MODE::POWER; // #SAFETY#: deceleration unlock const mode
           } else {
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+            // show state
           }
-          console << "Received: '" << input << "' -->  carState.ConstantMode - " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]
-                  << " On: " << carState.ConstantModeOn << NL;
+          console << "Received: '" << input.c_str() << "' -->  carState.ConstantMode - " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]                  << NL;
           break;
         default:
-          console << "Received: '" << input << "'\n";
-          console << "ERROR:: Unknown command '" << input << "' \n" << helpText << NL;
+          console << "ERROR:: Unknown command '" << input.c_str() << "' \n" << helpText << NL;
           break;
         // -------- Command Help -----------------
         case 'h':

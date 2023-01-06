@@ -30,12 +30,10 @@ private:
   DisplayValue<DRIVE_DIRECTION> DriveDirection = DisplayValue<DRIVE_DIRECTION>(0, 0, "", "%s", "");
   DisplayValue<LIGHT> Light = DisplayValue<LIGHT>(0, 0, "", "%s", "");
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");
-  DisplayValue<bool> ConstantModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
   DisplayValue<bool> EcoModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
 
   DisplayValue<int> Speed = DisplayValue<int>(0, 0, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
   DisplayValue<int> Acceleration = DisplayValue<int>(0, -1, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
-  DisplayValue<CONTROL_MODE> ControlMode = DisplayValue<CONTROL_MODE>(10, 158, "", "%s", "", ILI9341_YELLOW, ILI9341_BLACK, 1);
   DisplayValue<int> StepSize = DisplayValue<int>(10, 200, "", "%s", "", ILI9341_YELLOW, ILI9341_BLACK, 1);
   // DisplayValue<string> DateTimeStamp = DisplayValue<string>(10, 168, "", "%s", "", ILI9341_YELLOW, ILI9341_BLACK, 1);
   // this format will be changed dynamically in IOExt event handler in dependency of CONSTANT_MODE:
@@ -116,7 +114,7 @@ private:
   const int constantModeY = 158;
   const int constantModeTextSize = 1;
 
-  // constant mode speed or power display
+  // drive direction display
   const int driveDirectionX = 220;
   const int driveDirectionY = 178;
   const int driveDirectionTextSize = 2;
@@ -155,7 +153,7 @@ private:
   void draw_target_value_border(int color);
   void draw_display_background();
 
-  void control_mode_show();
+  void step_width_show();
   void constant_drive_mode_show();
   void eco_power_mode_show();
 

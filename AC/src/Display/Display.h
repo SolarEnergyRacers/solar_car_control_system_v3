@@ -61,6 +61,7 @@ public:
   void getCursor(int &x, int &y);
   void setCursor(int x, int y);
   void clear_screen(int bgColor);
+  int getPixelWidthOfText(int textSize, string t1);
   int getPixelWidthOfTexts(int textSize, string t1, string t2);
 
 protected:

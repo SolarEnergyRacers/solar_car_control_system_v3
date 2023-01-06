@@ -52,12 +52,10 @@ private:
 
   void _set_DAC();
   void _set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t valueDec, int16_t valueAcc, int valueDisplay);
-  
+
   static volatile int valueChangeRequest;
   bool isInValueChangedHandler = false;
   void _handleValueChanged();
-
   unsigned int _normalize_0_UINT16(int minOriginValue, int maxOriginValue, int value);
-  int _transform(int minDisplayValue, int maxDisplayValue, int minValue, int maxValue, int value);
 };
 #endif // SER_CAR_CONTROL_H

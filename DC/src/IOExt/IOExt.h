@@ -67,8 +67,6 @@ private:
   void setPortMode(int port, uint8_t mode);
   void handleIoInterrupt();
 
-  MCP23017 IOExtDevs[MCP23017_NUM_DEVICES] = {
-      MCP23017(I2C_ADDRESS_MCP23017_IOExt0)
-  };
+  MCP23017 IOExtDevs[MCP23017_NUM_DEVICES] = {MCP23017(I2C_ADDRESS_MCP23017_IOExt0)};
 };
 #endif // SER_IOEXT_H

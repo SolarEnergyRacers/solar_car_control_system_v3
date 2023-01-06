@@ -4,7 +4,6 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
 #define SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
 
-
 #include <map>
 
 #include <AbstractTask.h>
@@ -59,4 +58,4 @@ public:
   bool verboseModeCanOut = false;
   bool verboseModeCanOutNative = false;
 };
-#endif //SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
+#endif // SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H

@@ -68,3 +68,10 @@ string getTimeStamp() {
   int runSeconds = secsRemaining % 60;
   return fmt::format("T{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
 }
+
+int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value) {
+  float k = (float)(maxViewValue - minViewValue) / (maxOriginValue - minOriginValue);
+  int newValue = (int)round((value - minOriginValue) * k);
+  newValue = newValue < minViewValue ? minViewValue : newValue > maxViewValue ? maxViewValue : newValue;
+  return newValue;
+}

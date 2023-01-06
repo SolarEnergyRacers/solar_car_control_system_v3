@@ -243,46 +243,8 @@ void CmdHandler::task(void *pvParams) {
           console << "Car speed control deactivated\n";
 #endif
           break;
-        //-------- DRIVER INFO COMMANDS --------------------
-        // TODO: Implement and send by CAN
-        // case 's':
-        //   if (input[1] == 'u') {
-        //     carState.SpeedArrow = SPEED_ARROW::INCREASE;
-        //   } else if (input[1] == 'd') {
-        //     carState.SpeedArrow = SPEED_ARROW::DECREASE;
-        //   } else if (input[1] == 'o') {
-        //     carState.SpeedArrow = SPEED_ARROW::OFF;
-        //   }
-        //   console << "Received: '" << input << "' -->  carState.SpeedArrow=" << SPEED_ARROW_str[(int)(carState.SpeedArrow)] << NL;
-        //   break;
-        // case ':':
-        //   carState.DriverInfoType = INFO_TYPE::INFO;
-        //   carState.DriverInfo = &input[1];
-        //   console << "Received: '" << input << "' -->  carState.DriverInfo " << INFO_TYPE_str[(int)carState.DriverInfoType] << ": "
-        //           << carState.DriverInfo << NL;
-        //   break;
-        // case '!':
-        //   carState.DriverInfoType = INFO_TYPE::WARN;
-        //   carState.DriverInfo = &input[1];
-        //   console << "Received: '" << input << "' -->  carState.DriverInfo " << INFO_TYPE_str[(int)carState.DriverInfoType] << ": "
-        //           << carState.DriverInfo << NL;
-        //   break;
-        // // -------- Driver SUPPORT COMMANDS -----------------
-        // case 'c':
-        //   if (input[2] == '-') {
-        //     carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
-        //   } else if (input[2] == 's') {
-        //     carState.ConstantMode = CONSTANT_MODE::SPEED;
-        //     carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
-        //   } else if (input[2] == 'p') {
-        //     carState.ConstantMode = CONSTANT_MODE::POWER;
-        //     carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
-        //   } else {
-        //     carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
-        //   }
-        //   console << "Received: '" << input << "' -->  carState.ConstantMode - " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]
-        //           << " On: " << carState.ConstantModeOn << NL;
-        //   break;
+          //-------- DRIVER INFO COMMANDS --------------------
+
         default:
           console << "Received: '" << input << "'\n";
           console << "ERROR:: Unknown command '" << input << "'" << NL;

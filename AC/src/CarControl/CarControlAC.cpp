@@ -223,22 +223,6 @@ void CarControl::_set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t v
   valueDisplayLast = valueDisplay;
 }
 
-unsigned int CarControl::_normalize_0_UINT16(int minOriginValue, int maxOriginValue, int value) {
-  float k = UINT16_MAX / (maxOriginValue - minOriginValue);
-  value = value < minOriginValue ? minOriginValue : value;
-  value = value > UINT16_MAX ? UINT16_MAX : value;
-  return (unsigned int)round((value - minOriginValue) * k);
-}
-
-// 0, MAX_ACCELERATION_DISPLAY_VALUE, 0, UINT16_MAX, valueDec
-int CarControl::_transform(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value) {
-  float k = (float)(maxViewValue - minViewValue) / (maxOriginValue - minOriginValue);
-  value = value < minOriginValue ? minOriginValue : value > maxOriginValue ? maxOriginValue : value;
-  // console << "k=" << k << ", value - minOriginValue=" << (value - minOriginValue) << ", value=" << ((value - minOriginValue) * k)
-  //         << ", value'=" << round((value - minOriginValue) * k) << NL;
-  return (int)round((value - minOriginValue) * k);
-}
-
 bool CarControl::read_nextScreenButton() {
   if (!SystemInited)
     return false;
@@ -277,7 +261,7 @@ bool CarControl::read_ConstantModeButton() {
   }
   carState.TargetSpeed = carState.Speed;                                       // unit: km/h
   carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
-  return true; 
+  return true;
 }
 
 volatile int CarControl::valueChangeRequest = 0;

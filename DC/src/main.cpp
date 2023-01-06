@@ -74,7 +74,7 @@ DAC dac;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
 IOExt ioExt;
-//OneWireBus oneWireBus;
+// OneWireBus oneWireBus;
 SPIBus spiBus;
 Uart uart; // SERIAL
 
@@ -123,7 +123,7 @@ void app_main(void) {
   // Engineer Display
   // NOT available on DC
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, 90);
+  msg = canBus.init_t(0, 1, 10000, 100);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -157,7 +157,7 @@ void app_main(void) {
   console << msg << NL;
 #endif
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, 100);
+  msg = carControl.init_t(1, 10, 10000, 150);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -186,7 +186,7 @@ void app_main(void) {
   xTaskCreatePinnedToCore(ioExtTask,             /* task function. */
                           ioExt.getInfo(),       /* name of task. */
                           ioExt.getStackSize(),  /* stack size of task */
-                          NULL,                /* parameter of the task */
+                          NULL,                  /* parameter of the task */
                           ioExt.getPriority(),   /* priority of the task */
                           ioExt.getTaskHandle(), /* task handle to keep track of created task */
                           ioExt.getCoreId());    /* pin task to core id */
@@ -194,7 +194,7 @@ void app_main(void) {
   msg = ioExt.report_task_init();
   console << msg << NL;
   // ADC
-  msg = adc.init_t(1, 12, 10000, 100);
+  msg = adc.init_t(1, 12, 10000, 150);
   console << msg << NL;
   adc.verboseModeADC = false;
   adc.verboseModeADCDebug = false;

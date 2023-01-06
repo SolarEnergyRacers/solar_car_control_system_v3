@@ -137,7 +137,7 @@ void app_main(void) {
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, 90);
+  msg = canBus.init_t(0, 1, 10000, 100);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -173,7 +173,7 @@ void app_main(void) {
   engineerDisplay.print(msg + "\n");
 #endif
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, 100);
+  msg = carControl.init_t(1, 10, 10000, 150);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -202,7 +202,7 @@ void app_main(void) {
   engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
   //------------------------------------------------------------
   // Driver Display
-  msg = driverDisplay.init_t(1, 1, 10000, 100);
+  msg = driverDisplay.init_t(1, 1, 10000, 150);
   console << msg << NL;
   driverDisplay.verboseMode = false;
   driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);

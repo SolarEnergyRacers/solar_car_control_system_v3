@@ -26,11 +26,8 @@ static const char *INFO_TYPE_str[] = {"INFO", "STATUS", "WARN", "ERROR"};
 enum class SPEED_ARROW { OFF, INCREASE, DECREASE };
 static const char *SPEED_ARROW_str[] = {"OFF", "INCREASE", "DECREASE"};
 
-enum class CONSTANT_MODE { NONE, SPEED, POWER };
-static const char *CONSTANT_MODE_str[] = {"NONE", "SPEED", "POWER"};
-
-enum class CONTROL_MODE { PADDLES, BUTTONS };
-static const char *CONTROL_MODE_str[] = {"PADDLES", "BUTTONS"};
+enum class CONSTANT_MODE { OFF, SPEED, POWER };
+static const char *CONSTANT_MODE_str[] = {"OFF", "SPEED", "POWER"};
 
 enum class DRIVE_DIRECTION { FORWARD, BACKWARD };
 static const char *DRIVE_DIRECTION_str[] = {"fwd", "bwd"};
@@ -110,9 +107,7 @@ public:
     MotorCurrent = 0;
 
     DriveDirection = DRIVE_DIRECTION::FORWARD;
-    ConstantMode = CONSTANT_MODE::SPEED;
-
-    ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+    ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
 
     TargetSpeed = 0;
     TargetPower = 0;
@@ -130,7 +125,6 @@ public:
     (void)INFO_TYPE_str;
     (void)SPEED_ARROW_str;
     (void)CONSTANT_MODE_str;
-    (void)CONTROL_MODE_str;
     (void)DRIVE_DIRECTION_str;
     (void)LIGHT_str;
     (void)DISPLAY_STATUS_str;
@@ -196,9 +190,7 @@ public:
   // logical car data (values set by driver or chase car)
   DISPLAY_STATUS displayStatus;
   DRIVE_DIRECTION DriveDirection;
-  CONSTANT_MODE ConstantMode;
-  bool ConstantModeOn; // #SAFETY#: deceleration unlock const mode
-  CONTROL_MODE ControlMode;
+  CONSTANT_MODE ConstantMode; // #SAFETY#: deceleration unlock const mode
   bool SdCardDetect;
 
   float TargetSpeed;
@@ -236,13 +228,10 @@ public:
   double Kd; // differential
 
   // [Dynamic]
-  int PaddleDamping = 10;             // 0...99
-  int PaddleOffset;                   // 0 ... 65535: offset when paddle recognize not 0 values
-  int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
-  int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode
-  int ButtonControlModeIncreaseHeigh; // ButtonControlModeIncrease hight mode
-  float ConstSpeedIncrease;           // [km/h] per click
-  float ConstPowerIncrease;           // [W] per click
+  int PaddleDamping = 10; // 0...99
+  int PaddleOffset;       // 0 ... 65535: offset when paddle recognize not 0 values
+  int ConstSpeedIncrease; // [km/h] per click
+  int ConstPowerIncrease; // [W] per click
 
   // [Communication]
   int CarDataSendPeriod;        // [ms]

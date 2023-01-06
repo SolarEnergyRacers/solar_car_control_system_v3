@@ -196,9 +196,8 @@ void DriverDisplay::arrow_increase(bool on) {
 #define POWER_STRING "Target POWER"
 void DriverDisplay::constant_drive_mode_show() {
   CONSTANT_MODE mode = ConstantMode.get_recent_overtake_last();
-  bool isOn = ConstantModeOn.get_recent_overtake_last();
   int width = getPixelWidthOfTexts(constantModeTextSize, SPEED_STRING, POWER_STRING) + 4;
-  if (mode == CONSTANT_MODE::NONE || !isOn) {
+  if (mode == CONSTANT_MODE::OFF) {
     xSemaphoreTakeT(spiBus.mutex);
     tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_BLACK);
     xSemaphoreGive(spiBus.mutex);
@@ -218,26 +217,20 @@ void DriverDisplay::constant_drive_mode_show() {
   xSemaphoreGive(spiBus.mutex);
 }
 
-#define CONTROLMODE_PADDLES_STRING "paddle mode"
-#define CONTROLMODE_BUTTONS_STRING "button "
-void DriverDisplay::control_mode_show() {
-  CONTROL_MODE mode = ControlMode.get_recent_overtake_last();
-  int width = getPixelWidthOfTexts(constantModeTextSize, CONTROLMODE_PADDLES_STRING, CONTROLMODE_BUTTONS_STRING) + 6;
+void DriverDisplay::step_width_show() {
+  carState.ConstSpeedIncrease = transformArea(1, 20, 0, INT16_MAX, carState.Potentiometer);
+  carState.ConstPowerIncrease = transformArea(1, 300, 0, INT16_MAX, carState.Potentiometer);
+  string valueString = fmt::format("{:2d}km/h {:4d}W", carState.ConstSpeedIncrease, carState.ConstPowerIncrease);
+  int width = getPixelWidthOfText(constantModeTextSize, valueString) + 6;
 
   xSemaphoreTakeT(spiBus.mutex);
   tft.fillRoundRect(controlModeX - 2, controlModeY - 2, width, 18, 3, ILI9341_BLACK);
   tft.setCursor(controlModeX, controlModeY);
   tft.setTextSize(controlModeTextSize);
-  if (mode == CONTROL_MODE::PADDLES) {
-    tft.setTextColor(ILI9341_DARKGREEN);
-    tft.print(CONTROLMODE_PADDLES_STRING);
-  } else {
-    tft.setTextColor(ILI9341_GREENYELLOW);
-    tft.print(fmt::format("{} {}", CONTROLMODE_BUTTONS_STRING, carState.ButtonControlModeIncrease).c_str());
-  }
+  tft.setTextColor(ILI9341_GREENYELLOW);
+  tft.print(valueString.c_str());
   xSemaphoreGive(spiBus.mutex);
 }
-
 // #define ECO_MODE_STRING " eco"
 // #define PWR_MODE_STRING " power"
 // void DriverDisplay::eco_power_mode_show() {
@@ -426,16 +419,14 @@ DISPLAY_STATUS DriverDisplay::display_task() {
     //   show_light();
     // }
     ConstantMode.Value = carState.ConstantMode;
-    ConstantModeOn.Value = carState.ConstantModeOn;
-    if (ConstantMode.Value != ConstantMode.ValueLast || ConstantModeOn.Value != ConstantModeOn.ValueLast || justInited) {
+    if (ConstantMode.Value != ConstantMode.ValueLast || justInited) {
       constant_drive_mode_show();
     }
 
-    ControlMode.Value = carState.ControlMode;
-    StepSize.Value = carState.ButtonControlModeIncrease;
-    if (ControlMode.Value != ControlMode.ValueLast || StepSize.Value != StepSize.ValueLast || justInited) {
-      control_mode_show();
+    StepSize.Value = carState.Potentiometer;
+    if (StepSize.Value != StepSize.ValueLast || justInited) {
       StepSize.get_recent_overtake_last();
+      step_width_show();
     }
 
     // EcoModeOn.Value = carState.EcoOn;

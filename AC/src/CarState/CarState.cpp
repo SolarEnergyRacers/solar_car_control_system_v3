@@ -47,8 +47,7 @@ void CarState::init_values() {
 
   // values set by control elements or CarControl
   DriveDirection = DRIVE_DIRECTION::FORWARD;
-  ConstantMode = CONSTANT_MODE::SPEED;
-  ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+  ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
   TargetSpeed = 0;
   TargetPower = 0;
   DriverInfo = "Acceleration\nstill locked!";
@@ -137,7 +136,6 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Green Light ........... " << GreenLight << NL;
   ss << "Fan ................... " << Fan << NL;
   ss << "------------------------" << NL;
-  ss << "Constant Mode On ...... " << BOOL_str[(int)(ConstantModeOn)] << NL;
   ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << NL;
   ss << "Target Speed .......... " << TargetSpeed << NL;
   ss << "Target Power .......... " << TargetPower << NL;
@@ -214,12 +212,11 @@ const string CarState::serialize(string msg) {
   cJSON_AddNumberToObject(dynData, "tmin", floor(Tmin * 1000.0 + .5) / 1000.0);
   cJSON_AddNumberToObject(dynData, "tmax", floor(Tmax * 1000.0 + .5) / 1000.0);
 
-  cJSON_AddStringToObject(dynData, "driveDirection", DRIVE_DIRECTION_str[(int)(DriveDirection)]);
-  cJSON_AddStringToObject(dynData, "constantModeOn", BOOL_str[(int)(ConstantModeOn)]);
 
   cJSON_AddStringToObject(dynData, "sdCardDetect", BOOL_str[(int)(SdCardDetect)]);
 
   cJSON_AddItemToObject(carData, "controlData", ctrData);
+  cJSON_AddStringToObject(dynData, "driveDirection", DRIVE_DIRECTION_str[(int)(DriveDirection)]);
   cJSON_AddStringToObject(ctrData, "displayStatus", DISPLAY_STATUS_str[(int)displayStatus]);
   cJSON_AddStringToObject(ctrData, "constantMode", CONSTANT_MODE_str[(int)(ConstantMode)]);
   cJSON_AddNumberToObject(ctrData, "targetSpeed", TargetSpeed);
@@ -273,8 +270,6 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "Tmax, ";
 
     ss << "driveDirection, ";
-    ss << "controlMode";
-    ss << "constantModeOn, ";
     ss << "constantMode, ";
     ss << "sdCardDetected, ";
 
@@ -328,9 +323,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << floor(Tmax * 1000.0 + .5) / 1000.0 << ", ";
 
   ss << DRIVE_DIRECTION_str[(int)(DriveDirection)] << ", ";
-  ss << CONTROL_MODE_str[(int)(ControlMode)] << ", ";
   ss << CONSTANT_MODE_str[(int)(ConstantMode)] << ", ";
-  ss << ConstantModeOn << ", ";
   ss << SdCardDetect << ", ";
 
   ss << DISPLAY_STATUS_str[(int)displayStatus] << ", ";

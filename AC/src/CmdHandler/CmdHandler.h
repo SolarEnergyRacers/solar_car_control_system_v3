@@ -51,7 +51,7 @@ public:
                     "\t-------- DRIVER INFO COMMANDS --------------------\n"
                     "\t:<text> _ _ _ _ _ _ _ display driver info text\n"
                     "\t!<text> _ _ _ _ _ _ _ display driver warn text\n"
-                    "\ts [|+|-]  _ _ _ _ _ _ off (w/o) green speed up arrow (+), red speed down arrow (-)\n"
+                    "\ts [|+|-]  _ _ _ _ _ _ speed arrow off, green up (+), red down (-)\n"
                     "\t-------- Driver SUPPORT COMMANDS -----------------\n"
                     "\tc [-|s|p] _ _ _ _ _ _ constant mode on (-:off|s:speed|p:power)\n";
 

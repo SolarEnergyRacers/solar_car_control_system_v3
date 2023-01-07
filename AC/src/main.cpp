@@ -132,6 +132,7 @@ void app_main(void) {
                           engineerDisplay.getPriority(),   /* priority of the task */
                           engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
                           engineerDisplay.getCoreId());    /* pin task to core id */
+  engineerDisplay.clear_screen(0xffff);
   console << " done." << NL;
   msg = carControl.report_task_init();
   console << msg << NL;

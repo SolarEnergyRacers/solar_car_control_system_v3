@@ -283,20 +283,20 @@ void CarControl::task(void *pvParams) {
       someThingChanged |= read_nextScreenButton();
       someThingChanged |= read_ConstantModeButton();
 
-      int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
-      int button2pressed = !digitalRead(ESP32_AC_BUTTON_2);
-      uint16_t value = button1pressed << 1 | button2pressed;
-      if (value != 0) {
-        if (carControl.verboseModeDebug) {
-          console << "Buttons: " << button1pressed << ", " << button2pressed << " (" << value << ")" << NL;
-        }
+      bool button2pressed = !digitalRead(ESP32_AC_BUTTON_2); // switch constant mode (Off, Speed, Power)
 
-        canBus.writePacket(AC_BASE_ADDR | 0x00, carState.LifeSign, value);
-        if (carControl.verboseMode)
-          console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:button12 = {:1x} ", canBus.availiblePackets(),
-                                 canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, value)
-                  << NL;
-      }
+      canBus.writePacket(DC_BASE_ADDR | 0x00,
+                         carState.LifeSign,        // LifeSign
+                         (uint16_t)button2pressed, // switch constant mode Speed / Power
+                         (uint16_t)0,              // empty
+                         (uint16_t)0               // empty
+      );
+
+      if (carControl.verboseMode)
+        console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
+                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button2pressed)
+                << NL;
+
       // // one data row per second
       // if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       //   // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

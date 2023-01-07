@@ -306,7 +306,8 @@ void CmdHandler::task(void *pvParams) {
           } else {
             // show state
           }
-          console << "Received: '" << input.c_str() << "' -->  carState.ConstantMode - " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]                  << NL;
+          console << "Received: '" << input.c_str() << "' -->  carState.ConstantMode - " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]
+                  << NL;
           break;
         default:
           console << "ERROR:: Unknown command '" << input.c_str() << "' \n" << helpText << NL;

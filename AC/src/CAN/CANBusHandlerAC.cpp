@@ -127,38 +127,36 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   switch (packetId) {
 
   case DC_BASE_ADDR | 0x00:
-    carState.LifeSign = packet.getData_ui16(3);
-    carState.Potentiometer = packet.getData_ui16(2);
-    carState.Acceleration = packet.getData_ui16(1);
-    carState.Deceleration = packet.getData_ui16(0);
-    carState.AccelerationDisplay = (int)(carState.Acceleration / 256); // TODO: remove it
+    carState.LifeSign = packet.getData_u16(0);
+    carState.Potentiometer = packet.getData_u16(1);
+    carState.Acceleration = packet.getData_u16(2);
+    carState.Deceleration = packet.getData_u16(3);
     if (canBus.verboseModeCanIn)
       console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:lifeSign={:4x}, speed={:4x}, decl={:4x}, accl={:4x}, poti={:4x}",
                              canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.LifeSign,
                              carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
               << NL;
-    // carState.Speed = packet.getData_ui16(2);
     break;
 
-  case DC_BASE_ADDR | 0x01:
-    carState.AccelerationDisplay = packet.getData_i8(0);
-    carState.Speed = packet.getData_ui8(1);
-    carState.ButtonPlus = packet.getData_b(48);
-    carState.ButtonMinus = packet.getData_b(49);
-    carState.ButtonConstantModeOn = packet.getData_b(50);
-    carState.ButtonConstantModeOFF = packet.getData_b(51);
-    carState.ButtonConstant_v_P = packet.getData_b(52);
-    carState.BreakPedal = packet.getData_b(53);
-    {
-      bool dummy54 = packet.getData_b(54);
-      bool dummy55 = packet.getData_b(55);
-    }
+  case DC_BASE_ADDR | 0x01: {
+    carState.TargetSpeed = packet.getData_u16(0) / 1000.;
+    carState.TargetPower = packet.getData_u16(1) / 1000.;
+    carState.AccelerationDisplay = packet.getData_i8(4);
+    int constantMode = packet.getData_u8(5);
+    carState.ConstantMode = constantMode == 0 ? CONSTANT_MODE::OFF : constantMode == 0 ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+    carState.Speed = packet.getData_u8(6);
+    int driveDirection = packet.getData_b(56);
+    carState.DriveDirection = driveDirection == 1 ? DRIVE_DIRECTION::FORWARD : DRIVE_DIRECTION::BACKWARD;
+    carState.BreakPedal = packet.getData_b(57);
+    carState.MotorOn = packet.getData_b(58);
+  }
     if (canBus.verboseModeCanIn)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:speed={:3d}, accelDispl={:3d}, bPlus={}, bMinus={}, "
-                             "bConstOn={}, bConstOff={}, bConstPV={}, breakPedal={}",
-                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.Speed,
-                             carState.AccelerationDisplay, carState.ButtonPlus, carState.ButtonMinus, carState.ButtonConstantModeOn,
-                             carState.ButtonConstantModeOFF, carState.ButtonConstant_v_P, carState.BreakPedal)
+      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:targetSpeed={:3}, targetPower={:3}, speed={:3d}, "
+                             "accelDispl={:3d}, constMode={:5s}, direction={:8s}, breakPedal={}, MotorOn={}",
+                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.TargetSpeed,
+                             carState.TargetPower, carState.Speed, carState.AccelerationDisplay,
+                             CONSTANT_MODE_str[(int)(carState.ConstantMode)], DRIVE_DIRECTION_str[(int)(carState.DriveDirection)],
+                             carState.BreakPedal, carState.MotorOn)
               << NL;
     break;
   case DC_BASE_ADDR | 0x02:
@@ -167,25 +165,25 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     // heartbeat packet.getData_ui32(0)
     break;
   case BMS_BASE_ADDR | 0xFA:
-    carState.BatteryVoltage = (float)packet.getData_ui32(0) / 1000.0;
+    carState.BatteryVoltage = (float)packet.getData_u32(0) / 1000.0;
     carState.Uavg = carState.BatteryVoltage / 28.; // 28 cells in serie
     carState.BatteryCurrent = (float)packet.getData_i32(1) / 1000.0;
     // Battery Voltage mV packet.getData_ui32(0)
     // Battery Current mA packet.getData_i32(1)
     if (verboseModeCanIn) {
       console << ", Uavg=" << carState.Uavg << ", BatVolt=" << carState.BatteryVoltage << ", BatCur=" << carState.BatteryCurrent
-              << fmt::format(", raw: 0x{:08x}", packet.getData_ui64()) << NL;
+              << fmt::format(", raw: 0x{:08x}", packet.getData_u64()) << NL;
     }
     break;
   case BMS_BASE_ADDR | 0xF8:
-    carState.Umin = packet.getData_ui16(0) / 1000.;
-    carState.Umax = packet.getData_ui16(1) / 1000.;
-    // Battery min Cell Voltage mV packet.getData_ui16(0)
-    // Battery max Cell Voltage mV packet.getData_ui16(1)
-    // CMU number with min Cell Voltage packet.getData_ui8(4)
-    // Cell number with min Voltage packet.getData_ui8(5)
-    // CMU number with max Cell Voltage packet.getData_ui8(6)
-    // Cell number with max Voltage packet.getData_ui8(7)
+    carState.Umin = packet.getData_u16(0) / 1000.;
+    carState.Umax = packet.getData_u16(1) / 1000.;
+    // Battery min Cell Voltage mV packet.getData_u16(0)
+    // Battery max Cell Voltage mV packet.getData_u16(1)
+    // CMU number with min Cell Voltage packet.getData_u8(4)
+    // Cell number with min Voltage packet.getData_u8(5)
+    // CMU number with max Cell Voltage packet.getData_u8(6)
+    // Cell number with max Voltage packet.getData_u8(7)
     if (verboseModeCanIn) {
       console << ", Umin=" << carState.Umin << ", Umax=" << carState.Umax << NL;
     }
@@ -199,7 +197,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     // Contactor 3 driver error packet.getData_b(5)
     // Contactor 3 driver output status packet.getData_b(6)
 
-    // Precharge State packet.getData_ui8(1)
+    // Precharge State packet.getData_u8(1)
     /*
         0=Error
         1=Idle
@@ -208,7 +206,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
         4=Run
         5=Enable Pack
     */
-    switch (packet.getData_ui8(1)) {
+    switch (packet.getData_u8(1)) {
     case 0:
       carState.PrechargeState = PRECHARGE_STATE::ERROR;
       break;
@@ -235,8 +233,8 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     // Precharge Timer info also available
     break;
   case BMS_BASE_ADDR | 0xF9:
-    carState.Tmin = packet.getData_ui16(0) / 10.;
-    carState.Tmax = packet.getData_ui16(1) / 10.;
+    carState.Tmin = packet.getData_u16(0) / 10.;
+    carState.Tmax = packet.getData_u16(1) / 10.;
     if (verboseModeCanIn) {
       console << ", Bat Tmin=" << carState.Tmin << ", Bat Tmax=" << carState.Tmax << NL;
     }
@@ -244,7 +242,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
 
   case BMS_BASE_ADDR | 0xFD:
     carState.BatteryErrors.clear();
-    if (packet.getData_ui32(0) > 0) { // Saving CPU time in case there are no errors
+    if (packet.getData_u32(0) > 0) { // Saving CPU time in case there are no errors
       for (int i = 0; i < 13; i++) {
         if (packet.getData_b(i)) {
           carState.BatteryErrors.push_front(static_cast<BATTERY_ERROR>(i));

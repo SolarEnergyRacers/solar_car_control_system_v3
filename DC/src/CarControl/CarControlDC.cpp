@@ -254,16 +254,30 @@ void CarControl::task(void *pvParams) {
       _set_DAC();
       carState.LifeSign++;
 
-      canBus.writePacket(DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer, carState.Acceleration, carState.Deceleration);
-      canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.ButtonPlus, carState.ButtonMinus,
-                         carState.ConstantMode != CONSTANT_MODE::OFF, carState.ButtonConstantModeOFF, carState.ButtonConstant_v_P,
-                         carState.BreakPedal, false, false);
-      // canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, true, true, true, false, true, false, false,
-      // false);
-      //  canBus.writePacket(DC_BASE_ADDR | 0x02, carState.Speed, 0x1002, 0x1003, 0x10024);
-      //  canBus.writePacket(DC_BASE_ADDR | 0x00, 0x1234, 0x5678, 0x9abc, 0xdef0);
-      //  canBus.writePacket(DC_BASE_ADDR | 0x01, 0x6677, 0x4455, 0x2233, 0xaa11);
-      //  canBus.writePacket(DC_BASE_ADDR | 0x01, counter);
+      canBus.writePacket(DC_BASE_ADDR | 0x00,
+                         carState.LifeSign,      // LifeSign
+                         carState.Potentiometer, // Potentiometer value
+                         carState.Acceleration,  // HAL-paddle Acceleration ADC value
+                         carState.Deceleration   // HAL-paddle Deceleration ADC value
+      );
+      uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::OFF ? 0 : carState.ConstantMode == CONSTANT_MODE::SPEED ? 1 : 2;
+      bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
+      canBus.writePacket(DC_BASE_ADDR | 0x01,
+                         (uint16_t)(carState.TargetSpeed * 1000), // Target Speed [float as value\*1000]
+                         (uint16_t)(carState.TargetPower * 1000), // Target Power [float as value\*1000]
+                         carState.AccelerationDisplay,            // Display Acceleration
+                         constantMode,                            // Constant Mode OFF [0] / Speed [1] / Power [2]
+                         carState.Speed,                          // Display Speed
+                         driveDirection,                          // Fwd [1] / Bwd [0]
+                         carState.BreakPedal,                     // Button Lvl Brake Pedal
+                         carState.MotorOn,                        // MC Off [0] / On [1]
+                         false,                                   // empty
+                         false,                                   // empty
+                         false,                                   // empty
+                         false,                                   // empty
+                         false                                    // empty
+      );
+
       //  if (carControl.verboseModeCarControlMax)
       //    console << fmt::format(
       //                   "{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data: lifeSign={:4x}, speed={:5d}, decl={:5d}, accl={:5d},
@@ -272,8 +286,6 @@ void CarControl::task(void *pvParams) {
       //                   carState.LifeSign, carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
       //            << NL;
       //  counter++;
-      //  canBus.writePacket(DC_BASE_ADDR | 0x01, carState.Speed, carState.AccelerationDisplay, carState.Deceleration,
-      //  carState.Potentiometer);
       //  if (carControl.verboseMode)
       //    console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
       //                           canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,

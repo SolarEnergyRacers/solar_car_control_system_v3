@@ -72,7 +72,7 @@ DriverDisplay driverDisplay;
 EngineerDisplay engineerDisplay;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
-OneWireBus oneWireBus;
+// OneWireBus oneWireBus;
 SPIBus spiBus;
 Uart uart; // SERIAL
 
@@ -84,14 +84,9 @@ static void driverDisplayTask(void *pvParams) { driverDisplay.task(pvParams); }
 
 void app_main(void) {
   string msg;
-  console << NL;
-
-#if SERIAL_RADIO_ON
   // init console IO and radio console
   msg = uart.init();
-  console << msg << NL;
-#endif
-
+  console << NL << msg << NL;
   delay(1000);
   console << NL << "------------------------------------------------------------" << NL;
   console << "esp32dev + free RTOS" << NL;

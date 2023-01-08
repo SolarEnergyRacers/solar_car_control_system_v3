@@ -47,7 +47,8 @@ void CarState::init_values() {
 
   // values set by control elements or CarControl
   DriveDirection = DRIVE_DIRECTION::FORWARD;
-  ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
+  ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
+  ConstantModeOn = false;
   TargetSpeed = 0;
   TargetPower = 0;
   DriverInfo = "Acceleration\nstill locked!";
@@ -211,7 +212,6 @@ const string CarState::serialize(string msg) {
   cJSON_AddNumberToObject(dynData, "t3", floor(T3 * 1000.0 + .5) / 1000.0);
   cJSON_AddNumberToObject(dynData, "tmin", floor(Tmin * 1000.0 + .5) / 1000.0);
   cJSON_AddNumberToObject(dynData, "tmax", floor(Tmax * 1000.0 + .5) / 1000.0);
-
 
   cJSON_AddStringToObject(dynData, "sdCardDetect", BOOL_str[(int)(SdCardDetect)]);
 

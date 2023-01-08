@@ -26,8 +26,8 @@ static const char *INFO_TYPE_str[] = {"INFO", "STATUS", "WARN", "ERROR"};
 enum class SPEED_ARROW { OFF, INCREASE, DECREASE };
 static const char *SPEED_ARROW_str[] = {"OFF", "INCREASE", "DECREASE"};
 
-enum class CONSTANT_MODE { OFF, SPEED, POWER };
-static const char *CONSTANT_MODE_str[] = {"OFF", "SPEED", "POWER"};
+enum class CONSTANT_MODE { SPEED, POWER };
+static const char *CONSTANT_MODE_str[] = {"SPEED", "POWER"};
 
 enum class DRIVE_DIRECTION { FORWARD, BACKWARD };
 static const char *DRIVE_DIRECTION_str[] = {"fwd", "bwd"};
@@ -107,7 +107,8 @@ public:
     MotorCurrent = 0;
 
     DriveDirection = DRIVE_DIRECTION::FORWARD;
-    ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
+    ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
+    ConstantModeOn = false;
 
     TargetSpeed = 0;
     TargetPower = 0;
@@ -190,7 +191,8 @@ public:
   // logical car data (values set by driver or chase car)
   DISPLAY_STATUS displayStatus;
   DRIVE_DIRECTION DriveDirection;
-  CONSTANT_MODE ConstantMode; // #SAFETY#: deceleration unlock const mode
+  CONSTANT_MODE ConstantMode;
+  bool ConstantModeOn; // #SAFETY#: deceleration unlock const mode
   bool SdCardDetect;
 
   float TargetSpeed;

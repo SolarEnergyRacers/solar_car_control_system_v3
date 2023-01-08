@@ -38,7 +38,7 @@ void breakPedalHandler() {
   carState.BreakPedal = carState.getPin(PinDI_Break)->value == 0;
   if (!carState.BreakPedal) { // break pedal released
     carControl.reset_acceleration_values();
-    carState.ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
+    carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
   }
   if (ioExt.verboseModeDInHandler)
     console << "Break pedal pressed " << (carState.BreakPedal ? "pressed" : "released") << NL;
@@ -49,9 +49,9 @@ void buttonSetHandler() {
     return;
   if (carState.getPin(PinDI_Button_Set)->value != 0)
     return;
-  carState.ConstantMode = CONSTANT_MODE::SPEED;                                // #SAFETY#: deceleration unlock const mode
-  carState.TargetSpeed = carState.Speed;                                       // unit: km/h
-  carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
+  carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+  // carState.TargetSpeed = carState.Speed;                                       // unit: km/h
+  // carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
   if (ioExt.verboseModeDInHandler)
     console << "Set constant mode " << CONSTANT_MODE_str[(int)(carState.ConstantMode)] << ", target Speed: " << carState.TargetSpeed
             << "km/h / " << carState.TargetPower << "W.\n";
@@ -62,18 +62,19 @@ void buttenResetHandler() {
     return;
   if (carState.getPin(PinDI_Button_Reset)->value != 0)
     return;
-  carState.ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
+  carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
   if (ioExt.verboseModeDInHandler)
-    console << "ConstantMode  " << CONSTANT_MODE_str[(int)(carState.ConstantMode)] << " - buttenResetHandler " << NL;
+    console << "ConstantModeOn: " << carState.ConstantModeOn << ", mode: " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]
+            << " - buttenResetHandler " << NL;
 }
 
 void buttonMinusHandler() {
   if (!SystemInited)
     return;
-  if (carState.ConstantMode == CONSTANT_MODE::OFF) {
+  if (!carState.ConstantModeOn) {
+    carState.ConstantModeOn = true;
     carState.TargetSpeed = carState.Speed;                                       // unit: km/h
     carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
-    carState.ConstantMode = CONSTANT_MODE::SPEED;
     if (ioExt.verboseModeDInHandler)
       console << "Set (-) constant mode " << CONSTANT_MODE_str[(int)(carState.ConstantMode)] << ", target Speed: " << carState.TargetSpeed
               << "km/h | " << carState.TargetPower << "W.(" << carState.ConstSpeedIncrease << "km/h|" << carState.ConstPowerIncrease
@@ -81,7 +82,10 @@ void buttonMinusHandler() {
     return;
   }
   if (carState.ConstantMode == CONSTANT_MODE::SPEED) {
-    carState.TargetSpeed -= carState.ConstSpeedIncrease;
+    if (carState.TargetSpeed > carState.Speed)
+      carState.TargetSpeed = carState.Speed;
+    else
+      carState.TargetSpeed -= carState.ConstSpeedIncrease;
     if (carState.TargetSpeed < 0)
       carState.TargetSpeed = 0;
   } else { // CONSTANT_MODE::POWER
@@ -97,7 +101,8 @@ void buttonMinusHandler() {
 void buttonPlusHandler() {
   if (!SystemInited)
     return;
-  if (carState.ConstantMode == CONSTANT_MODE::OFF) {
+  if (!carState.ConstantModeOn) {
+    carState.ConstantModeOn = true;
     carState.TargetSpeed = carState.Speed;                                       // unit: km/h
     carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
     carState.ConstantMode = CONSTANT_MODE::SPEED;
@@ -108,7 +113,10 @@ void buttonPlusHandler() {
     return;
   }
   if (carState.ConstantMode == CONSTANT_MODE::SPEED) {
-    carState.TargetSpeed += carState.ConstSpeedIncrease;
+    if (carState.TargetSpeed < carState.Speed)
+      carState.TargetSpeed = carState.Speed;
+    else
+      carState.TargetSpeed += carState.ConstSpeedIncrease;
     if (carState.TargetSpeed > 111) // only until 111km/h
       carState.TargetSpeed = 111;
   } else { // CONSTANT_MODE::POWER
@@ -117,7 +125,7 @@ void buttonPlusHandler() {
       carState.TargetPower = 4500;
   }
   if (ioExt.verboseModeDInHandler)
-    console << "PLUS, mode " << CONSTANT_MODE_str[(int)(carState.ConstantMode)] << ", target Speed: " << carState.TargetSpeed << "km/h | "
+    console << "PLUS,  mode " << CONSTANT_MODE_str[(int)(carState.ConstantMode)] << ", target Speed: " << carState.TargetSpeed << "km/h | "
             << carState.TargetPower << "W (" << carState.ConstSpeedIncrease << "km/h|" << carState.ConstPowerIncrease << "W)\n";
 }
 

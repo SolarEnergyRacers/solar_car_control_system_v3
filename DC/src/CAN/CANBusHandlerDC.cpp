@@ -121,16 +121,13 @@ void CANBus::init_ages() {
 int CANBus::handle_rx_packet(CANPacket packet) {
   int retValue = 0;
   int packetId = packet.getId();
-  if (canBus.verboseModeCanInNative)
-    console << print_raw_packet("R", packet) << NL;
   // Do something with packet
   switch (packetId) {
   case AC_BASE_ADDR | 0x00: {
     carState.LifeSign = packet.getData_u16(0);
-    bool buttonSwitchConstantMode = (bool)packet.getData_u16(1) > 0;
-    if (buttonSwitchConstantMode) // buttonSwitchConstantMode
-      carState.ConstantMode = (carState.ConstantMode == CONSTANT_MODE::POWER) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
-    if (canBus.verboseModeCanIn && buttonSwitchConstantMode)
+    uint16_t value = packet.getData_u16(1);
+    CONSTANT_MODE constantMode = value == 0 ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+    if (canBus.verboseModeCanIn)
       console << fmt::format("LifeSign= {:4x}, carState.ConstantMode={}\n", carState.LifeSign,
                              CONSTANT_MODE_str[(int)(carState.ConstantMode)]);
   } break;

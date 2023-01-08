@@ -3,8 +3,10 @@
 
 #include <Arduino.h>
 
+using namespace std;
+
 typedef union {
-  bool data_b[64];
+  uint64_t b64;
   uint8_t data_u8[8];
   int8_t data_i8[8];
   uint16_t data_u16[4];
@@ -63,8 +65,22 @@ public:
   void setData_i8(uint8_t index, int8_t value) { this->data.data_i8[index] = value; }
   int8_t getData_i8(uint8_t index) { return this->data.data_i8[index]; }
 
-  void setData_b(uint8_t index, bool value) { this->data.data_b[index] = value; }
-  bool getData_b(uint8_t index) { return this->data.data_b[index]; }
+  void setData_b(uint8_t index, bool value) { if(value){this->data.b64 |= BIT64(index);}else{this->data.b64 &= ~BIT64(index);} }
+  bool getData_b(uint8_t index) { return this->data.b64 & BIT64(index); }
 };
+
+
+// if (status & BIT(1)) {
+//    // Do something if bit 1 is set
+// } elseif (~status | BIT(2) {
+//    // Do something else if bit 2 is cleared
+// } else  {
+//    // Set bits 1 and 2
+//    status |= BIT(1) | BIT(2)
+//    // Clear bits 0 and 4
+//    status &= ~(BIT(0) | BIT(4))
+//    // Toggle bit 5 
+//    status ^= BIT(5)
+// }
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_CANPACKET_H

@@ -53,7 +53,7 @@ public:
                     "\t!<text> _ _ _ _ _ _ _ display driver warn text\n"
                     "\ts [|+|-]  _ _ _ _ _ _ speed arrow off, green up (+), red down (-)\n"
                     "\t-------- Driver SUPPORT COMMANDS -----------------\n"
-                    "\tc [-|s|p] _ _ _ _ _ _ constant mode on (-:off|s:speed|p:power)\n";
+                    "\tc [-|+|s|p] _ _ _ _ _ _ constant mode on (-:off|+:on|s:speed|p:power)\n";
 
   string printSystemValues(void);
 };

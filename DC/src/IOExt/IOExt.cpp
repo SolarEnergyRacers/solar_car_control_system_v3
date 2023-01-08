@@ -205,7 +205,7 @@ int IOExt::getPort(int port) {
 void IOExt::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      bool changedInputs = readAndHandlePins();
+      bool changedInputs = readAndHandlePins(PinHandleMode::FORCED);
       if (changedInputs) {
         carControl.valueChangedHandler();
       }

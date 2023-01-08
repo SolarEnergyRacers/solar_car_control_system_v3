@@ -28,4 +28,3 @@ void CANPacket::setData(uint8_t data[]) {
     this->data.data_u8[i] = data[i];
   }
 }
-

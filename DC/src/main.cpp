@@ -60,6 +60,7 @@ void app_main(void);
 using namespace std;
 
 bool SystemInited = false;
+bool SystemJustInited = true;
 bool adcInited = false;
 bool dacInited = false;
 uint64_t life_sign = 0;
@@ -86,12 +87,9 @@ static void ioExtTask(void *pvParams) { ioExt.task(pvParams); }
 
 void app_main(void) {
   string msg;
-  console << NL;
-
   // init console IO and radio console
   msg = uart.init();
-  console << msg << NL;
-
+  console << NL << msg << NL;
   delay(1000);
   console << NL << "------------------------------------------------------------" << NL;
   console << "esp32dev + free RTOS" << NL;

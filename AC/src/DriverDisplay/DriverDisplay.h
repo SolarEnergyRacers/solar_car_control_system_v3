@@ -30,6 +30,8 @@ private:
   DisplayValue<DRIVE_DIRECTION> DriveDirection = DisplayValue<DRIVE_DIRECTION>(0, 0, "", "%s", "");
   DisplayValue<LIGHT> Light = DisplayValue<LIGHT>(0, 0, "", "%s", "");
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");
+  DisplayValue<bool> ConstantModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
+ 
   DisplayValue<bool> EcoModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
 
   DisplayValue<int> Speed = DisplayValue<int>(0, 0, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
@@ -72,7 +74,8 @@ private:
   const int speedFrameSizeY = 76;
   const int speedTextSize = 8;
   int speedUnitX = 0; // get claculated later
-  const int speedUnitY = 108;
+  const int speedUnitAccelY = 108;
+  const int speedUnitSpeedY = 72;
   const int speedUnitTextSize = 1;
 
   // target speed/power display
@@ -111,21 +114,21 @@ private:
 
   // constant mode speed or power display
   const int constantModeX = 242;
-  const int constantModeY = 158;
+  const int constantModeY = 169;
   const int constantModeTextSize = 1;
+
+  // step width for constant mode display
+  const int controlModeStepX = 242;
+  const int controlModeStepY = 158;
+  const int controlModeStepTextSize = 1;
 
   // drive direction display
   const int driveDirectionX = 220;
-  const int driveDirectionY = 178;
+  const int driveDirectionY = 180;
   const int driveDirectionTextSize = 2;
 
   const int lightX = 252;
   const int lightY = 198;
-
-  // paddles/buttons control mode display
-  const int controlModeX = 7;
-  const int controlModeY = 158;
-  const int controlModeTextSize = 1;
 
   // eco/pwr mode display
   const int ecoPwrModeX = 242;

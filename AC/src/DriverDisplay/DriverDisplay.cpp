@@ -91,10 +91,11 @@ void DriverDisplay::draw_display_border(int color) {
 // write color of the border of the speed display
 #define SPEED_UNIT "km/h"
 void DriverDisplay::draw_speed_border(int color) {
-  speedUnitX = speedFrameX + speedFrameSizeX + 2;
+  int vWidth = strlen(SPEED_UNIT) * speedUnitTextSize * 6;
+  speedUnitX = speedFrameX + speedFrameSizeX - vWidth;
   xSemaphoreTakeT(spiBus.mutex);
   tft.drawRoundRect(speedFrameX, speedFrameY, speedFrameSizeX, speedFrameSizeY, 4, color);
-  tft.setCursor(speedUnitX, speedUnitY);
+  tft.setCursor(speedUnitX, speedUnitSpeedY);
   tft.setTextSize(speedUnitTextSize);
   tft.setTextColor(ILI9341_GREENYELLOW);
   tft.print(SPEED_UNIT);
@@ -109,7 +110,7 @@ void DriverDisplay::draw_acceleration_border(int color) {
   ;
   xSemaphoreTakeT(spiBus.mutex);
   tft.drawRoundRect(accFrameX, accFrameY, accFrameSizeX, accFrameSizeY, 4, color);
-  tft.setCursor(accUnitX, speedUnitY);
+  tft.setCursor(accUnitX, speedUnitAccelY);
   tft.setTextSize(speedUnitTextSize);
   tft.setTextColor(ILI9341_GREENYELLOW);
   tft.print(ACCELERATION_UNIT);
@@ -143,7 +144,7 @@ void DriverDisplay::_arrow_increase(int color) {
   int y = speedFrameY - 3;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillTriangle(x, y, x + speedFrameSizeX, y, x + speedFrameSizeX / 2, y - 10, color);
+  tft.fillTriangle(x, y, x + speedFrameSizeX / 2, y, x + speedFrameSizeX / 4, y - 10, color);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -152,7 +153,7 @@ void DriverDisplay::_arrow_decrease(int color) {
   int y = speedFrameY + speedFrameSizeY + 3;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillTriangle(x, y, x + speedFrameSizeX, y, x + speedFrameSizeX / 2, y + 10, color);
+  tft.fillTriangle(x, y, x + speedFrameSizeX / 2, y, x + speedFrameSizeX / 4, y + 10, color);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -196,8 +197,9 @@ void DriverDisplay::arrow_increase(bool on) {
 #define POWER_STRING "Target POWER"
 void DriverDisplay::constant_drive_mode_show() {
   CONSTANT_MODE mode = ConstantMode.get_recent_overtake_last();
+  bool isOn = ConstantModeOn.get_recent_overtake_last();
   int width = getPixelWidthOfTexts(constantModeTextSize, SPEED_STRING, POWER_STRING) + 4;
-  if (mode == CONSTANT_MODE::OFF) {
+  if (!isOn) {
     xSemaphoreTakeT(spiBus.mutex);
     tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_BLACK);
     xSemaphoreGive(spiBus.mutex);
@@ -205,13 +207,14 @@ void DriverDisplay::constant_drive_mode_show() {
   }
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_YELLOW);
   tft.setCursor(constantModeX, constantModeY);
   tft.setTextSize(constantModeTextSize);
   tft.setTextColor(ILI9341_BLACK);
   if (mode == CONSTANT_MODE::POWER) {
+    tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_GREEN);
     tft.print(POWER_STRING);
   } else {
+    tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_YELLOW);
     tft.print(SPEED_STRING);
   }
   xSemaphoreGive(spiBus.mutex);
@@ -224,9 +227,9 @@ void DriverDisplay::step_width_show() {
   int width = getPixelWidthOfText(constantModeTextSize, valueString) + 6;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillRoundRect(controlModeX - 2, controlModeY - 2, width, 18, 3, ILI9341_BLACK);
-  tft.setCursor(controlModeX, controlModeY);
-  tft.setTextSize(controlModeTextSize);
+  tft.fillRoundRect(controlModeStepX - 2, controlModeStepY - 2, width, 11, 3, ILI9341_BLACK);
+  tft.setCursor(controlModeStepX, controlModeStepY);
+  tft.setTextSize(controlModeStepTextSize);
   tft.setTextColor(ILI9341_GREENYELLOW);
   tft.print(valueString.c_str());
   xSemaphoreGive(spiBus.mutex);
@@ -419,9 +422,17 @@ DISPLAY_STATUS DriverDisplay::display_task() {
     //   show_light();
     // }
     ConstantMode.Value = carState.ConstantMode;
-    if (ConstantMode.Value != ConstantMode.ValueLast || justInited) {
+    ConstantModeOn.Value = carState.ConstantModeOn;
+    if (ConstantMode.Value != ConstantMode.ValueLast || ConstantModeOn.Value != ConstantModeOn.ValueLast || justInited) {
       constant_drive_mode_show();
     }
+
+    // if (carState.Speed + 1 < carState.TargetSpeed)
+    //   arrow(SPEED_ARROW::INCREASE);
+    // else if (carState.Speed - 1 > carState.TargetSpeed)
+    //   arrow(SPEED_ARROW::DECREASE);
+    // else
+    //   arrow(SPEED_ARROW::OFF);
 
     StepSize.Value = carState.Potentiometer;
     if (StepSize.Value != StepSize.ValueLast || justInited) {

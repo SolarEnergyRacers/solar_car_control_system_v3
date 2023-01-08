@@ -139,24 +139,23 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     break;
 
   case DC_BASE_ADDR | 0x01: {
-    carState.TargetSpeed = packet.getData_u16(0) / 1000.;
-    carState.TargetPower = packet.getData_u16(1) / 1000.;
+    carState.TargetSpeed = (float)packet.getData_u16(0);
+    carState.TargetPower = (float)packet.getData_u16(1) / 1000.;
     carState.AccelerationDisplay = packet.getData_i8(4);
-    int constantMode = packet.getData_u8(5);
-    carState.ConstantMode = constantMode == 0 ? CONSTANT_MODE::OFF : constantMode == 0 ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
     carState.Speed = packet.getData_u8(6);
     int driveDirection = packet.getData_b(56);
     carState.DriveDirection = driveDirection == 1 ? DRIVE_DIRECTION::FORWARD : DRIVE_DIRECTION::BACKWARD;
     carState.BreakPedal = packet.getData_b(57);
     carState.MotorOn = packet.getData_b(58);
+    carState.ConstantModeOn = packet.getData_b(59);
   }
     if (canBus.verboseModeCanIn)
       console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:targetSpeed={:3}, targetPower={:3}, speed={:3d}, "
-                             "accelDispl={:3d}, constMode={:5s}, direction={:8s}, breakPedal={}, MotorOn={}",
+                             "accelDispl={:3d}, constMode={:5s}({}), direction={}, breakPedal={}, MotorOn={}",
                              canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.TargetSpeed,
                              carState.TargetPower, carState.Speed, carState.AccelerationDisplay,
-                             CONSTANT_MODE_str[(int)(carState.ConstantMode)], DRIVE_DIRECTION_str[(int)(carState.DriveDirection)],
-                             carState.BreakPedal, carState.MotorOn)
+                             CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn, DRIVE_DIRECTION_str[(int)(carState.DriveDirection)],
+                             carState.BreakPedal, carState.MotorOn, carState.ConstantModeOn)
               << NL;
     break;
   case DC_BASE_ADDR | 0x02:

@@ -21,6 +21,7 @@
 #include <ESP32Time.h>
 #include <RtcDateTime.cpp>
 #endif
+
 #include <Wire.h> // I2C
 
 #include <CANBus.h>
@@ -46,7 +47,6 @@
 
 extern CANBus can;
 extern I2CBus i2cBus;
-extern I2CBus i2cBus;
 extern CarState carState;
 extern CANBus canBus;
 // extern CarSpeed carSpeed;
@@ -59,6 +59,8 @@ extern Console console;
 extern RTC rtc;
 extern ESP32Time esp32time;
 #endif
+
+extern bool SystemInited;
 
 using namespace std;
 
@@ -82,30 +84,35 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
-      while (Serial.available() || Serial2.available()) {
+      //       if (Serial.available() || Serial2.available()) {
+      //         // read the incoming chars:
+      //         String input = "";
+      //         if (Serial.available()) {
+      //           input = Serial.readString();
+      //           Serial.flush();
+      //         } else if (Serial2.available()) {
+      //           input = Serial2.readString();
+      //           Serial2.flush();
+      //         }
+      // #if SERIAL_RADIO_ON
+      // #endif
+      while (SystemInited && Serial.available()) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
         }
-        if (Serial2.available()) {
-          input = Serial2.readString();
-          Serial2.flush();
-        }
-
         if (input.endsWith("\n")) {
           input = input.substring(0, input.length() - 1);
         }
         if (input.endsWith("\r")) {
           input = input.substring(0, input.length() - 1);
         }
-
-        if (input.length() > 0 && commands.find(input[0], 0) == -1) {
-          input = "h"; // help
-        }
         if (input.length() == 0)
           break;
+
+        console << "GOT: " << input.c_str() << NL;
 
         switch (input[0]) {
         // ---------------- controller commands
@@ -298,7 +305,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantMode = CONSTANT_MODE::OFF; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+          } else if (input[1] == '+') {
+            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {

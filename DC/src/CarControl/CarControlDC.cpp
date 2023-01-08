@@ -194,7 +194,7 @@ bool CarControl::read_paddles() {
 
   // #SAFETY#: Reset constant mode on deceleration paddel touched
   if (carState.Deceleration > carState.PaddleDamping) {
-    carState.ConstantMode = CONSTANT_MODE::OFF;
+    carState.ConstantModeOn = false;
   }
 
   carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
@@ -243,10 +243,9 @@ volatile int CarControl::valueChangeRequest = 0;
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      // read values from ADC/IO
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
-
+      // read values from ADC/IO
       read_paddles();
       read_reference_cell_data();
       read_speed();
@@ -260,37 +259,35 @@ void CarControl::task(void *pvParams) {
                          carState.Acceleration,  // HAL-paddle Acceleration ADC value
                          carState.Deceleration   // HAL-paddle Deceleration ADC value
       );
-      uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::OFF ? 0 : carState.ConstantMode == CONSTANT_MODE::SPEED ? 1 : 2;
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
       canBus.writePacket(DC_BASE_ADDR | 0x01,
-                         (uint16_t)(carState.TargetSpeed * 1000), // Target Speed [float as value\*1000]
+                         (uint16_t)carState.TargetSpeed, // Target Speed [float as value\*1000]
                          (uint16_t)(carState.TargetPower * 1000), // Target Power [float as value\*1000]
                          carState.AccelerationDisplay,            // Display Acceleration
-                         constantMode,                            // Constant Mode OFF [0] / Speed [1] / Power [2]
+                         0,                                       // empty
                          carState.Speed,                          // Display Speed
                          driveDirection,                          // Fwd [1] / Bwd [0]
                          carState.BreakPedal,                     // Button Lvl Brake Pedal
                          carState.MotorOn,                        // MC Off [0] / On [1]
-                         false,                                   // empty
+                         carState.ConstantModeOn,                 // Constant Mode Off [false], On [true]
                          false,                                   // empty
                          false,                                   // empty
                          false,                                   // empty
                          false                                    // empty
       );
 
-      //  if (carControl.verboseModeCarControlMax)
-      //    console << fmt::format(
-      //                   "{} [{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data: lifeSign={:4x}, speed={:5d}, decl={:5d}, accl={:5d},
-      //                   poti={:5d},
-      //                   ", counter, canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00,
-      //                   carState.LifeSign, carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-      //            << NL;
-      //  counter++;
-      //  if (carControl.verboseMode)
-      //    console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:dummy={:5d}, speed={:5d}, decl={:5d}, accl={:5d}",
-      //                           canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.Speed,
-      //                           carState.Deceleration, carState.Acceleration, carState.Potentiometer)
-      //            << NL;
+      if (carControl.verboseModeDebug) {
+        console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
+                               canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.LifeSign,
+                               carState.Potentiometer, carState.Acceleration, carState.Deceleration)
+                << NL;
+        console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, cMod={:1d}, speed={:3d}, "
+                               "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}",
+                               DC_BASE_ADDR | 0x01, (uint16_t)(carState.TargetSpeed * 1000), (uint16_t)(carState.TargetSpeed * 1000),
+                               carState.AccelerationDisplay, carState.ConstantModeOn, carState.Speed, driveDirection, carState.BreakPedal,
+                               carState.MotorOn,carState.ConstantModeOn)
+                << NL;
+      }
       //  one data row per second
       //  if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
       //    // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {

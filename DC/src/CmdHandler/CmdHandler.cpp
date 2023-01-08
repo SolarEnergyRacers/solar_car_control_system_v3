@@ -80,32 +80,19 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
-      while (Serial.available()) { // || Serial2.available()) {
+      while (Serial.available()) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
         }
-        console << input << NL;
-
-#if SERIAL_RADIO_ON
-        if (Serial2.available()) {
-          input = Serial2.readString();
-          Serial2.flush();
-        }
-#endif
         if (input.endsWith("\n")) {
           input = input.substring(0, input.length() - 1);
         }
         if (input.endsWith("\r")) {
           input = input.substring(0, input.length() - 1);
         }
-
-        if (input.length() > 0 && commands.find(input[0], 0) == -1) {
-          input = "h"; // help
-        }
-
         if (input.length() == 0)
           break;
 
@@ -130,9 +117,9 @@ void CmdHandler::task(void *pvParams) {
           // memory_info();
           break;
         case 'I':
-          console << "Received: '" << input << "' --> ";
+          console << "Received: '" << input.c_str() << "' --> ";
           if (input[1] == 's') {
-            // console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
+            // console << "Received: '" << input.c_str() << "' -->  i2cBus.scan_i2c_devices()\n";
             i2cBus.scan_i2c_devices();
           } else if (input[1] == 'i') {
             ioExt.verboseModeDIn = !ioExt.verboseModeDIn;
@@ -199,7 +186,7 @@ void CmdHandler::task(void *pvParams) {
           if (count == 0) {
             time_t theTime = time(NULL);
             struct tm t = *localtime(&theTime);
-            console << "Received: '" << input << "' --> DateTime: " << asctime(&t) << NL;
+            console << "Received: '" << input.c_str() << "' --> DateTime: " << asctime(&t) << NL;
           } else {
             int yy = atof(arr[0].c_str());
             int mm = atof(arr[1].c_str());
@@ -214,7 +201,7 @@ void CmdHandler::task(void *pvParams) {
             esp32time.setTime(ss, MM, hh, dd, mm, yy);
             time_t theTime = time(NULL);
             struct tm t = *localtime(&theTime);
-            console << "Received: '" << input << "' --> Set dateTime to: " << asctime(&t) << NL;
+            console << "Received: '" << input.c_str() << "' --> Set dateTime to: " << asctime(&t) << NL;
           }
 #else
           console << "RTC deactivated\n";
@@ -222,7 +209,7 @@ void CmdHandler::task(void *pvParams) {
         } break;
         case 'K':
 #if CARSPEED_ON
-          console << "Received: '" << input << "' --> ";
+          console << "Received: '" << input.c_str() << "' --> ";
           if (input[1] == 'v') {
             carSpeed.verboseModePID = !carSpeed.verboseModePID;
           } else {
@@ -246,9 +233,8 @@ void CmdHandler::task(void *pvParams) {
           //-------- DRIVER INFO COMMANDS --------------------
 
         default:
-          console << "Received: '" << input << "'\n";
-          console << "ERROR:: Unknown command '" << input << "'" << NL;
-          // break;
+          console << "ERROR:: Unknown command '" << input.c_str() << "' \n" << helpText << NL;
+          break;
         // -------- Command Help -----------------
         case 'h':
           console << helpText << NL;

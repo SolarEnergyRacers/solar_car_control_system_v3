@@ -9,7 +9,7 @@
 #define PWM_ON false           // 16-channel, 12-bit PWM Fm, I2C (PCA9685)
 #define RTC_ON false           // real time clock, I2C
 #define SD_ON true             // SD card, SPI
-#define SERIAL_RADIO_ON true   // additionally write/read to/from the Serial2, the radio console
+#define SERIAL_RADIO_ON false  // additionally write/read to/from the Serial2, the radio console
 
 #define WithTaskSuspend false // use of FreeRTOS task suspend functionality
 

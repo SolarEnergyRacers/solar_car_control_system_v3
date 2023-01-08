@@ -27,6 +27,7 @@ using namespace std;
 
 extern Console console;
 extern CarState carState;
+extern bool SystemInited;
 
 string Uart::re_init() { return init(); }
 
@@ -64,19 +65,21 @@ void Uart::exit() {}
 // bool payload2;
 void Uart::task(void *pvParams) {
   while (1) {
-    // // payload1 = payload2 = false;
-    // while (Serial2.available()) {
-    //   // Serial.print(char(Serial2.read()));
-    //   Serial << char(Serial2.read());
-    //   // payload2 = true;
-    // }
-    // // if (payload2) {
-    // //   Serial << "---read\n";
-    // // }
-    // while (Serial.available()) {
-    //   // Serial2.print(char(Serial.read()));
-    //   Serial2 << Serial.readString();
-    // }
+    if (SystemInited) {
+      // // payload1 = payload2 = false;
+      // while (Serial2.available()) {
+      //   // Serial.print(char(Serial2.read()));
+      //   Serial << char(Serial2.read());
+      //   // payload2 = true;
+      // }
+      // // if (payload2) {
+      // //   Serial << "---read\n";
+      // // }
+      // while (Serial.available()) {
+      //   // Serial2.print(char(Serial.read()));
+      //   Serial2 << Serial.readString();
+      // }
+    }
     taskSuspend();
   }
 }

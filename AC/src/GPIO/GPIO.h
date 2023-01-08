@@ -16,7 +16,7 @@ public:
   string init(void);
   string re_init(void);
   void exit(void);
-  void task(void * pvParams);
+  void task(void *pvParams);
 
   // Class functions and members
   void register_gpio_interrupt(void);

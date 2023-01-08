@@ -35,8 +35,8 @@ extern bool dacInited;
 
 string DAC::re_init() {
   // reset_and_lock_pot();
-  reset_pot();
-  return "";
+  dacInited = reset_pot();
+  return fmt::format("[{}] DAC re-inited.", dacInited ? "ok" : "--");
 }
 
 string DAC::init() {
@@ -68,7 +68,7 @@ uint8_t DAC::get_cmd(pot_chan channel) {
 
 void DAC::reset_and_lock_pot() {
   lock_acceleration();
-  reset_pot();
+  dacInited = reset_pot();
 }
 
 void DAC::lock_acceleration() {

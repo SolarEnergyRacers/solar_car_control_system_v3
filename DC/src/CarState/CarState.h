@@ -20,20 +20,14 @@ using namespace std;
 // public structures and structure texts
 static const char *BOOL_str[] = {"false", "true"};
 
-enum class INDICATOR { OFF, LEFT, RIGHT, WARN };
-static const char *INDICATOR_str[] = {"OFF", "LEFT", "RIGHT", "HAZARD FLASH"};
-
 enum class INFO_TYPE { INFO, STATUS, WARN, ERROR };
 static const char *INFO_TYPE_str[] = {"INFO", "STATUS", "WARN", "ERROR"};
 
 enum class SPEED_ARROW { OFF, INCREASE, DECREASE };
 static const char *SPEED_ARROW_str[] = {"OFF", "INCREASE", "DECREASE"};
 
-enum class CONSTANT_MODE { NONE, SPEED, POWER };
-static const char *CONSTANT_MODE_str[] = {"NONE", "SPEED", "POWER"};
-
-enum class CONTROL_MODE { PADDLES, BUTTONS };
-static const char *CONTROL_MODE_str[] = {"PADDLES", "BUTTONS"};
+enum class CONSTANT_MODE { SPEED, POWER };
+static const char *CONSTANT_MODE_str[] = {"SPEED", "POWER"};
 
 enum class DRIVE_DIRECTION { FORWARD, BACKWARD };
 static const char *DRIVE_DIRECTION_str[] = {"fwd", "bwd"};
@@ -112,11 +106,9 @@ public:
     PhotoVoltaicCurrent = 0;
     MotorCurrent = 0;
 
-    Indicator = INDICATOR::OFF;
     DriveDirection = DRIVE_DIRECTION::FORWARD;
-    ConstantMode = CONSTANT_MODE::SPEED;
-
-    ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+    ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
+    ConstantModeOn = false;
 
     TargetSpeed = 0;
     TargetPower = 0;
@@ -131,11 +123,9 @@ public:
     GreenLight = false;
     // BEGIN prevent stupid compiler warnings "defined but not used"
     (void)BOOL_str;
-    (void)INDICATOR_str;
     (void)INFO_TYPE_str;
     (void)SPEED_ARROW_str;
     (void)CONSTANT_MODE_str;
-    (void)CONTROL_MODE_str;
     (void)DRIVE_DIRECTION_str;
     (void)LIGHT_str;
     (void)DISPLAY_STATUS_str;
@@ -203,9 +193,6 @@ public:
   DRIVE_DIRECTION DriveDirection;
   CONSTANT_MODE ConstantMode;
   bool ConstantModeOn; // #SAFETY#: deceleration unlock const mode
-  CONTROL_MODE ControlMode;
-  INDICATOR Indicator;
-  bool IndicatorBlink;
   bool SdCardDetect;
 
   float TargetSpeed;

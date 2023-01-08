@@ -42,9 +42,8 @@ public:
 
   int16_t read(Pin pin);
   float get_multiplier();
-  bool verboseMode = false;
   bool verboseModeADC = false;
-  bool verboseModeADCMax = false;
+  bool verboseModeADCDebug = false;
 };
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_ADC_H

@@ -16,11 +16,20 @@
 
 using namespace std;
 
+template <size_t N> int splitString(string (&arr)[N], string str) {
+  int n = 0;
+  istringstream iss(str);
+  for (auto it = istream_iterator<string>(iss); it != istream_iterator<string>() && n < N; ++it, ++n)
+    arr[n] = *it;
+  return n;
+}
+
 char *fgets_stdio_blocking(char *str, int n);
 void xSemaphoreTakeT(xQueueHandle mutex);
 // string formatDateTime(RtcDateTime now);
 string getDateTime();
 string getTime();
 string getTimeStamp();
+int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value);
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_HELPER_H

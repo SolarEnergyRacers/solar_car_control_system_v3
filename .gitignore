@@ -35,7 +35,9 @@
 AC/sdkconfig.old
 AC/sdkconfig.esp32dev.old
 
+# exclude examples and temporary folders
 **/build/**
 **/examples/**
-**/.vscode
 
+# local tools settings
+**/.vscode

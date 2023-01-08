@@ -1,6 +1,8 @@
 //
 // CAN Bus
 //
+#ifndef SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
+#define SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
 
 #include <map>
 
@@ -43,18 +45,15 @@ public:
   int getMaxPacketsBufferUsage() { return packetsCountMax; };
 
   // optimize with: https://learn.microsoft.com/en-us/cpp/cpp/functions-with-variable-argument-lists-cpp?view=msvc-170
-  bool writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7);
-  bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, uint8_t data4);
-  bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint8_t data3, int8_t data4);
-  bool writePacket(uint16_t adr, uint16_t data0, uint16_t data1, uint16_t data2, uint16_t data3);
-  bool writePacket(uint16_t adr, uint32_t data0, uint32_t data1);
-  bool writePacket(uint16_t adr, uint64_t data);
+  bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
+                   bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63);
+  bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3);
+  bool writePacket(uint16_t adr, CANPacket packet);
 
   SemaphoreHandle_t mutex;
-  bool verboseModeCan = false;
   bool verboseModeCanIn = false;
   bool verboseModeCanInNative = false;
   bool verboseModeCanOut = false;
   bool verboseModeCanOutNative = false;
-  bool verboseModeCanDebug = false;
 };
+#endif // SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H

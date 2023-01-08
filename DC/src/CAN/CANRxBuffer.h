@@ -1,3 +1,6 @@
+#ifndef SOLAR_CAR_CONTROL_SYSTEM_CANRXBUFFER_H
+#define SOLAR_CAR_CONTROL_SYSTEM_CANRXBUFFER_H
+
 #include <Arduino.h>
 #include <vector>
 
@@ -19,3 +22,5 @@ public:
   bool isAvailable();
   uint16_t getSize();
 };
+
+#endif // SOLAR_CAR_CONTROL_SYSTEM_CANRXBUFFER_H

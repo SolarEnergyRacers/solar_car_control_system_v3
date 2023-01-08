@@ -38,6 +38,7 @@ extern SPIBus spiBus;
 extern CarState carState;
 // extern SDCard sdCard;
 extern Console console;
+extern bool SystemJustInited;
 
 using namespace std;
 
@@ -47,11 +48,6 @@ int lifeSignX = -1;
 int lifeSignY = -1;
 int lifeSignRadius = 4;
 //==== Display definitions ==== END
-//==== Display cache ========== START
-// ... to avoid flickering
-int lifeSignCounter = 0;
-bool lifeSignState = false;
-//==== Display cache ========== END
 
 string Display::getName() { return "Display"; };
 
@@ -98,10 +94,11 @@ string Display::_setup() {
 
     tft.setCursor(0, 0);
     tft.setTextSize(1);
-    tft.fillScreen(bgColor);
-    // tft.setTextColor(ILI9341_BLUE);
+    // tft.fillScreen(bgColor);
+    tft.setTextColor(ILI9341_BLACK);
     // tft.setScrollMargins(0, height);
     xSemaphoreGive(spiBus.mutex);
+    // clear_screen(bgColor);
 
     printf("     ILI9341_RDMADCTL:   0x%x\n", rdmadctl);
     printf("     ILI9341_RDPIXFMT:   0x%x\n", rdpixfmt);
@@ -124,8 +121,13 @@ void Display::clear_screen(int bgColor) {
   tft.setRotation(0);
   tft.fillScreen(bgColor);
   tft.setRotation(1);
-  tft.fillScreen(bgColor);
+  // tft.fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
+}
+
+int Display::getPixelWidthOfText(int textSize, string t1) {
+  int l1 = t1.length() * textSize * 6;
+  return l1;
 }
 
 int Display::getPixelWidthOfTexts(int textSize, string t1, string t2) {
@@ -374,72 +376,67 @@ int Display::write_nat_999(int x, int y, int valueLast, int value, int textSize,
   return value;
 }
 
-unsigned long secondLast = 0;
+// unsigned long deziSecondsLast = 0;
+bool lifeSignState = true;
+uint64_t lifeSignLast = 0;
 void Display::lifeSign() {
+  if (lifeSignLast == carState.LifeSign)
+    return;
+  lifeSignLast = carState.LifeSign;
+
+  if (SystemJustInited) {
+    carState.DriverInfo = "ok.";
+    SystemJustInited = false;
+  }
   int color = ILI9341_GREEN;
   // if (!sdCard.isReadyForLog()) {
   //   color = ILI9341_RED;
   // }
+  // unsigned long deziSeconds = millis() / 100;
+  // if (deziSecondsLast + 1 > deziSeconds)
+  //  return;
+  // deziSecondsLast = deziSeconds;
   xSemaphoreTakeT(spiBus.mutex);
   tft.fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
   xSemaphoreGive(spiBus.mutex);
-
   lifeSignState = !lifeSignState;
-
-  unsigned long allSeconds = millis() / 1000;
-  if (secondLast < allSeconds) {
-    secondLast = allSeconds;
-  }
 }
 
 void Display::drawCentreString(const string &buf, int x, int y) { return; }
 
-// -------------
-// FreeRTOS TASK
-// -------------
 void Display::task(void *pvParams) {
-  // polling loop
   while (1) {
     switch (carState.displayStatus) {
     // initializing states:
     case DISPLAY_STATUS::DRIVER_SETUP:
       bgColor = ILI9341_BLACK;
-      carState.displayStatus = display_task(lifeSignCounter);
+      carState.displayStatus = display_task();
       break;
     case DISPLAY_STATUS::ENGINEER_SETUP:
       bgColor = ILI9341_ORANGE;
-      carState.displayStatus = display_task(lifeSignCounter);
+      carState.displayStatus = display_task();
       break;
     case DISPLAY_STATUS::DRIVER_BACKGROUND:
-      carState.displayStatus = display_task(lifeSignCounter);
+      carState.displayStatus = display_task();
       break;
     case DISPLAY_STATUS::ENGINEER_BACKGROUND:
-      carState.displayStatus = display_task(lifeSignCounter);
+      carState.displayStatus = display_task();
       break;
     case DISPLAY_STATUS::DRIVER_DEMOSCREEN:
-      carState.displayStatus = display_task(lifeSignCounter);
+      carState.displayStatus = display_task();
       break;
     // working states:
     case DISPLAY_STATUS::ENGINEER_CONSOLE:
       bgColor = ILI9341_WHITE;
-      if (lifeSignCounter > 2) {
-        lifeSign();
-        lifeSignCounter = 0;
-      }
+      lifeSign();
       break;
     case DISPLAY_STATUS::ENGINEER_RUNNING:
-      carState.displayStatus = display_task(lifeSignCounter);
-      if (lifeSignCounter > 2) {
-        lifeSign();
-        lifeSignCounter = 0;
-      }
+      carState.displayStatus = display_task();
+      lifeSign();
       break;
     case DISPLAY_STATUS::DRIVER_RUNNING:
-      carState.displayStatus = display_task(lifeSignCounter);
-      if (lifeSignCounter > 1) {
-        lifeSign();
-        lifeSignCounter = 0;
-      }
+      carState.displayStatus = display_task();
+      lifeSign();
       break;
     case DISPLAY_STATUS::ENGINEER_HALTED:
       set_sleep_polling(1500);
@@ -451,9 +448,6 @@ void Display::task(void *pvParams) {
       // ignore others
       break;
     }
-#if LIFESIGN_ON == true
-    lifeSignCounter++;
-#endif
     taskSuspend();
   }
 }

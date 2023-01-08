@@ -15,7 +15,8 @@ Version 2023.01.01
 | Button Level Minus               | >   | binary 0/1  | carStateDC                    |
 | carStateAC -> Display Speed      | <   | CAN         | current speed ⬅ MC            |
 | Console input PID parameters     | >   | CAN         | carConfigDC? carStateDC       |
-| Button Constant Mode on/off      | >   | CAN         | carStateDC                    |
+| Button Set Constant Mode         | <   | CAN         | carStateDC                    |
+| Button Reset Constant Mode       | <   | CAN         | carStateDC                    |
 | Button Constant Mode speed/power | >   | CAN         | carStateDC                    |
 | Break pedal state                | <   | CAN         | carStateDC                    |
 | Step width Plus/Minus            | <   | CAN         | carStateDC ⬅ Switchboard Poti |
@@ -103,17 +104,26 @@ u_16   | [7]    | 7      | HAL-paddle Deceleration ADC value
 Interval: ?ms
 
 Format | IdxFmt | Index8 | Meaning
--------|--------|--------|----------------------------
-i_8    | [0]    | 0      | Display Acceleration 
-u_8    | [1]    | 1      | Display Speed 
-u_16   | [1]    | 2,3    |
-u_16   | [2]    | 4,5    |
-b      | [48]   | 6      | Button Lvl Plus
-b      | [49]   | 6      | Button Lvl Minus
-b      | [50]   | 6      | Button Lvl Const Mode Set
-b      | [51]   | 6      | Button Lvl Const Mode Reset
-b      | [52]   | 6      | Button Lvl Const Mode v/P
-b      | [53]   | 6      | Button Lvl Brake Pedal
+-------|--------|--------|----------------------------------------------
+i_8    | [0]    | 0      | Display Acceleration
+u_8    | [1]    | 1      | Display Speed
+u_16   | [1]    | 2,3    | Target Speed  [float as value\*1000]
+u_16   | [2]    | 4,5    | Target Power  [float as value\*1000]
+u_8    | [6]    | 6      | Constant Mode OFF [0] / Speed [1] / Power [2]
+b      | [56]   | 7      | Fwd [1] / Bwd [0]
+b      | [57]   | 7      | Button Lvl Brake Pedal
+b      | [58]   | 7      | MC Off [0] / On [1]
+b      | [59]   | 7      | 
+b      | [60]   | 7      | 
+b      | [61]   | 7      | 
+b      | [62]   | 7      | 
+b      | [63]   | 7      | 
+       |        |        |
+~~b    | [48]   | 6      | Button Lvl Plus~~
+~~b    | [49]   | 6      | Button Lvl Minus~~
+~~b    | [50]   | 6      | Button Lvl Const Mode Set~~
+~~b    | [51]   | 6      | Button Lvl Const Mode Reset~~
+~~b    | [52]   | 6      | Button Lvl Const Mode v/P~~
 
 #### CAN id: 0x02 - Motor, Bat, PV
 
@@ -146,15 +156,15 @@ AC_BASE_ADDR: **0x630**
 
 Interval: ?ms
 
-Format | IdxFmt | Index8 | Meaning
--------|--------|--------|-----------------------------------------
-u_16   | [0]    | 0,1    | LifeSign
-f_16   | [1]    | 2,3    | Target Power DAC value [0-65535]
-f_16   | [2]    | 4,5    | Target Speed DAC value [0-65535]
-b      | [48]   | 6      | Constant Mode On [0] / Off [1]
-b      | [49]   | 6      | Constant Mode Type Speed [0] / Power [1]
-b      | [50]   | 6      | Reserve Button 1
-b      | [51]   | 6      | Reserve Button 2
+Format | IdxFmt   | Index8 | Meaning
+-------|----------|--------|------------------------------------------
+u_16   | [0]      | 0,1    | LifeSign
+f_16   | [1]      | 2,3    | Target Power DAC value [0-65535]
+f_16   | [2]      | 4,5    | Target Speed DAC value [0-65535]
+~~b~~  | ~~[48]~~ | ~~6~~  | ~~Constant Mode On [0] / Off [1]~~
+b      | [49]     | 6      | Constant Mode Type Speed [0] / Power [1]
+~~b~~  | ~~[50]~~ | ~~6~~  | ~~Button 1~~ Next Screen
+b      | [51]     | 6      | Button 2 Constant Mode toggle Power/Speed
 
 #### CAN id: 0x01 - SET PID Params
 

@@ -59,7 +59,8 @@ string AbstractTask::report_task_init() { return report_task_init(this); };
 
 string AbstractTask::report_task_init(AbstractTask *task) {
   stringstream ss;
-  ss << "[ok] " << task->getName() << " started as prio-" << task->priority << "-task (taskSuspend=" << task->sleep_polling * portTICK_PERIOD_MS
-     << "ms, stack=" << task->stack_size << ") try core " << task->core_id << " real core" << xPortGetCoreID();
+  ss << "[ok] " << task->getName() << " started as prio-" << task->priority
+     << "-task (taskSuspend=" << task->sleep_polling * portTICK_PERIOD_MS << "ms, stack=" << task->stack_size << ") try core "
+     << task->core_id << " real core" << xPortGetCoreID();
   return ss.str();
 }

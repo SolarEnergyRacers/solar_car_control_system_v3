@@ -91,10 +91,11 @@ void DriverDisplay::draw_display_border(int color) {
 // write color of the border of the speed display
 #define SPEED_UNIT "km/h"
 void DriverDisplay::draw_speed_border(int color) {
-  speedUnitX = speedFrameX + speedFrameSizeX + 2;
+  int vWidth = strlen(SPEED_UNIT) * speedUnitTextSize * 6;
+  speedUnitX = speedFrameX + speedFrameSizeX - vWidth;
   xSemaphoreTakeT(spiBus.mutex);
   tft.drawRoundRect(speedFrameX, speedFrameY, speedFrameSizeX, speedFrameSizeY, 4, color);
-  tft.setCursor(speedUnitX, speedUnitY);
+  tft.setCursor(speedUnitX, speedUnitSpeedY);
   tft.setTextSize(speedUnitTextSize);
   tft.setTextColor(ILI9341_GREENYELLOW);
   tft.print(SPEED_UNIT);
@@ -109,7 +110,7 @@ void DriverDisplay::draw_acceleration_border(int color) {
   ;
   xSemaphoreTakeT(spiBus.mutex);
   tft.drawRoundRect(accFrameX, accFrameY, accFrameSizeX, accFrameSizeY, 4, color);
-  tft.setCursor(accUnitX, speedUnitY);
+  tft.setCursor(accUnitX, speedUnitAccelY);
   tft.setTextSize(speedUnitTextSize);
   tft.setTextColor(ILI9341_GREENYELLOW);
   tft.print(ACCELERATION_UNIT);
@@ -143,7 +144,7 @@ void DriverDisplay::_arrow_increase(int color) {
   int y = speedFrameY - 3;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillTriangle(x, y, x + speedFrameSizeX, y, x + speedFrameSizeX / 2, y - 10, color);
+  tft.fillTriangle(x, y, x + speedFrameSizeX / 2, y, x + speedFrameSizeX / 4, y - 10, color);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -152,7 +153,7 @@ void DriverDisplay::_arrow_decrease(int color) {
   int y = speedFrameY + speedFrameSizeY + 3;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillTriangle(x, y, x + speedFrameSizeX, y, x + speedFrameSizeX / 2, y + 10, color);
+  tft.fillTriangle(x, y, x + speedFrameSizeX / 2, y, x + speedFrameSizeX / 4, y + 10, color);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -198,7 +199,7 @@ void DriverDisplay::constant_drive_mode_show() {
   CONSTANT_MODE mode = ConstantMode.get_recent_overtake_last();
   bool isOn = ConstantModeOn.get_recent_overtake_last();
   int width = getPixelWidthOfTexts(constantModeTextSize, SPEED_STRING, POWER_STRING) + 4;
-  if (mode == CONSTANT_MODE::NONE || !isOn) {
+  if (!isOn) {
     xSemaphoreTakeT(spiBus.mutex);
     tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_BLACK);
     xSemaphoreGive(spiBus.mutex);
@@ -206,87 +207,82 @@ void DriverDisplay::constant_drive_mode_show() {
   }
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_YELLOW);
   tft.setCursor(constantModeX, constantModeY);
   tft.setTextSize(constantModeTextSize);
   tft.setTextColor(ILI9341_BLACK);
   if (mode == CONSTANT_MODE::POWER) {
+    tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_GREEN);
     tft.print(POWER_STRING);
   } else {
+    tft.fillRoundRect(constantModeX - 2, constantModeY - 2, width, 11, 3, ILI9341_YELLOW);
     tft.print(SPEED_STRING);
   }
   xSemaphoreGive(spiBus.mutex);
 }
 
-#define CONTROLMODE_PADDLES_STRING "paddle mode"
-#define CONTROLMODE_BUTTONS_STRING "button "
-void DriverDisplay::control_mode_show() {
-  CONTROL_MODE mode = ControlMode.get_recent_overtake_last();
-  int width = getPixelWidthOfTexts(constantModeTextSize, CONTROLMODE_PADDLES_STRING, CONTROLMODE_BUTTONS_STRING) + 6;
+void DriverDisplay::step_width_show() {
+  carState.ConstSpeedIncrease = transformArea(1, 20, 0, INT16_MAX, carState.Potentiometer);
+  carState.ConstPowerIncrease = transformArea(1, 300, 0, INT16_MAX, carState.Potentiometer);
+  string valueString = fmt::format("{:2d}km/h {:4d}W", carState.ConstSpeedIncrease, carState.ConstPowerIncrease);
+  int width = getPixelWidthOfText(constantModeTextSize, valueString) + 6;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillRoundRect(controlModeX - 2, controlModeY - 2, width, 18, 3, ILI9341_BLACK);
-  tft.setCursor(controlModeX, controlModeY);
-  tft.setTextSize(controlModeTextSize);
-  if (mode == CONTROL_MODE::PADDLES) {
-    tft.setTextColor(ILI9341_DARKGREEN);
-    tft.print(CONTROLMODE_PADDLES_STRING);
-  } else {
-    tft.setTextColor(ILI9341_GREENYELLOW);
-    tft.print(fmt::format("{} {}", CONTROLMODE_BUTTONS_STRING, carState.ButtonControlModeIncrease).c_str());
-  }
+  tft.fillRoundRect(controlModeStepX - 2, controlModeStepY - 2, width, 11, 3, ILI9341_BLACK);
+  tft.setCursor(controlModeStepX, controlModeStepY);
+  tft.setTextSize(controlModeStepTextSize);
+  tft.setTextColor(ILI9341_GREENYELLOW);
+  tft.print(valueString.c_str());
   xSemaphoreGive(spiBus.mutex);
 }
+// #define ECO_MODE_STRING " eco"
+// #define PWR_MODE_STRING " power"
+// void DriverDisplay::eco_power_mode_show() {
+//   bool isEco = EcoModeOn.get_recent_overtake_last();
+//   int width = getPixelWidthOfTexts(ecoPwrModeTextSize, ECO_MODE_STRING, PWR_MODE_STRING) + 4;
 
-#define ECO_MODE_STRING " eco"
-#define PWR_MODE_STRING " power"
-void DriverDisplay::eco_power_mode_show() {
-  bool isEco = EcoModeOn.get_recent_overtake_last();
-  int width = getPixelWidthOfTexts(ecoPwrModeTextSize, ECO_MODE_STRING, PWR_MODE_STRING) + 4;
+//   xSemaphoreTakeT(spiBus.mutex);
+//   tft.fillRoundRect(ecoPwrModeX - 2, ecoPwrModeY - 2, width, 18, 3, ILI9341_BLACK);
+//   tft.setCursor(ecoPwrModeX, ecoPwrModeY);
+//   tft.setTextSize(ecoPwrModeTextSize);
+//   if (isEco) {
+//     tft.setTextColor(ILI9341_GREEN);
+//     tft.print(ECO_MODE_STRING);
+//   } else {
+//     tft.setTextColor(ILI9341_BLUE);
+//     tft.print(PWR_MODE_STRING);
+//   }
+//   xSemaphoreGive(spiBus.mutex);
+// }
 
-  xSemaphoreTakeT(spiBus.mutex);
-  tft.fillRoundRect(ecoPwrModeX - 2, ecoPwrModeY - 2, width, 18, 3, ILI9341_BLACK);
-  tft.setCursor(ecoPwrModeX, ecoPwrModeY);
-  tft.setTextSize(ecoPwrModeTextSize);
-  if (isEco) {
-    tft.setTextColor(ILI9341_GREEN);
-    tft.print(ECO_MODE_STRING);
-  } else {
-    tft.setTextColor(ILI9341_BLUE);
-    tft.print(PWR_MODE_STRING);
-  }
-  xSemaphoreGive(spiBus.mutex);
-}
+// #define LIGHT1_STRING "Light"
+// #define LIGHT2_STRING "LIGHT"
+// void DriverDisplay::_hide_light() {
+//   int width = getPixelWidthOfTexts(lightTextSize, LIGHT1_STRING, LIGHT2_STRING) + 4;
+//   xSemaphoreTakeT(spiBus.mutex);
+//   tft.fillRoundRect(lightX - 2, lightY - 2, width, 18, 3, ILI9341_BLACK);
+//   xSemaphoreGive(spiBus.mutex);
+// }
 
-#define LIGHT1_STRING "Light"
-#define LIGHT2_STRING "LIGHT"
-void DriverDisplay::_hide_light() {
-  int width = getPixelWidthOfTexts(lightTextSize, LIGHT1_STRING, LIGHT2_STRING) + 4;
-  xSemaphoreTakeT(spiBus.mutex);
-  tft.fillRoundRect(lightX - 2, lightY - 2, width, 18, 3, ILI9341_BLACK);
-  xSemaphoreGive(spiBus.mutex);
-}
-
-void DriverDisplay::show_light() {
-  LIGHT light = Light.get_recent_overtake_last();
-  if (light == LIGHT::OFF) {
-    _hide_light();
-    return;
-  }
-  int width = getPixelWidthOfTexts(lightTextSize, LIGHT1_STRING, LIGHT2_STRING) + 4;
-  xSemaphoreTakeT(spiBus.mutex);
-  tft.setCursor(lightX, lightY);
-  tft.setTextSize(lightTextSize);
-  tft.fillRoundRect(lightX - 2, lightY - 2, width, 18, 3, ILI9341_BLACK);
-  if (light == LIGHT::L1) {
-    tft.setTextColor(ILI9341_YELLOW);
-    tft.print(LIGHT1_STRING);
-  } else {
-    tft.setTextColor(ILI9341_BLUE);
-    tft.print(LIGHT2_STRING);
-  }
-  xSemaphoreGive(spiBus.mutex);
-}
+// void DriverDisplay::show_light() {
+//   LIGHT light = Light.get_recent_overtake_last();
+//   if (light == LIGHT::OFF) {
+//     _hide_light();
+//     return;
+//   }
+// int width = getPixelWidthOfTexts(lightTextSize, LIGHT1_STRING, LIGHT2_STRING) + 4;
+// xSemaphoreTakeT(spiBus.mutex);
+// tft.setCursor(lightX, lightY);
+// tft.setTextSize(lightTextSize);
+// tft.fillRoundRect(lightX - 2, lightY - 2, width, 18, 3, ILI9341_BLACK);
+// if (light == LIGHT::L1) {
+//   tft.setTextColor(ILI9341_YELLOW);
+//   tft.print(LIGHT1_STRING);
+// } else {
+//   tft.setTextColor(ILI9341_BLUE);
+//   tft.print(LIGHT2_STRING);
+// }
+// xSemaphoreGive(spiBus.mutex);
+// }
 
 #define FORWARD_STRING ""
 #define BACKWARD_STRING "Backward"
@@ -353,7 +349,7 @@ void DriverDisplay::write_driver_info() {
   }
 }
 
-DISPLAY_STATUS DriverDisplay::display_task(int lifeSignCounter) {
+DISPLAY_STATUS DriverDisplay::display_task() {
   DISPLAY_STATUS status = carState.displayStatus;
   switch (carState.displayStatus) {
   // initializing states:
@@ -421,27 +417,33 @@ DISPLAY_STATUS DriverDisplay::display_task(int lifeSignCounter) {
     if (DriveDirection.Value != DriveDirection.ValueLast || justInited) {
       write_drive_direction();
     }
-    Light.Value = carState.Light;
-    if (Light.Value != Light.ValueLast || justInited) {
-      show_light();
-    }
+    // Light.Value = carState.Light;
+    // if (Light.Value != Light.ValueLast || justInited) {
+    //   show_light();
+    // }
     ConstantMode.Value = carState.ConstantMode;
     ConstantModeOn.Value = carState.ConstantModeOn;
     if (ConstantMode.Value != ConstantMode.ValueLast || ConstantModeOn.Value != ConstantModeOn.ValueLast || justInited) {
       constant_drive_mode_show();
     }
 
-    ControlMode.Value = carState.ControlMode;
-    StepSize.Value = carState.ButtonControlModeIncrease;
-    if (ControlMode.Value != ControlMode.ValueLast || StepSize.Value != StepSize.ValueLast || justInited) {
-      control_mode_show();
+    // if (carState.Speed + 1 < carState.TargetSpeed)
+    //   arrow(SPEED_ARROW::INCREASE);
+    // else if (carState.Speed - 1 > carState.TargetSpeed)
+    //   arrow(SPEED_ARROW::DECREASE);
+    // else
+    //   arrow(SPEED_ARROW::OFF);
+
+    StepSize.Value = carState.Potentiometer;
+    if (StepSize.Value != StepSize.ValueLast || justInited) {
       StepSize.get_recent_overtake_last();
+      step_width_show();
     }
 
-    EcoModeOn.Value = carState.EcoOn;
-    if (EcoModeOn.Value != EcoModeOn.ValueLast || justInited) {
-      eco_power_mode_show();
-    }
+    // EcoModeOn.Value = carState.EcoOn;
+    // if (EcoModeOn.Value != EcoModeOn.ValueLast || justInited) {
+    //   eco_power_mode_show();
+    // }
 
     BatteryVoltage.Value = carState.BatteryVoltage;
     if (BatteryVoltage.is_changed() || justInited) {

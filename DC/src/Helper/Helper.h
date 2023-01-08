@@ -22,5 +22,6 @@ void xSemaphoreTakeT(xQueueHandle mutex);
 string getDateTime();
 string getTime();
 string getTimeStamp();
+int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value);
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_HELPER_H

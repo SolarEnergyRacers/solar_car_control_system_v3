@@ -14,7 +14,7 @@
 
 class EngineerDisplay : public Display {
 public:
-  EngineerDisplay() { bgColor = ILI9341_ORANGE; };
+  EngineerDisplay() { bgColor = ILI9341_LIGHTGREY; };
   ~EngineerDisplay(){};
   //==== overwrites from base class ==== START
   string getName(void) { return "EngineerDisplay"; };
@@ -23,7 +23,7 @@ public:
 protected:
   //==== overwrites from base class ==== START
   DISPLAY_STATUS display_setup() override;
-  DISPLAY_STATUS display_task(int lifeSignCounter) override;
+  DISPLAY_STATUS display_task() override;
   //==== overwrites from base class ==== END
 
 private:

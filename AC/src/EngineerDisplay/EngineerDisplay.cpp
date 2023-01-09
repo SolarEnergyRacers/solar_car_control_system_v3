@@ -31,7 +31,7 @@ DISPLAY_STATUS EngineerDisplay::display_setup() {
 void EngineerDisplay::draw_display_background() {
   PhotoVoltaicOn.showLabel(tft);
   MotorOn.showLabel(tft);
-  BatteryOn.showLabel(tft);
+  //BatteryOn.showLabel(tft);
   Mppt1.showLabel(tft);
   Mppt2.showLabel(tft);
   Mppt3.showLabel(tft);
@@ -71,7 +71,7 @@ DISPLAY_STATUS EngineerDisplay::display_task() {
     break;
   // working state:
   case DISPLAY_STATUS::ENGINEER_RUNNING:
-    BatteryOn.Value = carState.BatteryOn;
+    //BatteryOn.Value = carState.BatteryOn;
     PhotoVoltaicOn.Value = carState.PhotoVoltaicOn;
     MotorOn.Value = carState.MotorOn;
     BatteryVoltage.Value = carState.BatteryVoltage;
@@ -90,7 +90,7 @@ DISPLAY_STATUS EngineerDisplay::display_task() {
     VoltageAvg.Value = carState.Uavg;
     VoltageMax.Value = carState.Umax;
 
-    BatteryOn.showValue(tft);
+    //BatteryOn.showValue(tft);
     PhotoVoltaicOn.showValue(tft);
     MotorOn.showValue(tft);
 

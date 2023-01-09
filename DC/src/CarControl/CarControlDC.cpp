@@ -205,7 +205,7 @@ bool CarControl::read_paddles() {
   if (valueDisplayLast != carState.AccelerationDisplay) {
     valueDisplayLast = carState.AccelerationDisplay;
     if (carControl.verboseMode)
-      console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
+      console << fmt::format("xAccl={:5d} |{:5d}, xDecl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
                              adc.stw_dec, carState.AccelerationDisplay);
     return true;
   }
@@ -232,13 +232,12 @@ void CarControl::_set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t v
   valueDisplayLast = valueDisplay;
 }
 
-unsigned int CarControl::_normalize_0_UINT16(int minOriginValue, int maxOriginValue, int value) {
-  float k = UINT16_MAX / (maxOriginValue - minOriginValue);
-  value = value < minOriginValue ? minOriginValue : value;
-  value = value > UINT16_MAX ? UINT16_MAX : value;
-  return (unsigned int)round((value - minOriginValue) * k);
+uint16_t CarControl::_normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value) {
+  float k = (float)UINT16_MAX / (maxOriginValue - minOriginValue);
+  value = value < minOriginValue? minOriginValue : value;
+  value = value > maxOriginValue? maxOriginValue : value;
+  return (uint16_t)round((value - minOriginValue) * k);
 }
-volatile int CarControl::valueChangeRequest = 0;
 
 void CarControl::task(void *pvParams) {
   while (1) {
@@ -261,7 +260,7 @@ void CarControl::task(void *pvParams) {
       );
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
       canBus.writePacket(DC_BASE_ADDR | 0x01,
-                         (uint16_t)carState.TargetSpeed, // Target Speed [float as value\*1000]
+                         (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
                          (uint16_t)(carState.TargetPower * 1000), // Target Power [float as value\*1000]
                          carState.AccelerationDisplay,            // Display Acceleration
                          0,                                       // empty
@@ -285,7 +284,7 @@ void CarControl::task(void *pvParams) {
                                "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}",
                                DC_BASE_ADDR | 0x01, (uint16_t)(carState.TargetSpeed * 1000), (uint16_t)(carState.TargetSpeed * 1000),
                                carState.AccelerationDisplay, carState.ConstantModeOn, carState.Speed, driveDirection, carState.BreakPedal,
-                               carState.MotorOn,carState.ConstantModeOn)
+                               carState.MotorOn, carState.ConstantModeOn)
                 << NL;
       }
       //  one data row per second

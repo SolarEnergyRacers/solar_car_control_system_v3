@@ -112,8 +112,6 @@ void CmdHandler::task(void *pvParams) {
         if (input.length() == 0)
           break;
 
-        console << "GOT: " << input.c_str() << NL;
-
         switch (input[0]) {
         // ---------------- controller commands
         case '\n':
@@ -215,7 +213,20 @@ void CmdHandler::task(void *pvParams) {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
           } else {
-            console << "set verboseModeCan needs a specifier: i,I,o,O." << NL;
+            string arr[4];
+            int count = splitString(arr, &input[1]);
+            float batCurrent = atof(arr[0].c_str());
+            float batVoltage = atof(arr[1].c_str());
+            float motCurrent = atof(arr[2].c_str());
+            carState.MotorCurrent = motCurrent;
+            uint64_t data = 0;
+            int address = BMS_BASE_ADDR | 0xFA;
+            CANPacket packet = CANPacket(address, data);
+            packet.setData_i32(0, batVoltage);
+            packet.setData_i32(1, batCurrent);
+            canBus.handle_rx_packet(packet);
+            console << fmt::format("CAN inject for AdrId[{:04x}]: batCurrent={}, batVoltage={}\n", address, batCurrent, batVoltage);
+            
           }
           break;
         case 'O':

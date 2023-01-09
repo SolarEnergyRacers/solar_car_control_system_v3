@@ -366,7 +366,7 @@ DISPLAY_STATUS DriverDisplay::display_task() {
 
     BatteryVoltage.showLabel(tft);
     BatteryVoltage.set_epsilon(0.1);
-    BatteryOn.showLabel(tft);
+    //BatteryOn.showLabel(tft);
     PhotoVoltaicCurrent.showLabel(tft);
     PhotoVoltaicCurrent.set_epsilon(0.1);
     PhotoVoltaicOn.showLabel(tft);
@@ -449,10 +449,10 @@ DISPLAY_STATUS DriverDisplay::display_task() {
     if (BatteryVoltage.is_changed() || justInited) {
       BatteryVoltage.showValue(tft);
     }
-    BatteryOn.Value = carState.BatteryOn;
-    if (BatteryOn.is_changed() || justInited) {
-      BatteryOn.showValue(tft);
-    }
+    // BatteryOn.Value = carState.BatteryOn;
+    // if (BatteryOn.is_changed() || justInited) {
+    //   BatteryOn.showValue(tft);
+    // }
     // TODO: PhotoVoltaicCurrent.Value = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
     PhotoVoltaicCurrent.Value = carState.PhotoVoltaicCurrent;
     if (PhotoVoltaicCurrent.is_changed() || justInited) {

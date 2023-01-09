@@ -125,8 +125,7 @@ int CANBus::handle_rx_packet(CANPacket packet) {
   switch (packetId) {
   case AC_BASE_ADDR | 0x00: {
     carState.LifeSign = packet.getData_u16(0);
-    uint16_t value = packet.getData_u16(1);
-    CONSTANT_MODE constantMode = value == 0 ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+    carState.ConstantMode = packet.getData_u16(1) == 0 ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
     if (canBus.verboseModeCanIn)
       console << fmt::format("LifeSign= {:4x}, carState.ConstantMode={}\n", carState.LifeSign,
                              CONSTANT_MODE_str[(int)(carState.ConstantMode)]);

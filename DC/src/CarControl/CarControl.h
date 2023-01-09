@@ -27,8 +27,6 @@ public:
   void task(void *pvParams);
 
   // Class member and functions
-  static void valueChangedHandler() { valueChangeRequest++; };
-
   bool read_reference_cell_data();
   bool read_potentiometer();
   bool read_speed(); // in km/h
@@ -53,9 +51,9 @@ private:
   void _set_DAC();
   void _set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t valueDec, int16_t valueAcc, int valueDisplay);
 
-  static volatile int valueChangeRequest;
+  // ;
   bool isInValueChangedHandler = false;
   void _handleValueChanged();
-  unsigned int _normalize_0_UINT16(int minOriginValue, int maxOriginValue, int value);
+  uint16_t _normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value);
 };
 #endif // SER_CAR_CONTROL_H

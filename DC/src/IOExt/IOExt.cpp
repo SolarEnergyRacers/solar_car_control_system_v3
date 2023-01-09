@@ -205,20 +205,7 @@ int IOExt::getPort(int port) {
 void IOExt::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      bool changedInputs = readAndHandlePins(); // PinHandleMode::FORCED);
-      // if (changedInputs) {
-      //   carControl.valueChangedHandler();
-      // }
-      // handle INPUT pin interrupts
-      //   if (ioInterruptRequest) {
-      //     console << "jump ioInterruptRequest " << millis() << "\n";
-      //     handleIoInterrupt();
-      //     ioInterruptRequest = false;
-      //     // carControl.valueChangedHandler();
-      //   }
-
-      // update OUTPUT pins
-      // writeAllPins(PinHandleMode::NORMAL);
+      readAndHandlePins(); // PinHandleMode::FORCED);
     }
     taskSuspend();
   }

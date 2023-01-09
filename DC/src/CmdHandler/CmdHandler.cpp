@@ -165,7 +165,17 @@ void CmdHandler::task(void *pvParams) {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
           } else {
-            console << "set verboseModeCan needs a specifier: i,I,o,O." << NL;
+            string arr[4];
+            int count = splitString(arr, &input[1]);
+            float batCurrent = atof(arr[0].c_str());
+            float batVoltage = atof(arr[1].c_str());
+            int address = BMS_BASE_ADDR | 0xFA;
+            uint64_t data = 0;
+            CANPacket packet = CANPacket(address, data);
+            packet.setData_i32(0, batVoltage);
+            packet.setData_i32(1, batCurrent);
+            canBus.handle_rx_packet(packet);
+            console << "CAN inject for AdrId[" << address << "]: batCurrent=" << batCurrent << ", batVoltage=" << batVoltage << NL;
           }
           break;
         case 'O':

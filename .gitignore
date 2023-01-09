@@ -41,3 +41,4 @@ AC/sdkconfig.esp32dev.old
 
 # local tools settings
 **/.vscode
+AC/.pio/**

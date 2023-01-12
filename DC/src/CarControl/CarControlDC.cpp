@@ -205,7 +205,7 @@ bool CarControl::read_paddles() {
   if (valueDisplayLast != carState.AccelerationDisplay) {
     valueDisplayLast = carState.AccelerationDisplay;
     if (carControl.verboseMode)
-      console << fmt::format("xAccl={:5d} |{:5d}, xDecl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
+      console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
                              adc.stw_dec, carState.AccelerationDisplay);
     return true;
   }

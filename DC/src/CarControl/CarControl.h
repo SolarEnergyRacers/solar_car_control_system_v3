@@ -51,7 +51,6 @@ private:
   void _set_DAC();
   void _set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t valueDec, int16_t valueAcc, int valueDisplay);
 
-  // ;
   bool isInValueChangedHandler = false;
   void _handleValueChanged();
   uint16_t _normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value);

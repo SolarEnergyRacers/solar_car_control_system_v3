@@ -1,0 +1,9 @@
+fmtlib/fmt@8.1.1
+davetcc/IoAbstraction@3.0.1
+plerup/EspSoftwareSerial@6.17.1
+mikalhart/Streaming@1.0.0
+paulstoffregen/OneWire@2.3.7
+robtillaart/ADS1X15@0.3.8
+https://github.com/SolarEnergyRacers/SER-arduino-CAN
+adafruit/Adafruit ILI9341@1.5.12
+blemasle/MCP23017 @ 2.0.0

@@ -69,9 +69,18 @@ string getTimeStamp() {
   return fmt::format("T{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
 }
 
+uint16_t normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value) {
+  float k = (float)UINT16_MAX / (maxOriginValue - minOriginValue);
+  value = value < minOriginValue ? minOriginValue : value;
+  value = value > maxOriginValue ? maxOriginValue : value;
+  return (uint16_t)round((value - minOriginValue) * k);
+}
+
 int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value) {
   float k = (float)(maxViewValue - minViewValue) / (maxOriginValue - minOriginValue);
-  int newValue = (int)round((value - minOriginValue) * k);
-  newValue = newValue < minViewValue ? minViewValue : newValue > maxViewValue ? maxViewValue : newValue;
-  return newValue;
+  value = value < minOriginValue ? minOriginValue : value;
+  value = value > maxOriginValue ? maxOriginValue : value;
+  value = (int)round((value - minOriginValue) * k);
+  value = value < minViewValue ? minViewValue : value;
+  return value;
 }

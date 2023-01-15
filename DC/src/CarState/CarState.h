@@ -235,8 +235,8 @@ public:
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode
   int ButtonControlModeIncreaseHeigh; // ButtonControlModeIncrease hight mode
-  float ConstSpeedIncrease;           // [km/h] per click
-  float ConstPowerIncrease;           // [W] per click
+  int ConstSpeedIncrease;             // [km/h] per click
+  int ConstPowerIncrease;             // [W] per click
 
   // [Communication]
   int CarDataSendPeriod;        // [ms]

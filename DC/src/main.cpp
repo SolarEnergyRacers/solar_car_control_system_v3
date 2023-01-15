@@ -121,7 +121,7 @@ void app_main(void) {
   // Engineer Display
   // NOT available on DC
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, 100);
+  msg = canBus.init_t(0, 1, 10000, 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -155,7 +155,7 @@ void app_main(void) {
   console << msg << NL;
 #endif
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, 150);
+  msg = carControl.init_t(1, 20, 10000, 90);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -192,7 +192,7 @@ void app_main(void) {
   msg = ioExt.report_task_init();
   console << msg << NL;
   // ADC
-  msg = adc.init_t(1, 12, 10000, 150);
+  msg = adc.init_t(1, 20, 10000, 90);
   console << msg << NL;
   adc.verboseModeADC = false;
   adc.verboseModeADCDebug = false;

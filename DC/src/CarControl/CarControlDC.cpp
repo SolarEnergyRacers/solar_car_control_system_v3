@@ -72,12 +72,16 @@ bool CarControl::read_reference_cell_data() {
   return true;
 }
 
+#define MAX_POTENTIOMETER_VALUE 22000
 bool CarControl::read_potentiometer() {
   int value = adc.switch_potentiometer;
   if (carState.Potentiometer != value) {
     carState.Potentiometer = value;
-    carState.ConstSpeedIncrease = transformArea(1, 20, 0, INT16_MAX, value);
-    carState.ConstPowerIncrease = transformArea(1, 500, 0, INT16_MAX, value);
+    carState.ConstSpeedIncrease = transformArea(1, 21, 0, MAX_POTENTIOMETER_VALUE, value);
+    carState.ConstPowerIncrease = transformArea(1, 501, 0, MAX_POTENTIOMETER_VALUE, value);
+
+    //console << carState.ConstSpeedIncrease << "km/h|" << carState.ConstPowerIncrease << "W\n";
+
     return true;
   }
   return false;
@@ -99,74 +103,10 @@ bool CarControl::read_speed() {
 int CarControl::calculate_acceleration_display(int valueDec, int valueAcc) {
   if (valueDec > 0) {
     return -transformArea(0, MAX_ACCELERATION_DISPLAY_VALUE, 0, INT16_MAX, valueDec);
-    // return transformArea(MAX_ACCELERATION_DISPLAY_VALUE, 0, 0, UINT16_MAX, valueDec);
   } else {
     return transformArea(0, MAX_ACCELERATION_DISPLAY_VALUE, 0, INT16_MAX, valueAcc);
   }
 }
-
-// bool CarControl::read_PLUS_MINUS() {
-//   //   bool hasChanged = false;
-//   if (carState.BreakPedal) {
-//     _set_dec_acc_values(DAC_MAX, 0, ADC_MAX, 0, -64);
-//     return true;
-//   }
-//   bool plusButton = false;  // ioExt.getPort(carState.getPin(PinIncrease)->port) == 0;  // currently pressed?
-//   bool minusButton = false; // ioExt.getPort(carState.getPin(PinDecrease)->port) == 0; // currently pressed?
-//   if (!plusButton && !minusButton)
-//     return false;
-
-//   carState.ConstantModeOn = true;
-//   int8_t acceleration; // -99 ... +99
-//   if (carState.Deceleration > 0) {
-//     acceleration = -carState.Deceleration;
-//   } else {
-//     acceleration = carState.Acceleration;
-//   }
-
-//   if (minusButton) {
-//     if (acceleration - carState.ButtonControlModeIncrease > -99)
-//       acceleration -= carState.ButtonControlModeIncrease;
-//     else
-//       acceleration = -99;
-//   } else if (plusButton) {
-//     if (acceleration + carState.ButtonControlModeIncrease < 99)
-//       acceleration += carState.ButtonControlModeIncrease;
-//     else
-//       acceleration = 99;
-//   }
-
-// int8_t valueDec = 0;
-// int8_t valueAcc = 0;
-// if (acceleration < 0) {
-//   valueDec = -acceleration;
-// } else if (acceleration > 0) {
-//   valueAcc = acceleration;
-// }
-
-// int valueDisplay = valueDec > 0 ? -valueDec : valueAcc;
-// // prepare and write motor acceleration and recuperation values to DigiPot
-// int valueDecPot;
-// int valueAccPot;
-// if (valueDisplay < 0) {
-//   valueDecPot = -(int)(((float)valueDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
-//   valueAccPot = 0;
-// } else {
-//   valueDecPot = 0;
-//   valueAccPot = (int)(((float)valueDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
-// }
-
-// if (valueDisplayLast != valueDisplay) {
-//   hasChanged = true;
-//   _set_dec_acc_values(valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
-// }
-// if (carControl.verboseMode) {
-//   console << fmt::format(
-//       "button mode: acc={:5d} --> valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n",
-//       acceleration, valueDecPot, valueAccPot, valueDec, valueAcc, valueDisplay);
-// }
-//   return hasChanged;
-// }
 
 bool CarControl::read_paddles() {
   if (carState.BreakPedal) {
@@ -181,8 +121,8 @@ bool CarControl::read_paddles() {
   }
   // carState.Deceleration = transformArea(ads_min_dec, ads_max_dec, 0, INT16_MAX, adc.stw_dec);
   // carState.Acceleration = transformArea(ads_min_acc, ads_max_acc, 0, INT16_MAX, adc.stw_acc);
-  carState.Deceleration = _normalize_0_UINT16(ads_min_dec, ads_max_dec, adc.stw_dec);
-  carState.Acceleration = _normalize_0_UINT16(ads_min_acc, ads_max_acc, adc.stw_acc);
+  carState.Deceleration = normalize_0_UINT16(ads_min_dec, ads_max_dec, adc.stw_dec);
+  carState.Acceleration = normalize_0_UINT16(ads_min_acc, ads_max_acc, adc.stw_acc);
 
   // check if change is in damping
   // if (abs(accelLast - carState.Acceleration) < carState.PaddleDamping && abs(recupLast - carState.Deceleration) <
@@ -230,13 +170,6 @@ void CarControl::_set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t v
   dac.set_pot(valueDecPot, DAC::pot_chan::POT_CHAN1);
   dac.set_pot(valueAccPot, DAC::pot_chan::POT_CHAN0);
   valueDisplayLast = valueDisplay;
-}
-
-uint16_t CarControl::_normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value) {
-  float k = (float)UINT16_MAX / (maxOriginValue - minOriginValue);
-  value = value < minOriginValue? minOriginValue : value;
-  value = value > maxOriginValue? maxOriginValue : value;
-  return (uint16_t)round((value - minOriginValue) * k);
 }
 
 void CarControl::task(void *pvParams) {

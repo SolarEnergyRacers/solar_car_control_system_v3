@@ -161,9 +161,13 @@ bool IOExt::readAndHandlePins(PinHandleMode mode) {
   readAllPins();
   list<void (*)()> pinHandlerList;
   for (CarStatePin &pin : carState.pins) {
-    if (pin.mode != OUTPUT) {
+    if (pin.mode != OUTPUT && (pin.handlerFunction != NULL)) {
       unsigned long timestamp = millis();
-      if (pin.handlerFunction != NULL && (pin.oldValue != pin.value || !pin.inited || mode == PinHandleMode::FORCED)) {
+      // button: debounced time and value == 0 --> activate Handler
+      // toggles: debounced time == 0, value 0|1 --> activate handler
+      if ( (pin.value == 0 || (pin.debounceTime_ms == 0 && pin.oldValue != pin.value)) &&
+          (timestamp > pin.timestamp + pin.debounceTime_ms) &&
+          (pin.continouseMode || pin.oldValue != pin.value || !pin.inited || mode == PinHandleMode::FORCED)) {
         if (ioExt.verboseModeDIn)
           console << fmt::format("Get BOOL -- 0x{:02x}: {} --> {}, inited: {}  <-- {:18s} \t({})\t -> handle ({}ms)\n", pin.port,
                                  pin.oldValue, pin.value, pin.inited, pin.name, millis(), timestamp - pin.timestamp);
@@ -174,6 +178,8 @@ bool IOExt::readAndHandlePins(PinHandleMode mode) {
         pin.oldValue = pin.value;
         pin.timestamp = timestamp;
       }
+      if (pin.value == 1)
+        pin.oldValue = 1;
     }
   }
   // avoid multi registration:

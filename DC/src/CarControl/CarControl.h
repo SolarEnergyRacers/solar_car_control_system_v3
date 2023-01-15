@@ -53,6 +53,5 @@ private:
 
   bool isInValueChangedHandler = false;
   void _handleValueChanged();
-  uint16_t _normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value);
 };
 #endif // SER_CAR_CONTROL_H

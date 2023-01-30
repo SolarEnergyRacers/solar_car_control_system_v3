@@ -225,9 +225,9 @@ public:
   int SleepTimeIOExt = 400; // [ms]
 
   // [PID]
-  double Kp; // proportional
-  double Ki; // integral
-  double Kd; // differential
+  double Kp = 35.0; // proportional
+  double Ki = 2.0;  // integral
+  double Kd = 0.1;  // differential
 
   // [Dynamic]
   int PaddleDamping = 10;             // 0...99

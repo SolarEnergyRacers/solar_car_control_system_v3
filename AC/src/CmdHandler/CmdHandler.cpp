@@ -26,9 +26,6 @@
 
 #include <CANBus.h>
 #include <CarControl.h>
-#if CARSPEED_ON
-#include <CarSpeed.h>
-#endif
 #include <CANBus.h>
 #include <CarState.h>
 #include <CarStatePin.h>
@@ -214,7 +211,7 @@ void CmdHandler::task(void *pvParams) {
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
           } else {
             string arr[4];
-            int count = splitString(arr, &input[1]);
+            splitString(arr, &input[1]);
             float motCurrent = atof(arr[0].c_str());
             float batVoltage = atof(arr[1].c_str());
             float batCurrent = atof(arr[2].c_str());

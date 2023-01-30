@@ -27,14 +27,11 @@
 #include <ADC.h>
 #include <CANBus.h>
 #include <CarControl.h>
-#if CARSPEED_ON
-#include <CarSpeed.h>
-#endif
-#include <CANBus.h>
 #include <CarState.h>
 #include <CarStatePin.h>
 #include <CmdHandler.h>
 #include <Console.h>
+#include <ConstSpeed.h>
 #include <DAC.h>
 #include <Helper.h>
 #include <I2CBus.h>
@@ -49,7 +46,7 @@ extern I2CBus i2cBus;
 extern IOExt ioExt;
 extern CarState carState;
 extern CANBus canBus;
-// extern CarSpeed carSpeed;
+extern ConstSpeed constSpeed;
 extern CarControl carControl;
 extern Console console;
 extern DAC dac;
@@ -166,7 +163,7 @@ void CmdHandler::task(void *pvParams) {
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
           } else {
             string arr[4];
-            int count = splitString(arr, &input[1]);
+            splitString(arr, &input[1]);
             float batCurrent = atof(arr[0].c_str());
             float batVoltage = atof(arr[1].c_str());
             int address = BMS_BASE_ADDR | 0xFA;
@@ -218,10 +215,10 @@ void CmdHandler::task(void *pvParams) {
 #endif
         } break;
         case 'K':
-#if CARSPEED_ON
           console << "Received: '" << input.c_str() << "' --> ";
           if (input[1] == 'v') {
-            carSpeed.verboseModePID = !carSpeed.verboseModePID;
+            constSpeed.verboseModePID = !constSpeed.verboseModePID;
+            console << "set verboseModePID: " << constSpeed.verboseModePID << NL;
           } else {
             string arr[4];
             int count = splitString(arr, &input[1]);
@@ -231,14 +228,11 @@ void CmdHandler::task(void *pvParams) {
               float Kp = atof(arr[0].c_str());
               float Ki = atof(arr[1].c_str());
               float Kd = atof(arr[2].c_str());
-              carSpeed.update_pid(Kp, Ki, Kd);
+              constSpeed.update_pid(Kp, Ki, Kd);
               console << "PID set parameters: ";
             }
             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
           }
-#else
-          console << "Car speed control deactivated\n";
-#endif
           break;
           //-------- DRIVER INFO COMMANDS --------------------
 

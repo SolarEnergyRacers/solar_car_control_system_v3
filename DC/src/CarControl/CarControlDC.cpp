@@ -79,8 +79,8 @@ bool CarControl::read_potentiometer() {
     carState.Potentiometer = value;
     carState.ConstSpeedIncrease = transformArea(1, 21, 0, MAX_POTENTIOMETER_VALUE, value);
     carState.ConstPowerIncrease = transformArea(1, 501, 0, MAX_POTENTIOMETER_VALUE, value);
-
-    //console << carState.ConstSpeedIncrease << "km/h|" << carState.ConstPowerIncrease << "W\n";
+    if (verboseModeDebug)
+      console << carState.ConstSpeedIncrease << "km/h|" << carState.ConstPowerIncrease << "W\n";
 
     return true;
   }
@@ -111,39 +111,50 @@ int CarControl::calculate_acceleration_display(int valueDec, int valueAcc) {
 bool CarControl::read_paddles() {
   if (carState.BreakPedal) {
     // #SAFETY#: on break pedal -> deccelerate
-    //_set_dec_acc_values(DAC_MAX, 0, ADC_MAX, 0, -64);
+    carState.ConstantModeOn = false;
+    carState.Acceleration = 0;
+    uint16_t dec_procent = ads_max_dec * 0.64;
+    if (carState.Deceleration < dec_procent) {
+      carState.Deceleration = dec_procent;
+    }
+    carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
     if (carControl.verboseMode) {
       console << fmt::format(
-          "paddle mode BREAK PEDAL: valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", DAC_MAX,
+          "paddle mode BREAK PEDAL: valueDAC_dec={:5d}, valueDAC_acc={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", DAC_MAX,
           0, ADC_MAX, 0, -64);
     }
-    return true;
+  } else {
+    carState.Deceleration = normalize_0_UINT16(ads_min_dec, ads_max_dec, adc.stw_dec);
+    carState.Acceleration = normalize_0_UINT16(ads_min_acc, ads_max_acc, adc.stw_acc);
+    // // check if change is in damping
+    // if (abs(accelLast - carState.Acceleration) < carState.PaddleDamping && abs(recupLast - carState.Deceleration) <
+    // carState.PaddleDamping)
+    //   return false;
+    //
+    // accelLast = carState.Acceleration;
+    // recupLast = carState.Deceleration;
+
+    // #SAFETY#: Reset constant mode on deceleration paddel touched
+    if (carState.Deceleration > carState.PaddleDamping) {
+      carState.ConstantModeOn = false;
+      carState.Acceleration = 0;
+      carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
+    } else {
+      if (carState.ConstantModeOn) {
+        int8_t temp = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
+        if (carState.AccelerationDisplay < temp && carState.Acceleration > carState.PaddleDamping) {
+          carState.AccelerationDisplay = temp;
+        }
+      } else {
+        carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
+      }
+    }
+
+
   }
-  // carState.Deceleration = transformArea(ads_min_dec, ads_max_dec, 0, INT16_MAX, adc.stw_dec);
-  // carState.Acceleration = transformArea(ads_min_acc, ads_max_acc, 0, INT16_MAX, adc.stw_acc);
-  carState.Deceleration = normalize_0_UINT16(ads_min_dec, ads_max_dec, adc.stw_dec);
-  carState.Acceleration = normalize_0_UINT16(ads_min_acc, ads_max_acc, adc.stw_acc);
 
-  // check if change is in damping
-  // if (abs(accelLast - carState.Acceleration) < carState.PaddleDamping && abs(recupLast - carState.Deceleration) <
-  // carState.PaddleDamping)
-  //   return false;
-
-  accelLast = carState.Acceleration;
-  recupLast = carState.Deceleration;
-
-  // #SAFETY#: Reset constant mode on deceleration paddel touched
-  if (carState.Deceleration > carState.PaddleDamping) {
-    carState.ConstantModeOn = false;
-  }
-
-  carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
-
-  // console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
-  //                        adc.stw_dec, carState.AccelerationDisplay);
-
-  if (valueDisplayLast != carState.AccelerationDisplay) {
-    valueDisplayLast = carState.AccelerationDisplay;
+  if (accelerationDisplayLast != carState.AccelerationDisplay) {
+    accelerationDisplayLast = carState.AccelerationDisplay;
     if (carControl.verboseMode)
       console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
                              adc.stw_dec, carState.AccelerationDisplay);
@@ -153,23 +164,17 @@ bool CarControl::read_paddles() {
 }
 
 // prepare and write motor acceleration and recuperation values to DigiPot
-void CarControl::_set_DAC() {
+void CarControl::set_DAC() {
   int setpoint = (int)(((float)carState.AccelerationDisplay / MAX_ACCELERATION_DISPLAY_VALUE) * DAC_MAX);
-  int valueDecPot = carState.AccelerationDisplay < 0 ? -setpoint : 0;
-  int valueAccPot = carState.AccelerationDisplay < 0 ? 0 : setpoint;
-  dac.set_pot(valueDecPot, DAC::pot_chan::POT_CHAN1);
-  dac.set_pot(valueAccPot, DAC::pot_chan::POT_CHAN0);
+  int valueDAC_dec = carState.AccelerationDisplay < 0 ? -setpoint : 0;
+  int valueDAC_acc = carState.AccelerationDisplay < 0 ? 0 : setpoint;
+  dac.set_pot(valueDAC_dec, DAC::pot_chan::POT_CHAN1_DEC);
+  dac.set_pot(valueDAC_acc, DAC::pot_chan::POT_CHAN0_ACC);
 
   if (carControl.verboseMode) {
-    console << fmt::format("valueDecPot={:5d}, valueAccPot={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", valueDecPot,
-                           valueAccPot, carState.Deceleration, carState.Acceleration, carState.AccelerationDisplay);
+    console << fmt::format("valueDAC_dec={:5d}, valueDAC_acc={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", valueDAC_dec,
+                           valueDAC_acc, carState.Deceleration, carState.Acceleration, carState.AccelerationDisplay);
   }
-}
-
-void CarControl::_set_dec_acc_values(int valueDecPot, int valueAccPot, int16_t valueDec, int16_t valueAcc, int valueDisplay) {
-  dac.set_pot(valueDecPot, DAC::pot_chan::POT_CHAN1);
-  dac.set_pot(valueAccPot, DAC::pot_chan::POT_CHAN0);
-  valueDisplayLast = valueDisplay;
 }
 
 void CarControl::task(void *pvParams) {
@@ -178,11 +183,11 @@ void CarControl::task(void *pvParams) {
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       // read values from ADC/IO
-      read_paddles();
       read_reference_cell_data();
       read_speed();
       read_potentiometer();
-      _set_DAC();
+      if (read_paddles())
+        set_DAC();
       carState.LifeSign++;
 
       canBus.writePacket(DC_BASE_ADDR | 0x00,
@@ -210,7 +215,7 @@ void CarControl::task(void *pvParams) {
 
       if (carControl.verboseModeDebug) {
         console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
-                               canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x01, carState.LifeSign,
+                               canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
                                carState.Potentiometer, carState.Acceleration, carState.Deceleration)
                 << NL;
         console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, cMod={:1d}, speed={:3d}, "

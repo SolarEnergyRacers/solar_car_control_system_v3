@@ -28,10 +28,9 @@ extern Console console;
 extern PID pid;
 extern ConstSpeed constSpeed;
 extern CarState carState;
+extern CarControl carControl;
 extern bool SystemInited;
-#if DAC_ON
 extern DAC dac;
-#endif
 
 // ------------------
 // FreeRTOS functions
@@ -105,16 +104,16 @@ void ConstSpeed::task(void *pvParams) {
       uint8_t dec = 0;
       if (output_setpoint > 0) {
         acc = round(output_setpoint);
-        console << "acc=" << acc;
+        if (verboseModePID)
+          console << "acc=" << acc;
       } else if (output_setpoint < 0) {
         dec = round(-output_setpoint);
-        console << "dec=" << dec;
+        if (verboseModePID)
+          console << "dec=" << dec;
       }
-#if DAC_ON
-      dac.set_pot(acc, DAC::pot_chan::POT_CHAN0); // acceleration
-      dac.set_pot(dec, DAC::pot_chan::POT_CHAN1); // deceleration
-#endif
       carState.AccelerationDisplay = round((acc > 0 ? acc : -dec) * MAX_ACCELERATION_DISPLAY_VALUE / DAC_MAX);
+      carControl.set_DAC();
+
       if (verboseModePID) {
         console << ", disp: " << carState.AccelerationDisplay << " (" << output_setpoint << ")\n";
       }

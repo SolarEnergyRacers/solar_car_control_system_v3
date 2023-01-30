@@ -18,7 +18,7 @@ CarStatePin CarState::pins[] = {
     {0x02, 0x04, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Minus, buttonMinusHandler, true, 200},
     {0x03, 0x08, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Set, buttonSetHandler, false, 200},
     //
-    {0x04, 0x10, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Break, breakPedalHandler, false, 200},
+    {0x04, 0x10, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Break, breakPedalHandler, false, 0},
     {0x05, 0x20, OUTPUT, 1, 1, false, 0l, PinDO_BreakLight, NULL, false, 200},
     {0x06, 0x40, INPUT, 0, 0, false, 0l, PinDI_FWD_BWD, fwdBwdHandler, false, 0},  // don't pull z-diode!
     {0x07, 0x80, INPUT, 0, 0, false, 0l, PinDI_MCONOFF, mcOnOffHandler, false, 0}, // don't pull z-diode!

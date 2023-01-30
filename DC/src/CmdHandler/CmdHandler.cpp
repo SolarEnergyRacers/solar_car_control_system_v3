@@ -260,8 +260,8 @@ string CmdHandler::printSystemValues() {
   ss << fmt::format("ADC: dec={:5d}  acc={:5d}\n", valueDec, valueAcc);
 #endif
 #if DAC_ON
-  ss << fmt::format("DAC: POT-0 (accel)= {:4d}, POT-1 (recup)= {:4d}\n", dac.get_pot(DAC::pot_chan::POT_CHAN0),
-                    dac.get_pot(DAC::pot_chan::POT_CHAN1));
+  ss << fmt::format("DAC: POT-0 (accel)= {:4d}, POT-1 (recup)= {:4d}\n", dac.get_pot(DAC::pot_chan::POT_CHAN0_ACC),
+                    dac.get_pot(DAC::pot_chan::POT_CHAN1_DEC));
 #endif
   // for (int devNr = 0; devNr < MCP23017_NUM_DEVICES; devNr++) {
   //   for (int pinNr = 0; pinNr < MCP23017_NUM_PORTS; pinNr++) {

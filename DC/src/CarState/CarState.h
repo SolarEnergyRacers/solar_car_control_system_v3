@@ -230,7 +230,7 @@ public:
   double Kd = 0.1;  // differential
 
   // [Dynamic]
-  int PaddleDamping = 10;             // 0...99
+  int PaddleDamping = 200;            // 0...ca.30000
   int PaddleOffset;                   // 0 ... 65535: offset when paddle recognize not 0 values
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode

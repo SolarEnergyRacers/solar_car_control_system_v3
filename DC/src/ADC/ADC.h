@@ -36,7 +36,7 @@ public:
   };
   // ADC native values
   int16_t motor_speed = 0;
-  int16_t switch_potentiometer = 0;
+  int16_t switch_potentiometer = -1;
   int16_t stw_acc = 0;
   int16_t stw_dec = 0;
 

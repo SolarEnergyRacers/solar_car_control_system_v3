@@ -16,7 +16,7 @@ All sources and libraries are built every time the compile or compile, upload, m
 
 #### Files affeced
 
-.platformio/penv/lib/python3.8/site-packages/platformio/builder/main.py:
+~~.platformio/penv/lib/python3.8/site-packages/platformio/builder/main.py:~~
 
 ```python
 #env.SConsignFile(
@@ -32,7 +32,9 @@ env.SConsignFile(
 )
 ```
 
+#### Solution
 
+remove `-D CURRENT_TIME=$UNIX_TIME` from `build_flags`
 
 ## AC + DC
 
@@ -40,16 +42,26 @@ env.SConsignFile(
 
 #### Error Message
 
-???
+```bash
+/home/ksc/.platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h:31:12: error: expected '>' before numeric constant
+ #define B1 1
+            ^
+.pio/libdeps/esp32dev-linux/fmt/include/fmt/core.h:1118:16: note: in expansion of macro 'B1'
+ template <bool B1, bool B2, bool... Tail> constexpr auto count() -> size_t {
+                ^~
+```
 
 #### Files affeced
 
 - File1: `.platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h`
-- File2: `.pio/libdeps/esp32dev/fmt/include/fmt/core.h`
+- File2:
+  -  Linux: `.pio/libdeps/esp32dev-linux/fmt/include/fmt/core.h`
+  - Windows:  `.pio/libdeps/esp32dev-windows/fmt/include/fmt/core.h`
 
 #### FIX
 
-Change in `.pio/libdeps/esp32dev/fmt/include/fmt/core.h` at line 1120ff
+- Change for Linux: `.pio/libdeps/esp32dev-linux/fmt/include/fmt/core.h` at line 1120ff
+- - Change for Windows: `.pio/libdeps/esp32dev-windows/fmt/include/fmt/core.h` at line 1120ff
 
 ```c++
 // marker line:

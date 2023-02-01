@@ -30,7 +30,7 @@ public:
   Console();
 
 private:
-  string buffer = "";
+  string buffer;
 
 public:
   //------- OUT ---------
@@ -46,25 +46,11 @@ public:
   friend Console &operator<<(Console &c, const unsigned long &var);
   friend Console &operator<<(Console &c, const uint64_t &var);
   friend Console &operator<<(Console &c, const volatile int &var);
-  // // real output
+  // real output
   friend Console &operator<<(Console &c, const char *var);
 
   //-------- IN ---------
   friend string &operator>>(string &s, Console &c);
 };
-
-// class Console {
-// public:
-//   string buffer = "";
-//   //------- OUT ---------
-//   // transformers
-//   friend Console &operator<<(Console &c, const char &var);
-//   friend Console &operator<<(Console &c, const string &var);
-//   // // real output
-//   friend Console &operator<<(Console &c, char const *var);
-
-//   //-------- IN ---------
-//   // friend string &operator>>(string &s, Console &c);
-// };// console;
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_CONSOLE_H

@@ -20,6 +20,7 @@ public:
   void exit(void);
   void task(void *pvParams);
   bool is_to_ignore_packet(int packetId);
+  int handle_rx_packet(CANPacket packet);
 
   // Class functions and members
 private:
@@ -29,7 +30,6 @@ private:
   std::map<uint16_t, int32_t> ages;
 
   void init_ages();
-  int handle_rx_packet(CANPacket packet);
   string print_raw_packet(string msg, CANPacket packet);
 
 public:

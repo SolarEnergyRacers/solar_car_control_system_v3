@@ -98,7 +98,7 @@ void ADC::task(void *pvParams) {
 
       if (abs(motor_speed - mot) > 2 || abs(switch_potentiometer - pot) > 2 || abs(stw_acc - acc) > 2 || abs(stw_dec - dec) > 2) {
         if (adc.verboseModeADC)
-          console << fmt::format("ADC: speed={:4x} | acc={:4x} | dec={:4x} | poti= {:4x}\n", mot, acc, dec, pot);
+          console << fmt::format("ADC: speed={:5d} | acc={:5d} | dec={:5d} | poti= {:5d}\n", mot, acc, dec, pot);
 
         motor_speed = mot;
         switch_potentiometer = pot;

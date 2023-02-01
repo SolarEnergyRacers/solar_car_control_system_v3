@@ -151,9 +151,9 @@ bool CANBus::writePacket(uint16_t adr,
 }
 
 bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
+  if (canBus.verboseModeCanOutNative)
+    console << print_raw_packet("S", packet) << NL;
   try {
-    if (canBus.verboseModeCanOutNative)
-      console << print_raw_packet("S", packet) << NL;
     xSemaphoreTakeT(mutex);
     CAN.beginPacket(adr);
     CAN.write(packet.getData_i8(0));
@@ -167,6 +167,7 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
     CAN.endPacket();
     xSemaphoreGive(mutex);
   } catch (exception &ex) {
+    xSemaphoreGive(mutex);
     console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
     return false;
   }

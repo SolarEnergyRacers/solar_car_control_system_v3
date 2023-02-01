@@ -69,7 +69,6 @@ public:
   bool getData_b(uint8_t index) { return this->data.b64 & BIT64(index); }
 };
 
-
 // if (status & BIT(1)) {
 //    // Do something if bit 1 is set
 // } elseif (~status | BIT(2) {
@@ -79,7 +78,7 @@ public:
 //    status |= BIT(1) | BIT(2)
 //    // Clear bits 0 and 4
 //    status &= ~(BIT(0) | BIT(4))
-//    // Toggle bit 5 
+//    // Toggle bit 5
 //    status ^= BIT(5)
 // }
 

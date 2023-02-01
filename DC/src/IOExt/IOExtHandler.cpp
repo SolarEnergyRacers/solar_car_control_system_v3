@@ -36,10 +36,8 @@ void breakPedalHandler() {
     return;
 
   carState.BreakPedal = carState.getPin(PinDI_Break)->value == 0;
-  if (!carState.BreakPedal) { // break pedal released
-    carControl.reset_acceleration_values();
-    carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
-  }
+  carControl.read_paddles(); // read peaddels and handels breeak
+  
   if (ioExt.verboseModeDInHandler)
     console << "Break pedal pressed " << (carState.BreakPedal ? "pressed" : "released") << NL;
 }

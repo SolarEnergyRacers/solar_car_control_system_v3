@@ -20,6 +20,8 @@ public:
   unsigned long timestamp;
   string name;
   void (*handlerFunction)();
+  bool continouseMode;
+  unsigned long debounceTime_ms; // in ms
 };
 
 #endif // CARSTATEPIN_H

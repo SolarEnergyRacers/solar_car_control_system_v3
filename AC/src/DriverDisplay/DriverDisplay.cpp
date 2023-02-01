@@ -220,9 +220,10 @@ void DriverDisplay::constant_drive_mode_show() {
   xSemaphoreGive(spiBus.mutex);
 }
 
+#define MAX_POTENTIOMETER_VALUE 22000
 void DriverDisplay::step_width_show() {
-  carState.ConstSpeedIncrease = transformArea(1, 20, 0, INT16_MAX, carState.Potentiometer);
-  carState.ConstPowerIncrease = transformArea(1, 300, 0, INT16_MAX, carState.Potentiometer);
+  carState.ConstSpeedIncrease = transformArea(1, 21, 0, MAX_POTENTIOMETER_VALUE, carState.Potentiometer);
+  carState.ConstPowerIncrease = transformArea(1, 501, 0, MAX_POTENTIOMETER_VALUE, carState.Potentiometer);
   string valueString = fmt::format("{:2d}km/h {:4d}W", carState.ConstSpeedIncrease, carState.ConstPowerIncrease);
   int width = getPixelWidthOfText(constantModeTextSize, valueString) + 6;
 
@@ -366,7 +367,7 @@ DISPLAY_STATUS DriverDisplay::display_task() {
 
     BatteryVoltage.showLabel(tft);
     BatteryVoltage.set_epsilon(0.1);
-    BatteryOn.showLabel(tft);
+    //BatteryOn.showLabel(tft);
     PhotoVoltaicCurrent.showLabel(tft);
     PhotoVoltaicCurrent.set_epsilon(0.1);
     PhotoVoltaicOn.showLabel(tft);
@@ -449,10 +450,10 @@ DISPLAY_STATUS DriverDisplay::display_task() {
     if (BatteryVoltage.is_changed() || justInited) {
       BatteryVoltage.showValue(tft);
     }
-    BatteryOn.Value = carState.BatteryOn;
-    if (BatteryOn.is_changed() || justInited) {
-      BatteryOn.showValue(tft);
-    }
+    // BatteryOn.Value = carState.BatteryOn;
+    // if (BatteryOn.is_changed() || justInited) {
+    //   BatteryOn.showValue(tft);
+    // }
     // TODO: PhotoVoltaicCurrent.Value = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
     PhotoVoltaicCurrent.Value = carState.PhotoVoltaicCurrent;
     if (PhotoVoltaicCurrent.is_changed() || justInited) {

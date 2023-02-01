@@ -18,7 +18,7 @@ const char *strip_extended_chars(string str) {
   return str.c_str();
 }
 
-Console::Console() { buffer = ""; }
+Console::Console() { buffer = string(); }
 
 //--Operator overloads-
 Console &operator<<(Console &c, const bool &var) { return operator<<(c, to_string(var)); }
@@ -42,14 +42,6 @@ Console &operator<<(Console &c, const char *str) {
   cout << str << flush;
   return c;
 }
-
-// Console &operator<<(Console &c, const char &var) { return operator<<(c, to_string(var)); }
-// Console &operator<<(Console &c, const string &var) { return operator<<(c, var.c_str()); }
-
-// Console &operator<<(Console &c, char const *var) {
-//   cout << var;
-//   return c;
-// }
 
 //--------IN-----------
 string &operator>>(string &s, Console &c) {

@@ -59,6 +59,7 @@ void app_main(void);
 
 using namespace std;
 
+int base_offset_suspend = 150;
 bool SystemInited = false;
 bool SystemJustInited = true;
 uint64_t life_sign = 0;
@@ -116,7 +117,7 @@ void app_main(void) {
   delay(200);
 
   // Engineer Display
-  msg = engineerDisplay.init_t(1, 1, 10000, 300);
+  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 300);
   console << msg << NL;
   engineerDisplay.verboseMode = false;
   console << "[  ] Create " << engineerDisplay.getName() << " ...";
@@ -133,7 +134,7 @@ void app_main(void) {
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, 100);
+  msg = canBus.init_t(1, 1, 10000, base_offset_suspend + 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -153,7 +154,7 @@ void app_main(void) {
   engineerDisplay.print(msg + "\n");
 #if COMMANDHANDLER_ON
   // CMD Handler
-  msg = cmdHandler.init_t(1, 1, 10000, 200);
+  msg = cmdHandler.init_t(1, 1, 10000, base_offset_suspend + 300);
   console << msg << NL;
   console << "[  ] Create " << cmdHandler.getName() << " task ...";
   xTaskCreatePinnedToCore(cmdHandlerTask,             /* task function. */
@@ -169,7 +170,7 @@ void app_main(void) {
   engineerDisplay.print(msg + "\n");
 #endif
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, 150);
+  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 100);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -198,7 +199,7 @@ void app_main(void) {
   engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
   //------------------------------------------------------------
   // Driver Display
-  msg = driverDisplay.init_t(1, 1, 10000, 150);
+  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 110);
   console << msg << NL;
   driverDisplay.verboseMode = false;
   driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
@@ -230,5 +231,6 @@ void app_main(void) {
   console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
   console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
   console << "------------------------------------------------------------" << NL;
+  delay(1000);
   SystemInited = true;
 }

@@ -155,7 +155,7 @@ public:
   int8_t AccelerationDisplay; // Display Value (-99...+99)
   // #SAFETY-END#
 
-  bool BatteryOn;      // IO-In
+  //bool BatteryOn;      // IO-In
   bool PhotoVoltaicOn; // IO-in
   bool MotorOn;        // IO-In
   bool EcoOn;          // IO-In

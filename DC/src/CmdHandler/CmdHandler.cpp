@@ -27,14 +27,11 @@
 #include <ADC.h>
 #include <CANBus.h>
 #include <CarControl.h>
-#if CARSPEED_ON
-#include <CarSpeed.h>
-#endif
-#include <CANBus.h>
 #include <CarState.h>
 #include <CarStatePin.h>
 #include <CmdHandler.h>
 #include <Console.h>
+#include <ConstSpeed.h>
 #include <DAC.h>
 #include <Helper.h>
 #include <I2CBus.h>
@@ -49,7 +46,7 @@ extern I2CBus i2cBus;
 extern IOExt ioExt;
 extern CarState carState;
 extern CANBus canBus;
-// extern CarSpeed carSpeed;
+extern ConstSpeed constSpeed;
 extern CarControl carControl;
 extern Console console;
 extern DAC dac;
@@ -165,7 +162,17 @@ void CmdHandler::task(void *pvParams) {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
           } else {
-            console << "set verboseModeCan needs a specifier: i,I,o,O." << NL;
+            string arr[4];
+            splitString(arr, &input[1]);
+            float batCurrent = atof(arr[0].c_str());
+            float batVoltage = atof(arr[1].c_str());
+            int address = BMS_BASE_ADDR | 0xFA;
+            uint64_t data = 0;
+            CANPacket packet = CANPacket(address, data);
+            packet.setData_i32(0, batVoltage);
+            packet.setData_i32(1, batCurrent);
+            canBus.handle_rx_packet(packet);
+            console << "CAN inject for AdrId[" << address << "]: batCurrent=" << batCurrent << ", batVoltage=" << batVoltage << NL;
           }
           break;
         case 'O':
@@ -208,10 +215,10 @@ void CmdHandler::task(void *pvParams) {
 #endif
         } break;
         case 'K':
-#if CARSPEED_ON
           console << "Received: '" << input.c_str() << "' --> ";
           if (input[1] == 'v') {
-            carSpeed.verboseModePID = !carSpeed.verboseModePID;
+            constSpeed.verboseModePID = !constSpeed.verboseModePID;
+            console << "set verboseModePID: " << constSpeed.verboseModePID << NL;
           } else {
             string arr[4];
             int count = splitString(arr, &input[1]);
@@ -221,14 +228,11 @@ void CmdHandler::task(void *pvParams) {
               float Kp = atof(arr[0].c_str());
               float Ki = atof(arr[1].c_str());
               float Kd = atof(arr[2].c_str());
-              carSpeed.update_pid(Kp, Ki, Kd);
+              constSpeed.update_pid(Kp, Ki, Kd);
               console << "PID set parameters: ";
             }
             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
           }
-#else
-          console << "Car speed control deactivated\n";
-#endif
           break;
           //-------- DRIVER INFO COMMANDS --------------------
 
@@ -256,8 +260,8 @@ string CmdHandler::printSystemValues() {
   ss << fmt::format("ADC: dec={:5d}  acc={:5d}\n", valueDec, valueAcc);
 #endif
 #if DAC_ON
-  ss << fmt::format("DAC: POT-0 (accel)= {:4d}, POT-1 (recup)= {:4d}\n", dac.get_pot(DAC::pot_chan::POT_CHAN0),
-                    dac.get_pot(DAC::pot_chan::POT_CHAN1));
+  ss << fmt::format("DAC: POT-0 (accel)= {:4d}, POT-1 (recup)= {:4d}\n", dac.get_pot(DAC::pot_chan::POT_CHAN0_ACC),
+                    dac.get_pot(DAC::pot_chan::POT_CHAN1_DEC));
 #endif
   // for (int devNr = 0; devNr < MCP23017_NUM_DEVICES; devNr++) {
   //   for (int pinNr = 0; pinNr < MCP23017_NUM_PORTS; pinNr++) {

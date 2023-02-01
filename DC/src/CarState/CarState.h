@@ -225,18 +225,18 @@ public:
   int SleepTimeIOExt = 400; // [ms]
 
   // [PID]
-  double Kp; // proportional
-  double Ki; // integral
-  double Kd; // differential
+  double Kp = 1.0; // proportional
+  double Ki = 1.0;  // integral
+  double Kd = 0.01;  // differential
 
   // [Dynamic]
-  int PaddleDamping = 10;             // 0...99
+  int PaddleDamping = 200;            // 0...ca.30000
   int PaddleOffset;                   // 0 ... 65535: offset when paddle recognize not 0 values
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode
   int ButtonControlModeIncreaseHeigh; // ButtonControlModeIncrease hight mode
-  float ConstSpeedIncrease;           // [km/h] per click
-  float ConstPowerIncrease;           // [W] per click
+  int ConstSpeedIncrease;             // [km/h] per click
+  int ConstPowerIncrease;             // [W] per click
 
   // [Communication]
   int CarDataSendPeriod;        // [ms]

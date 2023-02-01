@@ -39,6 +39,7 @@
 #include <CarControl.h>
 #include <CmdHandler.h>
 #include <Console.h>
+#include <ConstSpeed.h>
 #include <DAC.h>
 #if RTC_ON
 #include <ESP32Time.h>
@@ -59,6 +60,7 @@ void app_main(void);
 
 using namespace std;
 
+int base_offset_suspend = 150;
 bool SystemInited = false;
 bool SystemJustInited = true;
 bool adcInited = false;
@@ -71,6 +73,7 @@ CarControl carControl;
 CarState carState;
 CmdHandler cmdHandler;
 Console console;
+ConstSpeed constSpeed;
 DAC dac;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
@@ -83,6 +86,7 @@ static void adcTask(void *pvParams) { adc.task(pvParams); }
 static void canBusTask(void *pvParams) { canBus.task(pvParams); }
 static void carControlTask(void *pvParams) { carControl.task(pvParams); }
 static void cmdHandlerTask(void *pvParams) { cmdHandler.task(pvParams); }
+static void constSpeedTask(void *pvParams) { constSpeed.task(pvParams); }
 static void ioExtTask(void *pvParams) { ioExt.task(pvParams); }
 
 void app_main(void) {
@@ -121,7 +125,7 @@ void app_main(void) {
   // Engineer Display
   // NOT available on DC
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, 100);
+  msg = canBus.init_t(1, 10, 10000, base_offset_suspend + 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -140,7 +144,7 @@ void app_main(void) {
   console << msg << NL;
 #if COMMANDHANDLER_ON
   // CMD Handler
-  msg = cmdHandler.init_t(1, 1, 10000, 200);
+  msg = cmdHandler.init_t(1, 1, 10000, base_offset_suspend + 300);
   console << msg << NL;
   console << "[  ] Create " << cmdHandler.getName() << " task ...";
   xTaskCreatePinnedToCore(cmdHandlerTask,             /* task function. */
@@ -155,7 +159,7 @@ void app_main(void) {
   console << msg << NL;
 #endif
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, 150);
+  msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 100);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -175,7 +179,7 @@ void app_main(void) {
   console << msg << NL;
   dac.verboseModeDAC = false;
   // IOExt
-  msg = ioExt.init_t(1, 10, 10000, 100);
+  msg = ioExt.init_t(1, 10, 10000, base_offset_suspend + 150);
   console << msg << NL;
   ioExt.verboseModeDIn = false;
   ioExt.verboseModeDInHandler = false;
@@ -192,7 +196,7 @@ void app_main(void) {
   msg = ioExt.report_task_init();
   console << msg << NL;
   // ADC
-  msg = adc.init_t(1, 12, 10000, 150);
+  msg = adc.init_t(1, 20, 10000, base_offset_suspend + 100);
   console << msg << NL;
   adc.verboseModeADC = false;
   adc.verboseModeADCDebug = false;
@@ -207,15 +211,23 @@ void app_main(void) {
   console << " done." << NL;
   msg = adc.report_task_init();
   console << msg << NL;
-
-  // Driver Display
-  // NOT available on DC
+  // Constant speed (PID)
+  msg = constSpeed.init_t(1, 15, 10000, base_offset_suspend + 150);
+  console << msg << NL;
+  constSpeed.verboseModePID = false;
+  console << "[  ] Create " << constSpeed.getName() << " task ...";
+  xTaskCreatePinnedToCore(constSpeedTask,                    /* task function. */
+                          constSpeed.getInfo(),       /* name of task. */
+                          constSpeed.getStackSize(),  /* stack size of task */
+                          NULL,                       /* parameter of the task */
+                          constSpeed.getPriority(),   /* priority of the task */
+                          constSpeed.getTaskHandle(), /* task handle to keep track of created task */
+                          constSpeed.getCoreId());    /* pin task to core id */
+  console << " done." << NL;
+  msg = constSpeed.report_task_init();
+  console << msg << NL;
   console << "------------------------------------------------------------" << NL;
-  if (i2cBus.isDC()) {
-    console << "Initialization ready as DriveController" << NL;
-  } else {
-    console << "Initialization ready as AuxiliaryController" << NL;
-  }
+  console << "Initialization ready as DriveController" << NL;
   console << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
   console << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
   console << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
@@ -226,6 +238,8 @@ void app_main(void) {
   console << fmt::format("- canBus.verboseModeDOut        = {}", ioExt.verboseModeDOut) << NL;
   console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
   console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
+  console << fmt::format("- constSpeed.verboseModePID     = {}", constSpeed.verboseModePID) << NL;
   console << "------------------------------------------------------------" << NL;
+  delay(1000);
   SystemInited = true;
 }

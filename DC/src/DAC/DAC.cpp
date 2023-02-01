@@ -50,10 +50,10 @@ string DAC::init() {
 uint8_t DAC::get_cmd(pot_chan channel) {
   uint8_t command = BASE_ADDR_CMD;
   switch (channel) {
-  case POT_CHAN0:
+  case POT_CHAN0_ACC:
     command |= 0x1;
     break;
-  case POT_CHAN1:
+  case POT_CHAN1_DEC:
     command |= 0x2;
     break;
   case POT_CHAN_ALL:
@@ -163,9 +163,9 @@ uint16_t DAC::get_pot(pot_chan channel) {
 
   if (channel == POT_CHAN_ALL) {
     return pot0 | (pot1 << 8);
-  } else if (channel == POT_CHAN0) {
+  } else if (channel == POT_CHAN0_ACC) {
     return pot0;
-  } else { // POT_CHAN1
+  } else { // POT_CHAN1_DEC
     return pot1;
   }
 }

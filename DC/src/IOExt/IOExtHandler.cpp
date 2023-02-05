@@ -37,7 +37,7 @@ void breakPedalHandler() {
 
   carState.BreakPedal = carState.getPin(PinDI_Break)->value == 0;
   carControl.read_paddles(); // read peaddels and handels breeak
-  
+
   if (ioExt.verboseModeDInHandler)
     console << "Break pedal pressed " << (carState.BreakPedal ? "pressed" : "released") << NL;
 }
@@ -80,10 +80,7 @@ void buttonMinusHandler() {
     return;
   }
   if (carState.ConstantMode == CONSTANT_MODE::SPEED) {
-    if (carState.TargetSpeed > carState.Speed)
-      carState.TargetSpeed = carState.Speed;
-    else
-      carState.TargetSpeed -= carState.ConstSpeedIncrease;
+    carState.TargetSpeed -= carState.ConstSpeedIncrease;
     if (carState.TargetSpeed < 0)
       carState.TargetSpeed = 0;
   } else { // CONSTANT_MODE::POWER
@@ -111,10 +108,7 @@ void buttonPlusHandler() {
     return;
   }
   if (carState.ConstantMode == CONSTANT_MODE::SPEED) {
-    if (carState.TargetSpeed < carState.Speed)
-      carState.TargetSpeed = carState.Speed;
-    else
-      carState.TargetSpeed += carState.ConstSpeedIncrease;
+    carState.TargetSpeed += carState.ConstSpeedIncrease;
     if (carState.TargetSpeed > 111) // only until 111km/h
       carState.TargetSpeed = 111;
   } else { // CONSTANT_MODE::POWER

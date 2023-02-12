@@ -43,6 +43,7 @@ public:
                     "\t  [I]                 - verbose CAN in native packages\n"
                     "\t  [o]                 - verbose CAN out\n"
                     "\t  [O]                 - verbose CAN out native packages\n"
+                    "\t  [S]                 - verbose sd card\n"
                     "\t  motC batV           - inject motor current [A] and battery voltage [V]\n"
                     "\tO _ _ _ _ _ _ _ _ _ _ set CarControl verbose mode\n"
                     "\t  [o]                 - verbose\n"

@@ -12,7 +12,7 @@
 #include <CAN.h>
 #include <Wire.h> // I2C
 
-#include <ADC.h>
+#include <ADC_SER.h>
 #include <CANBus.h>
 #include <CarControl.h>
 // #include <CarSpeed.h>

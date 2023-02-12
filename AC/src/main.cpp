@@ -48,6 +48,7 @@
 #include <I2CBus.h>
 #include <OneWire.h>
 #include <OneWireBus.h>
+#include <SDCard.h>
 #include <SPIBus.h>
 #include <Serial.h>
 #include <System.h>
@@ -71,11 +72,12 @@ CmdHandler cmdHandler;
 Console console;
 DriverDisplay driverDisplay;
 EngineerDisplay engineerDisplay;
-GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
+GPInputOutput gpio; // I2C Interrupts, ESP32 GPInputOutput pin settings
 I2CBus i2cBus;
-// OneWireBus oneWireBus;
+SDCard sdCard;
 SPIBus spiBus;
 Uart uart; // SERIAL
+// OneWireBus oneWireBus;
 
 static void canBusTask(void *pvParams) { canBus.task(pvParams); }
 static void carControlTask(void *pvParams) { carControl.task(pvParams); }
@@ -152,7 +154,11 @@ void app_main(void) {
   msg = canBus.report_task_init();
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
+
+  delay(10);
+
 #if COMMANDHANDLER_ON
+  //------------------------------------------------------------
   // CMD Handler
   msg = cmdHandler.init_t(1, 1, 10000, base_offset_suspend + 300);
   console << msg << NL;
@@ -169,6 +175,10 @@ void app_main(void) {
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
 #endif
+
+  delay(10);
+
+  //------------------------------------------------------------
   // Car Control AC
   msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 100);
   console << msg << NL;
@@ -197,6 +207,9 @@ void app_main(void) {
   }
   engineerDisplay.print("start");
   engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
+
+  delay(10);
+
   //------------------------------------------------------------
   // Driver Display
   msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 110);
@@ -215,7 +228,22 @@ void app_main(void) {
   msg = carControl.report_task_init();
   console << msg << driverDisplay.get_DisplayStatus_text() << NL;
   engineerDisplay.print(msg + "\n");
-  delay(1000);
+
+  delay(10);
+
+  //------------------------------------------------------------
+  // Driver Display
+  // sdCardDetectHandler();
+  msg = sdCard.init();
+  console << msg << "\n";
+  engineerDisplay.print(msg + "\n");
+
+  //--- SD card available
+  carState.init_values();
+  sdCard.open_log_file();
+  //------from now config ini values can be used
+
+  delay(10);
 
   console << "------------------------------------------------------------" << NL;
   if (i2cBus.isDC()) {

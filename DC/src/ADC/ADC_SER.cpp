@@ -13,7 +13,7 @@
 #include <ADS1X15.h>
 #include <Wire.h> // I2C
 
-#include <ADC.h>
+#include <ADC_SER.h>
 #include <AbstractTask.h>
 #include <CarState.h>
 #include <Console.h>

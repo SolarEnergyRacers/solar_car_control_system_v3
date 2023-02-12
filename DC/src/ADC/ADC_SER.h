@@ -2,8 +2,8 @@
  * Analog to Digital Converter
  */
 
-#ifndef SOLAR_CAR_CONTROL_SYSTEM_ADC_H
-#define SOLAR_CAR_CONTROL_SYSTEM_ADC_H
+#ifndef SOLAR_CAR_CONTROL_SYSTEM_ADC_SER_H
+#define SOLAR_CAR_CONTROL_SYSTEM_ADC_SER_H
 
 #include <string>
 
@@ -46,4 +46,4 @@ public:
   bool verboseModeADCDebug = false;
 };
 
-#endif // SOLAR_CAR_CONTROL_SYSTEM_ADC_H
+#endif // SOLAR_CAR_CONTROL_SYSTEM_ADC_SER_H

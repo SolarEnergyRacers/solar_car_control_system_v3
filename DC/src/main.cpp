@@ -34,7 +34,7 @@
 #include <AbstractTask.h>
 #include <LocalFunctionsAndDevices.h>
 // local components
-#include <ADC.h>
+#include <ADC_SER.h>
 #include <CANBus.h>
 #include <CarControl.h>
 #include <CmdHandler.h>

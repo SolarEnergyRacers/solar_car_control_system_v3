@@ -61,7 +61,7 @@ remove `-D CURRENT_TIME=$UNIX_TIME` from `build_flags`
 #### FIX
 
 - Change for Linux: `.pio/libdeps/esp32dev-linux/fmt/include/fmt/core.h` at line 1120ff
-- - Change for Windows: `.pio/libdeps/esp32dev-windows/fmt/include/fmt/core.h` at line 1120ff
+- Change for Windows: `.pio/libdeps/esp32dev-windows/fmt/include/fmt/core.h` at line 1120ff
 
 ```c++
 // marker line:

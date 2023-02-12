@@ -22,8 +22,7 @@
 #include <EngineerDisplay.h>
 #include <Helper.h>
 #include <I2CBus.h>
-// #include <IOExt.h>
-// #include <SDCard.h>
+#include <SDCard.h>
 
 extern CANBus canBus;
 extern CarControl carControl;
@@ -32,8 +31,7 @@ extern Console console;
 // extern DriverDisplay driverDisplay;
 // extern EngineerDisplay engineerDisplay;
 extern I2CBus i2cBus;
-// extern IOExt ioExt;
-// extern SDCard sdCard;
+extern SDCard sdCard;
 
 extern bool SystemInited;
 
@@ -66,7 +64,7 @@ bool CarControl::read_nextScreenButton() {
   if (!SystemInited)
     return false;
 
-  int button1pressed = !digitalRead(ESP32_AC_BUTTON_1);
+  int button1pressed = !digitalRead(ESP32_AC_BUTTON_AC_NEXT);
   if (!button1pressed)
     return false;
 
@@ -85,16 +83,45 @@ bool CarControl::read_nextScreenButton() {
   return true;
 }
 
+bool CarControl::read_sd_card_detect() {
+  if (!SystemInited)
+    return false;
+
+  // TODO: check hardware: sd detect signal does not work (2023.02.12)
+  // carState.SdCardDetect = !digitalRead(ESP32_AC_DIS_DC);
+  // if (!carState.SdCardDetect)
+  //   return false;
+
+  return true;
+}
+
+bool CarControl::read_const_mode() {
+  if (!SystemInited)
+    return false;
+
+  bool button2pressed = !digitalRead(ESP32_AC_BUTTON_CONST_MODE); // switch constant mode (Speed, Power)
+  if (!button2pressed)
+    return false;
+
+  carState.ConstantMode = (carState.ConstantMode == CONSTANT_MODE::POWER) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+
+  return true;
+}
+
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
 
-      read_nextScreenButton();
+      bool button2pressed = read_nextScreenButton();
+      bool sd_detected = read_sd_card_detect();
+      read_const_mode();
 
-      bool button2pressed = !digitalRead(ESP32_AC_BUTTON_2); // switch constant mode (Speed, Power)
-      if (button2pressed) {
-        carState.ConstantMode = (carState.ConstantMode == CONSTANT_MODE::POWER) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
-      }
+      // if (sd_detected)
+      //   console << "SD-card detected." << NL;
+      // else
+      //   console << "NO SD-card detected." << NL;
+
+      delay(1);
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
@@ -102,26 +129,28 @@ void CarControl::task(void *pvParams) {
                          (uint16_t)0,            // empty
                          (uint16_t)0             // empty
       );
-
+      delay(1);
       if (carControl.verboseModeDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
                                canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button2pressed)
                 << NL;
 
-      // // one data row per second
-      // if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-      //   // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
-      //   //   sdCard.write(record);
-      //   //   millisNextStampCsv = millis() + carState.LogInterval;
-      //   // }
-      //   if (verboseModeCarControlMax) {
-      //     string record = carState.csv();
-      //     if (millis() > millisNextStampSnd) {
-      //       console << "d: " + record;
-      //       millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-      //     }
-      //   }
-      // }
+      // one data row per second
+      if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
+        console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
+        string record = carState.csv();
+        if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
+          if (sdCard.verboseModeDebug)
+            console << "d: " << record << NL;
+          sdCard.write(record);
+          millisNextStampCsv = millis() + carState.LogInterval;
+        }
+        if (sdCard.verboseModeDebug) {
+          if (millis() > millisNextStampSnd) {
+            millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+          }
+        }
+      }
     }
     taskSuspend();
   }

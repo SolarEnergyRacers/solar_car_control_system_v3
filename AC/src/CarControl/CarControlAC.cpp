@@ -137,7 +137,7 @@ void CarControl::task(void *pvParams) {
 
       // one data row per second
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-        console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
+        //console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
         string record = carState.csv();
         if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
           if (sdCard.verboseModeDebug)

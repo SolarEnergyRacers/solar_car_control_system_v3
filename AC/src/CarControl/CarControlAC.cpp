@@ -87,12 +87,20 @@ bool CarControl::read_sd_card_detect() {
   if (!SystemInited)
     return false;
 
-  // TODO: check hardware: sd detect signal does not work (2023.02.12)
-  // carState.SdCardDetect = !digitalRead(ESP32_AC_DIS_DC);
-  // if (!carState.SdCardDetect)
-  //   return false;
+  bool sdCardDetectOld = carState.SdCardDetect;
+  carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
 
-  return true;
+  if (carState.SdCardDetect && !sdCardDetectOld) {
+    console << "SD card detected, try to start logging...\n";
+    string msg = sdCard.init();
+    console << msg << "\n";
+    string state = carState.csv("Recent State", true); // with header
+    sdCard.write(state);
+    sdCard.open_log_file();
+  } else if (!carState.SdCardDetect && sdCardDetectOld) {
+    console << "SD card removed.\n";
+  }
+  return carState.SdCardDetect;
 }
 
 bool CarControl::read_const_mode() {
@@ -116,12 +124,8 @@ void CarControl::task(void *pvParams) {
       bool sd_detected = read_sd_card_detect();
       read_const_mode();
 
-      // if (sd_detected)
-      //   console << "SD-card detected." << NL;
-      // else
-      //   console << "NO SD-card detected." << NL;
-
       delay(1);
+
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
@@ -137,7 +141,7 @@ void CarControl::task(void *pvParams) {
 
       // one data row per second
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-        //console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
+        // console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
         string record = carState.csv();
         if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
           if (sdCard.verboseModeDebug)

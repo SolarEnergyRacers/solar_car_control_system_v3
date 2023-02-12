@@ -149,8 +149,6 @@ bool CarControl::read_paddles() {
         carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
       }
     }
-
-
   }
 
   if (accelerationDisplayLast != carState.AccelerationDisplay) {
@@ -186,10 +184,11 @@ void CarControl::task(void *pvParams) {
       read_reference_cell_data();
       read_speed();
       read_potentiometer();
+      delay(1);
       if (read_paddles())
         set_DAC();
       carState.LifeSign++;
-
+      delay(1);
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          carState.Potentiometer, // Potentiometer value
@@ -212,7 +211,7 @@ void CarControl::task(void *pvParams) {
                          false,                                   // empty
                          false                                    // empty
       );
-
+      delay(1);
       if (carControl.verboseModeDebug) {
         console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
                                canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,

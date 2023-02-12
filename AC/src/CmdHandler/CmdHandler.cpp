@@ -26,7 +26,6 @@
 
 #include <CANBus.h>
 #include <CarControl.h>
-#include <CANBus.h>
 #include <CarState.h>
 #include <CarStatePin.h>
 #include <CmdHandler.h>
@@ -133,21 +132,17 @@ void CmdHandler::task(void *pvParams) {
           break;
         case 'V':
           state = carState.csv("Recent State", input[1] == '+' ? true : false); // with header
-          console << "Not implemented yet!" << NL;
-          // sdCard.write(state);
-          // console << state;
+          sdCard.write(state);
+          console << state;
           break;
         case 'M':
-          console << "Not implemented yet!" << NL;
-          // sdCard.mount();
+          sdCard.mount();
           break;
         case 'P':
-          console << "Not implemented yet!" << NL;
-          // sdCard.directory();
+          sdCard.directory();
           break;
         case 'U':
-          console << "Not implemented yet!" << NL;
-          // sdCard.unmount();
+          sdCard.unmount();
           break;
         case 'H':
           console << "Not implemented yet!" << NL;
@@ -206,7 +201,7 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'O') {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
-         } else if (input[1] == 'S') {
+          } else if (input[1] == 'S') {
             sdCard.verboseModeDebug = !sdCard.verboseModeDebug;
             console << "set verboseModeDebug: " << sdCard.verboseModeDebug << NL;
           } else {

@@ -36,7 +36,7 @@ string GPInputOutput::init() {
 
   pinMode(ESP32_AC_BUTTON_AC_NEXT, INPUT);
   pinMode(ESP32_AC_BUTTON_CONST_MODE, INPUT);
-  pinMode(ESP32_AC_DIS_DC, INPUT);
+  pinMode(ESP32_AC_SD_DETECT, INPUT);
 
   digitalWrite(SPI_CS_TFT, HIGH);
   digitalWrite(SPI_CS_SDCARD, HIGH);
@@ -51,14 +51,14 @@ void GPInputOutput::exit() {
 
 void GPInputOutput::register_gpio_interrupt() {
 
-  // report
-  console << "[HW Interrupt] Register GPIO interrupt pin " << GPIO_INTERRUPT_PIN << " (falling edge)\n";
+  // // report
+  // console << "[HW Interrupt] Register GPIO interrupt pin " << GPIO_INTERRUPT_PIN << " (falling edge)\n";
 
-  // set operating mode of interrupt pin to pull-up (i.e. interrupt is generated
-  // if pin is getting grounded)
-  pinMode(GPIO_INTERRUPT_PIN, INPUT_PULLUP);
-  // register interrupt routine
-  attachInterrupt(digitalPinToInterrupt(GPIO_INTERRUPT_PIN), handle_gpio_interrupt, FALLING);
+  // // set operating mode of interrupt pin to pull-up (i.e. interrupt is generated
+  // // if pin is getting grounded)
+  // pinMode(GPIO_INTERRUPT_PIN, INPUT_PULLUP);
+  // // register interrupt routine
+  // attachInterrupt(digitalPinToInterrupt(GPIO_INTERRUPT_PIN), handle_gpio_interrupt, FALLING);
 }
 
 volatile int GPInputOutput::interrupt_counter = 0;

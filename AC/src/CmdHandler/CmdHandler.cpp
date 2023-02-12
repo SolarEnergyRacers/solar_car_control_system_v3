@@ -36,21 +36,18 @@
 #include <EngineerDisplay.h>
 #include <Helper.h>
 #include <I2CBus.h>
-// #include <IOExt.h>
-// #include <IOExtHandler.h>
 // #include <RTC.h>
-// #include <SDCard.h>
+#include <SDCard.h>
 #include <System.h>
 
 extern CANBus can;
 extern I2CBus i2cBus;
 extern CarState carState;
 extern CANBus canBus;
-// extern CarSpeed carSpeed;
 extern CarControl carControl;
 extern DriverDisplay driverDisplay;
 extern EngineerDisplay engineerDisplay;
-// extern SDCard sdCard;
+extern SDCard sdCard;
 extern Console console;
 #if RTC_ON
 extern RTC rtc;
@@ -209,6 +206,9 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'O') {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
+         } else if (input[1] == 'S') {
+            sdCard.verboseModeDebug = !sdCard.verboseModeDebug;
+            console << "set verboseModeDebug: " << sdCard.verboseModeDebug << NL;
           } else {
             string arr[4];
             splitString(arr, &input[1]);

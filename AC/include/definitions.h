@@ -18,8 +18,9 @@
 /*
  * ESP32 IOs.
  */
-#define ESP32_AC_BUTTON_1 27
-#define ESP32_AC_BUTTON_2 33
+#define ESP32_AC_BUTTON_AC_NEXT 27  // Next Screen
+#define ESP32_AC_BUTTON_CONST_MODE 33  // switch constant mode (Speed, Power)
+#define ESP32_AC_DIS_DC 35  // SD card detect
 
 /* Non free selectable addresses:
  *

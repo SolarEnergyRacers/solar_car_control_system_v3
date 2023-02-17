@@ -36,27 +36,47 @@ Version 2023.01.01
 | Speed                 | <   | analog 0-5V |                       |
 
 ### Communication BMS - MC
-
+[BMS Comm Documentation](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/blob/add_comm_documentation/docs/PRH67.010v2-BMS-BMU-Communications-Protocol.pdf)
 | BMS (battery management system) | Dir | Type | DC (drive controller) |
 |---------------------------------|-----|------|-----------------------|
-| (see c++)                       | >   | CAN  |                       |
+| (see docs)                      | >   | CAN  |                       |
 
 ### Communication MPPT - MC
-
+[MPPT Documentation](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/blob/add_comm_documentation/docs/Elmar_Solar_MPPT.pdf)
 | MPPT (maximum power point tracker) | Dir | Type | DC (drive controller) |
 |------------------------------------|-----|------|-----------------------|
-|                                    | >   | CAN  |                       |
+| (see docs)                         | >   | CAN  |                       |
 
 ### Communication AC-Chase Car
 
 #### Envelope, Encodeing
+Forward some CAN Frames, encoded as ASCII chars
+The id (11 bits) and data (64 bits) parts of the CAN frame get transmitted
+
+The id is encoded into two chars, aligned by least significant bit.
+The 5 unused bits are set to 1 to make the start of the CAN frame easier to identify.
+\[ char 0 \]\[ char 1 \]
+  11111abc    defghijk
 
 #### Data Frames
 
 | AC | Dir | Type | ChaseCar |
-|------------------------------------|-----|------|-----------------------|
-|                                    | >   | CAN  |                       |
+|------------------------------------|-----|-------|-----------------------|
+| MPPT Outputs (MPPT Base+1)         | >   | CAN*  |                       |
+| BMS min/max Voltage (BMS Base+F8)  | >   | CAN*  |                       |
+| BMS min/max Temp (BMS Base+F9)     | >   | CAN*  |                       |
+| BMS voltage & current (BMS Base+FA)| >   | CAN*  |                       |
+| BMS extended status (BMS Base+FD)  | >   | CAN*  |                       |
 
+##### nice-to-haves
+
+| AC | Dir | Type | ChaseCar |
+|------------------------------------|-----|-------|-----------------------|
+| MPPT Inputs (MPPT Base+0)          | >   | CAN*  |                       |
+| MPPT Status (MPPT Base+3)          | >   | CAN*  |                       |
+| BMS cell Voltages (BMS Base+[1..]) | >   | CAN*  |                       |
+
+* CAN frames ecoded to ASCII chars, transmitted over serial
 
 ## DC Data
 

@@ -55,7 +55,9 @@ The id (11 bits) and data (64 bits) parts of the CAN frame get transmitted
 
 The id is encoded into two chars, aligned by least significant bit.
 The 5 unused bits are set to 1 to make the start of the CAN frame easier to identify.
+
 \[ char 0 \]\[ char 1 \]
+
   11111abc    defghijk
 
 #### Data Frames

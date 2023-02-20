@@ -59,6 +59,8 @@ The 5 unused bits are set to 1 to make the start of the CAN frame easier to iden
 \[ char 0 \]\[ char 1 \]
 
   11111abc    defghijk
+a = MSB
+k = LSB
 
 #### Data Frames
 
@@ -69,6 +71,8 @@ The 5 unused bits are set to 1 to make the start of the CAN frame easier to iden
 | BMS min/max Temp (BMS Base+F9)     | >   | CAN*  |                       |
 | BMS voltage & current (BMS Base+FA)| >   | CAN*  |                       |
 | BMS extended status (BMS Base+FD)  | >   | CAN*  |                       |
+| DC Speed, Accel., buttons (0x661)  | >   | CAN*  |                       |
+|                                    | < > | Serial(text)| CommandHandler cmds |
 
 ##### nice-to-haves
 
@@ -78,7 +82,7 @@ The 5 unused bits are set to 1 to make the start of the CAN frame easier to iden
 | MPPT Status (MPPT Base+3)          | >   | CAN*  |                       |
 | BMS cell Voltages (BMS Base+[1..]) | >   | CAN*  |                       |
 
-* CAN frames ecoded to ASCII chars, transmitted over serial
+\* CAN frames ecoded to ASCII chars, transmitted over serial
 
 ## DC Data
 

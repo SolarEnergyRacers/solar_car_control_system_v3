@@ -56,9 +56,13 @@ The id (11 bits) and data (64 bits) parts of the CAN frame get transmitted
 The id is encoded into two chars, aligned by least significant bit.
 The 5 unused bits are set to 1 to make the start of the CAN frame easier to identify.
 
-\[ char 0 \]\[ char 1 \]
+\[ char 0 \]  \[ char 1 \]
 
   11111abc    defghijk
+
+a = MSB
+
+k = LSB
 
 #### Data Frames
 
@@ -69,6 +73,9 @@ The 5 unused bits are set to 1 to make the start of the CAN frame easier to iden
 | BMS min/max Temp (BMS Base+F9)     | >   | CAN*  |                       |
 | BMS voltage & current (BMS Base+FA)| >   | CAN*  |                       |
 | BMS extended status (BMS Base+FD)  | >   | CAN*  |                       |
+| DC Speed, Accel., buttons (0x661)  | >   | CAN*  |                       |
+| AC Display Data (0x630)            | >   | CAN*  |                       |
+|                                    | < > | Serial(text)| CommandHandler cmds |
 
 ##### nice-to-haves
 
@@ -78,7 +85,7 @@ The 5 unused bits are set to 1 to make the start of the CAN frame easier to iden
 | MPPT Status (MPPT Base+3)          | >   | CAN*  |                       |
 | BMS cell Voltages (BMS Base+[1..]) | >   | CAN*  |                       |
 
-* CAN frames ecoded to ASCII chars, transmitted over serial
+\* CAN frames ecoded to ASCII chars, transmitted over serial
 
 ## DC Data
 
@@ -151,7 +158,7 @@ b      | [60]   | 7      |
 b      | [61]   | 7      | 
 b      | [62]   | 7      | 
 b      | [63]   | 7      | 
-       |        |        |
+
 ~~b    | [48]   | 6      | Button Lvl Plus~~
 ~~b    | [49]   | 6      | Button Lvl Minus~~
 ~~b    | [50]   | 6      | Button Lvl Const Mode Set~~

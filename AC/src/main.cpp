@@ -60,7 +60,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 150;
+int base_offset_suspend = 300;
 bool SystemInited = false;
 bool SystemJustInited = true;
 uint64_t life_sign = 0;
@@ -130,9 +130,9 @@ void app_main(void) {
                           engineerDisplay.getPriority(),   /* priority of the task */
                           engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
                           engineerDisplay.getCoreId());    /* pin task to core id */
-  engineerDisplay.clear_screen(0xffff);
   console << " done." << NL;
-  msg = carControl.report_task_init();
+  engineerDisplay.clear_screen(0xffff);
+  msg = engineerDisplay.report_task_init();
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
   // CAN Bus
@@ -155,7 +155,7 @@ void app_main(void) {
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
 
-  delay(10);
+  vTaskDelay(10);
 
 #if COMMANDHANDLER_ON
   //------------------------------------------------------------
@@ -176,7 +176,7 @@ void app_main(void) {
   engineerDisplay.print(msg + "\n");
 #endif
 
-  delay(10);
+  vTaskDelay(10);
 
   //------------------------------------------------------------
   // Car Control AC
@@ -208,7 +208,7 @@ void app_main(void) {
   engineerDisplay.print("start");
   engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
 
-  delay(10);
+  vTaskDelay(10);
 
   //------------------------------------------------------------
   // Driver Display
@@ -229,7 +229,7 @@ void app_main(void) {
   console << msg << driverDisplay.get_DisplayStatus_text() << NL;
   engineerDisplay.print(msg + "\n");
 
-  delay(10);
+  vTaskDelay(10);
 
   //------------------------------------------------------------
   // Driver Display
@@ -243,7 +243,7 @@ void app_main(void) {
   sdCard.open_log_file();
   //------from now config ini values can be used
 
-  delay(10);
+  vTaskDelay(10);
 
   console << "------------------------------------------------------------" << NL;
   if (i2cBus.isDC()) {

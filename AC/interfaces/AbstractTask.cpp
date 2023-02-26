@@ -58,6 +58,6 @@ void AbstractTask::exit() { vTaskDelete(xHandle); }
 string AbstractTask::report_task_init() { return report_task_init(this); };
 
 string AbstractTask::report_task_init(AbstractTask *task) {
-  return fmt::format("[ok] {} task started: prio{}, suspend {}ms, stack {}. core{}",
+  return fmt::format("[ok] {} task started: prio{}, suspend {}ms,\n     stack {}. core{}",
    task->getName(), task->priority, task->sleep_polling * portTICK_PERIOD_MS, task->stack_size, task->core_id );
 }

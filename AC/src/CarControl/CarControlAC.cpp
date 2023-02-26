@@ -121,10 +121,10 @@ void CarControl::task(void *pvParams) {
     if (SystemInited) {
 
       bool button2pressed = read_nextScreenButton();
-      bool sd_detected = read_sd_card_detect();
+      read_sd_card_detect();
       read_const_mode();
 
-      delay(1);
+      vTaskDelay(10);
 
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
@@ -133,16 +133,17 @@ void CarControl::task(void *pvParams) {
                          (uint16_t)0,            // empty
                          (uint16_t)0             // empty
       );
-      delay(1);
+      vTaskDelay(10);
       if (carControl.verboseModeDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
                                canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button2pressed)
                 << NL;
-
+      vTaskDelay(10);
       // one data row per second
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
         // console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
         string record = carState.csv();
+        vTaskDelay(10);
         if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
           if (sdCard.verboseModeDebug)
             console << "d: " << record << NL;

@@ -184,17 +184,18 @@ void CarControl::task(void *pvParams) {
       read_reference_cell_data();
       read_speed();
       read_potentiometer();
-      delay(1);
+      vTaskDelay(10);
       if (read_paddles())
         set_DAC();
       carState.LifeSign++;
-      delay(1);
+      vTaskDelay(10);
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          carState.Potentiometer, // Potentiometer value
                          carState.Acceleration,  // HAL-paddle Acceleration ADC value
                          carState.Deceleration   // HAL-paddle Deceleration ADC value
       );
+      vTaskDelay(10);
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
       canBus.writePacket(DC_BASE_ADDR | 0x01,
                          (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
@@ -211,7 +212,7 @@ void CarControl::task(void *pvParams) {
                          false,                                   // empty
                          false                                    // empty
       );
-      delay(1);
+      vTaskDelay(10);
       if (carControl.verboseModeDebug) {
         console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
                                canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,

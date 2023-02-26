@@ -60,7 +60,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 150;
+int base_offset_suspend = 0;
 bool SystemInited = false;
 bool SystemJustInited = true;
 bool adcInited = false;
@@ -143,7 +143,7 @@ void app_main(void) {
   msg = canBus.report_task_init();
   console << msg << NL;
 
-  delay(10);
+  vTaskDelay(10);
 
 #if COMMANDHANDLER_ON
   // CMD Handler
@@ -162,7 +162,7 @@ void app_main(void) {
   console << msg << NL;
 #endif
 
-  delay(10);
+  vTaskDelay(10);
 
   // Car Control AC
   msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 100);
@@ -185,7 +185,7 @@ void app_main(void) {
   console << msg << NL;
   dac.verboseModeDAC = false;
 
-  delay(10);
+  vTaskDelay(10);
 
   // IOExt
   msg = ioExt.init_t(1, 10, 10000, base_offset_suspend + 150);
@@ -205,7 +205,7 @@ void app_main(void) {
   msg = ioExt.report_task_init();
   console << msg << NL;
 
-  delay(10);
+  vTaskDelay(10);
 
   // ADC
   msg = adc.init_t(1, 20, 10000, base_offset_suspend + 100);
@@ -224,7 +224,7 @@ void app_main(void) {
   msg = adc.report_task_init();
   console << msg << NL;
 
-  delay(10);
+  vTaskDelay(10);
 
   // Constant speed (PID)
   msg = constSpeed.init_t(1, 15, 10000, base_offset_suspend + 150);
@@ -242,7 +242,7 @@ void app_main(void) {
   msg = constSpeed.report_task_init();
   console << msg << NL;
 
-  delay(10);
+  vTaskDelay(10);
 
   console << "------------------------------------------------------------" << NL;
   console << "Initialization ready as DriveController" << NL;
@@ -258,6 +258,6 @@ void app_main(void) {
   console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
   console << fmt::format("- constSpeed.verboseModePID     = {}", constSpeed.verboseModePID) << NL;
   console << "------------------------------------------------------------" << NL;
-  delay(10);
+  vTaskDelay(10);
   SystemInited = true;
 }

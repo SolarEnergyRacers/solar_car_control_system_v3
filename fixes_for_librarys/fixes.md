@@ -72,13 +72,13 @@ template <bool BOOL1, bool BOOL2, bool... Tail> constexpr auto count() -> size_t
 }
 ```
 
-### esp32-hal-gpio.c
+### ~~esp32-hal-gpio.c~~
 
-#### Error Message
+#### ~~Error Message~~
 
 ???
 
-#### Files affeced
+#### ~~Files affeced~~
 
 ```bash
 /home/ksc/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.c: In function '__pinMode':

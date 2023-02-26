@@ -10,6 +10,8 @@ writes the file `sdconfig` and sdconfig.esp32dev
 
 `pio run -t nobuild -t upload --disable-auto-clean`
 
+`platformio run --target upload --target monitor --environment esp32dev-linux` 
+
 ## Thread Safe C++
 
 [c-thread-safe-queue](https://www.educba.com/c-thread-safe-queue/)

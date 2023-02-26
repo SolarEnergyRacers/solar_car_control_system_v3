@@ -17,7 +17,7 @@ public:
   void task(void *pvParams);
 
   // Class functions and members
-  string commands = "REDPSVMUBICOTK:!sc";
+  string commands = "REDPSVMUBICOTK:!sc?";
   string helpText = "Available commands (" + commands +
                     "):\n"
                     "\t-------- SYSTEM COMMANDS -------------------------\n"

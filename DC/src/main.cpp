@@ -243,21 +243,22 @@ void app_main(void) {
   console << msg << NL;
 
   vTaskDelay(10);
-
-  console << "------------------------------------------------------------" << NL;
-  console << "Initialization ready as DriveController" << NL;
-  console << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
-  console << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
-  console << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
-  console << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
-  console << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
-  console << fmt::format("- canBus.verboseModeDIn         = {}", ioExt.verboseModeDIn) << NL;
-  console << fmt::format("- canBus.verboseModeDInHandler  = {}", ioExt.verboseModeDInHandler) << NL;
-  console << fmt::format("- canBus.verboseModeDOut        = {}", ioExt.verboseModeDOut) << NL;
-  console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
-  console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
-  console << fmt::format("- constSpeed.verboseModePID     = {}", constSpeed.verboseModePID) << NL;
-  console << "------------------------------------------------------------" << NL;
+  stringstream ss("------------------------------------------------------------");
+  ss << NL;
+  ss << "Initialization ready as DriveController" << NL;
+  ss << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
+  ss << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
+  ss << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
+  ss << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
+  ss << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  ss << fmt::format("- canBus.verboseModeDIn         = {}", ioExt.verboseModeDIn) << NL;
+  ss << fmt::format("- canBus.verboseModeDInHandler  = {}", ioExt.verboseModeDInHandler) << NL;
+  ss << fmt::format("- canBus.verboseModeDOut        = {}", ioExt.verboseModeDOut) << NL;
+  ss << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
+  ss << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
+  ss << fmt::format("- constSpeed.verboseModePID     = {}", constSpeed.verboseModePID) << NL;
+  ss << "------------------------------------------------------------" << NL;
   vTaskDelay(10);
+  console << ss.str();
   SystemInited = true;
 }

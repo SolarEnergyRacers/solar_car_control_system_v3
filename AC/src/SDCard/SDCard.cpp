@@ -49,17 +49,17 @@ bool SDCard::mount() {
   if (!carState.SdCardDetect) {
     console << "     No SD card detected!\n";
     mounted = false;
-    // xSemaphoreTakeT(spiBus.mutex);
+    xSemaphoreTakeT(spiBus.mutex);
     SD.end();
-    // xSemaphoreGive(spiBus.mutex);
+    xSemaphoreGive(spiBus.mutex);
     return false;
   }
   try {
     console << "     Mounting SD card ...\n";
-    // xSemaphoreGive(spiBus.mutex);
+     xSemaphoreGive(spiBus.mutex);
     xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
-    mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 4000000);
+    mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
     xSemaphoreGive(spiBus.mutex);
     console << "xxx";
     if (mounted) {

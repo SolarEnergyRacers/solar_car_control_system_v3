@@ -60,7 +60,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 300;
+int base_offset_suspend = 0;
 bool SystemInited = false;
 bool SystemJustInited = true;
 uint64_t life_sign = 0;
@@ -244,21 +244,18 @@ void app_main(void) {
   //------from now config ini values can be used
 
   vTaskDelay(10);
-
-  console << "------------------------------------------------------------" << NL;
-  if (i2cBus.isDC()) {
-    console << "Initialization ready as DriveController" << NL;
-  } else {
-    console << "Initialization ready as AuxiliaryController" << NL;
-  }
-  console << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
-  console << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
-  console << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
-  console << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
-  console << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
-  console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
-  console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
-  console << "------------------------------------------------------------" << NL;
-  delay(1000);
+  stringstream ss("------------------------------------------------------------");
+  ss << NL;
+  ss << "Initialization ready as AuxiliaryController" << NL;
+  ss << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
+  ss << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
+  ss << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
+  ss << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
+  ss << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  ss << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
+  ss << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
+  ss << "------------------------------------------------------------" << NL;
+  vTaskDelay(10);
+  console << ss.str();
   SystemInited = true;
 }

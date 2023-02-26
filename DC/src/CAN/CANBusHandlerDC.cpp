@@ -121,6 +121,8 @@ void CANBus::init_ages() {
 int CANBus::handle_rx_packet(CANPacket packet) {
   int retValue = 0;
   int packetId = packet.getId();
+  if (canBus.verboseModeCanInNative)
+    console << print_raw_packet("R", packet) << NL;
   // Do something with packet
   switch (packetId) {
   case AC_BASE_ADDR | 0x00: {

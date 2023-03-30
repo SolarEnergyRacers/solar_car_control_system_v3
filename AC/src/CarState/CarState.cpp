@@ -51,7 +51,7 @@ void CarState::init_values() {
   ConstantModeOn = false;
   TargetSpeed = 0;
   TargetPower = 0;
-  DriverInfo = "Acceleration\nstill locked!";
+  DriverInfo = "No DC connection!";
   DriverInfoType = INFO_TYPE::STATUS;
   Light = LIGHT::OFF;
   GreenLight = false;

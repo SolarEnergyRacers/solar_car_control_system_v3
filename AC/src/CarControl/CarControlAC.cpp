@@ -116,16 +116,27 @@ bool CarControl::read_const_mode() {
   return true;
 }
 
+int cyclecounter = 0;
+void vTaskDelay_debug(int delay_ms, string msg) {
+  console << msg;
+  vTaskDelay(10);
+}
+
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-
+      cyclecounter++;
+      if (cyclecounter > 50) {
+        console << NL;
+        cyclecounter = 0;
+      }
+      vTaskDelay_debug(10, "I-");
       bool button2pressed = read_nextScreenButton();
+      vTaskDelay_debug(10, "1-");
       read_sd_card_detect();
+      vTaskDelay_debug(10, "2-");
       read_const_mode();
-
-      vTaskDelay(10);
-
+      vTaskDelay_debug(10, "3-");
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
@@ -133,29 +144,31 @@ void CarControl::task(void *pvParams) {
                          (uint16_t)0,            // empty
                          (uint16_t)0             // empty
       );
-      vTaskDelay(10);
+      vTaskDelay_debug(10, "4-");
       if (carControl.verboseModeDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
                                canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button2pressed)
                 << NL;
-      vTaskDelay(10);
+      vTaskDelay_debug(10, "5-");
       // one data row per second
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
         // console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
         string record = carState.csv();
-        vTaskDelay(10);
+        vTaskDelay_debug(10, "6-");
         if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
           if (sdCard.verboseModeDebug)
             console << "d: " << record << NL;
           sdCard.write(record);
           millisNextStampCsv = millis() + carState.LogInterval;
         }
+        vTaskDelay_debug(10, "7-");
         if (sdCard.verboseModeDebug) {
           if (millis() > millisNextStampSnd) {
             millisNextStampSnd = millis() + carState.CarDataSendPeriod;
           }
         }
       }
+      vTaskDelay_debug(10, "X.");
     }
     taskSuspend();
   }

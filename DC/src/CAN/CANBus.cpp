@@ -23,25 +23,30 @@ extern I2CBus i2cBus;
 extern CANBus canBus;
 extern bool SystemInited;
 
+BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
 
   if (!SystemInited)
     return;
 
-  int packetId = CAN.packetId();
-  if (canBus.is_to_ignore_packet(packetId))
-    return;
+  if (xSemaphoreTakeFromISR(canBus.mutex, &xHigherPriorityTaskWoken) == pdTRUE) {
+    int packetId = CAN.packetId();
+    if (canBus.is_to_ignore_packet(packetId))
+      return;
 
-  canBus.setPacketTimeStamp(packetId, millis());
+    canBus.setPacketTimeStamp(packetId, millis());
 
-  if (CAN.available()) {
-    uint64_t rxData = 0l;
-    for (int i = 0; i < packetSize && i < 8; i++) {
-      rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
+    if (CAN.available()) {
+      uint64_t rxData = 0l;
+      for (int i = 0; i < packetSize && i < 8; i++) {
+        rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
+      }
+      canBus.push(CANPacket(packetId, rxData));
     }
-    canBus.push(CANPacket(packetId, rxData));
+    xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
+  } else {
+    // TODO: log: console << "SEMAPHORE task CANBus not free for receive handler!" << NL;
   }
-  // xSemaphoreGive(canBus.mutex);
 }
 
 bool CANBus::isPacketToRenew(uint16_t packetId) {
@@ -56,7 +61,9 @@ CANBus::CANBus() {
 }
 
 string CANBus::re_init() {
+  xSemaphoreTakeT(mutex);
   CAN.end();
+  xSemaphoreGive(mutex);
   return CANBus::init();
 }
 
@@ -67,24 +74,22 @@ string CANBus::init() {
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
-    xSemaphoreGive(canBus.mutex);
-    console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
+    xSemaphoreGive(mutex);
     hasError = true;
+    console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   } else {
-    xSemaphoreGive(canBus.mutex);
+    CAN.onReceive(onReceive);
+    xSemaphoreGive(mutex);
     console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   }
-  xSemaphoreTakeT(canBus.mutex);
-  CAN.onReceive(onReceive);
-  xSemaphoreGive(canBus.mutex);
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
 
 void CANBus::exit() {
   // Exit needs to be implemented for Task, here or in AbstractTask
-  xSemaphoreTakeT(canBus.mutex);
+  xSemaphoreTakeT(mutex);
   CAN.end();
-  xSemaphoreGive(canBus.mutex);
+  xSemaphoreGive(mutex);
 }
 
 void CANBus::push(CANPacket packet) {
@@ -154,18 +159,25 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
   if (canBus.verboseModeCanOutNative)
     console << print_raw_packet("S", packet) << NL;
   try {
-    xSemaphoreTakeT(mutex);
-    CAN.beginPacket(adr);
-    CAN.write(packet.getData_i8(0));
-    CAN.write(packet.getData_i8(1));
-    CAN.write(packet.getData_i8(2));
-    CAN.write(packet.getData_i8(3));
-    CAN.write(packet.getData_i8(4));
-    CAN.write(packet.getData_i8(5));
-    CAN.write(packet.getData_i8(6));
-    CAN.write(packet.getData_i8(7));
-    CAN.endPacket();
-    xSemaphoreGive(mutex);
+    if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+      console << "++" << adr << "+";
+      CAN.beginPacket(adr);
+      CAN.write(packet.getData_i8(0));
+      CAN.write(packet.getData_i8(1));
+      CAN.write(packet.getData_i8(2));
+      CAN.write(packet.getData_i8(3));
+      CAN.write(packet.getData_i8(4));
+      CAN.write(packet.getData_i8(5));
+      CAN.write(packet.getData_i8(6));
+      CAN.write(packet.getData_i8(7));
+      CAN.endPacket();
+      console << "-.";
+      xSemaphoreGive(mutex);
+      console << "--";
+    } else {
+      console << "SEMAPHORE send CANBus not free for write!" << NL;
+      return false;
+    }
   } catch (exception &ex) {
     xSemaphoreGive(mutex);
     console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
@@ -185,12 +197,15 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      // handle recieved message with CANBus
-      xSemaphoreTakeT(canBus.mutex);
-      while (rxBuffer.isAvailable()) {
-        handle_rx_packet(rxBuffer.pop());
+      if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
+        // handle recieved message with CANBus
+        while (rxBuffer.isAvailable()) {
+          handle_rx_packet(rxBuffer.pop());
+        }
+        xSemaphoreGive(mutex);
+      } else {
+        console << "SEMAPHORE task CANBus not free for receive!" << NL;
       }
-      xSemaphoreGive(canBus.mutex);
     }
     taskSuspend();
   }

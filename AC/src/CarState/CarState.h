@@ -219,7 +219,7 @@ public:
   // [Main]
   string LogFilename; // telemetry data: %stamp% get replaced by datetime stamp if period != 0
   int LogFilePeriod;  // [h], after that a new log file is created, 0 - never
-  int LogInterval;    // [ms]
+  int LogInterval = 1000;    // [ms]
 
   // [TaskTimings]
   int SleepTimeIOExt = 400; // [ms]

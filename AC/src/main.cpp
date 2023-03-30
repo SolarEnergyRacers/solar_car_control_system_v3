@@ -136,7 +136,7 @@ void app_main(void) {
   console << msg << NL;
   engineerDisplay.print(msg + "\n");
   // CAN Bus
-  msg = canBus.init_t(0, 1, 10000, base_offset_suspend + 90);
+  msg = canBus.init_t(0, 22, 10000, base_offset_suspend + 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;

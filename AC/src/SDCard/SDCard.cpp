@@ -12,7 +12,7 @@
 
 #include <FS.h>
 #include <SD.h>
-#include <SD_MMC.h>
+// #include <SD_MMC.h>
 #include <SPI.h>
 
 #include <ADS1X15.h>

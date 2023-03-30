@@ -125,7 +125,7 @@ void app_main(void) {
   // Engineer Display
   // NOT available on DC
   // CAN Bus
-  msg = canBus.init_t(1, 10, 10000, base_offset_suspend + 90);
+  msg = canBus.init_t(0, 20, 10000, base_offset_suspend + 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;

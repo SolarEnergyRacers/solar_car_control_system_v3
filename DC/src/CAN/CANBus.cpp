@@ -23,6 +23,11 @@ extern I2CBus i2cBus;
 extern CANBus canBus;
 extern bool SystemInited;
 
+bool canBusReinitRequestR = false;
+bool canBusReinitRequestI = false;
+int onReceiveCounterI = 0;
+int onReceiveCounterR = 0;
+
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
 
@@ -34,6 +39,7 @@ void onReceive(int packetSize) {
     if (canBus.is_to_ignore_packet(packetId))
       return;
 
+    onReceiveCounterI++;
     canBus.setPacketTimeStamp(packetId, millis());
 
     if (CAN.available()) {
@@ -45,7 +51,7 @@ void onReceive(int packetSize) {
     }
     xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
   } else {
-    // TODO: log: console << "SEMAPHORE task CANBus not free for receive handler!" << NL;
+    canBusReinitRequestI = true;
   }
 }
 
@@ -60,20 +66,20 @@ CANBus::CANBus() {
   init_ages();
 }
 
-string CANBus::re_init() {
-  xSemaphoreTakeT(mutex);
-  CAN.end();
-  xSemaphoreGive(mutex);
-  return CANBus::init();
-}
+string CANBus::re_init() { return CANBus::init(); }
 
 string CANBus::init() {
   bool hasError = false;
+  canBusReinitRequestR = false;
+  canBusReinitRequestI = false;
+  onReceiveCounterI = 0;
+  onReceiveCounterR = 0;
   console << "[  ] Init CANBus...\n";
   packetsCountMax = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
+    CAN.setTimeout(400);
     xSemaphoreGive(mutex);
     hasError = true;
     console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
@@ -111,16 +117,16 @@ bool CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // Target Speed [float as value\*1000]
                          uint16_t data_u16_1, // Target Power [float as value\*1000]
                          int8_t data_i8_4,    // Display Acceleration
-                         uint8_t data_u8_5,   // Constant Mode OFF [0] / Speed [1] / Power [2]
+                         uint8_t data_u8_5,   // empty
                          uint8_t data_u8_6,   // Display Speed
                          bool b_56,           // Fwd [1] / Bwd [0]
                          bool b_57,           // Button Lvl Brake Pedal
                          bool b_58,           // MC Off [0] / On [1]
-                         bool b_59,           //
-                         bool b_60,           //
-                         bool b_61,           //
-                         bool b_62,           //
-                         bool b_63            //
+                         bool b_59,           // Constant Mode Off [false], On [true]
+                         bool b_60,           // empty
+                         bool b_61,           // empty
+                         bool b_62,           // empty
+                         bool b_63            // empty
 ) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
@@ -159,8 +165,8 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
   if (canBus.verboseModeCanOutNative)
     console << print_raw_packet("S", packet) << NL;
   try {
-    if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
-      console << "++" << adr << "+";
+    if (CAN.availableForWrite() && xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+      console << "++" << fmt::format("{:x}", adr) << "+";
       CAN.beginPacket(adr);
       CAN.write(packet.getData_i8(0));
       CAN.write(packet.getData_i8(1));
@@ -197,14 +203,22 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
+      if (canBusReinitRequestR || canBusReinitRequestI) {
+        console << NL
+                << fmt::format("CANBus REINIT, trigger: I{} | R{} : {:4d} | {:4d}", canBusReinitRequestI, canBusReinitRequestR,
+                               onReceiveCounterI, onReceiveCounterR)
+                << NL;
+        canBus.re_init();
+      }
       if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
-        // handle recieved message with CANBus
+        onReceiveCounterR++;
         while (rxBuffer.isAvailable()) {
           handle_rx_packet(rxBuffer.pop());
         }
         xSemaphoreGive(mutex);
       } else {
         console << "SEMAPHORE task CANBus not free for receive!" << NL;
+        canBusReinitRequestR = true;
       }
     }
     taskSuspend();

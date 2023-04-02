@@ -155,12 +155,12 @@ void CarControl::task(void *pvParams) {
         // console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
         string record = carState.csv();
         vTaskDelay_debug(10, "6-");
-        if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
-          if (sdCard.verboseModeDebug)
-            console << "d: " << record << NL;
-          sdCard.write(record);
-          millisNextStampCsv = millis() + carState.LogInterval;
-        }
+        // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
+        //   if (sdCard.verboseModeDebug)
+        //     console << "d: " << record << NL;
+        //   sdCard.write(record);
+        //   millisNextStampCsv = millis() + carState.LogInterval;
+        // }
         vTaskDelay_debug(10, "7-");
         if (sdCard.verboseModeDebug) {
           if (millis() > millisNextStampSnd) {

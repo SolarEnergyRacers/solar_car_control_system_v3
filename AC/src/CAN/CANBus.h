@@ -1,5 +1,7 @@
 //
 // CAN Bus
+// https://github.com/sandeepmistry/arduino-CAN
+// --> https://github.com/SolarEnergyRacers/SER-arduino-CAN
 //
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H
 #define SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H

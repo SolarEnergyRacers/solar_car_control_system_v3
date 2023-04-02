@@ -27,6 +27,7 @@ bool canBusReinitRequestR = false;
 bool canBusReinitRequestI = false;
 int onReceiveCounterI = 0;
 int onReceiveCounterR = 0;
+int onReceiveCounterINotAvail = 0;
 
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
@@ -40,6 +41,7 @@ void onReceive(int packetSize) {
       return;
 
     onReceiveCounterI++;
+    onReceiveCounterINotAvail = 0;
     canBus.setPacketTimeStamp(packetId, millis());
 
     if (CAN.available()) {
@@ -51,7 +53,8 @@ void onReceive(int packetSize) {
     }
     xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
   } else {
-    canBusReinitRequestI = true;
+    if(onReceiveCounterINotAvail++ > 8)
+      canBusReinitRequestI = true;
   }
 }
 
@@ -165,7 +168,7 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
   if (canBus.verboseModeCanOutNative)
     console << print_raw_packet("S", packet) << NL;
   try {
-    if (CAN.availableForWrite() && xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+    if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
       console << "++" << fmt::format("{:x}", adr) << "+";
       CAN.beginPacket(adr);
       CAN.write(packet.getData_i8(0));
@@ -205,8 +208,8 @@ void CANBus::task(void *pvParams) {
     if (SystemInited) {
       if (canBusReinitRequestR || canBusReinitRequestI) {
         console << NL
-                << fmt::format("CANBus REINIT, trigger: I{} | R{} : {:4d} | {:4d}", canBusReinitRequestI, canBusReinitRequestR,
-                               onReceiveCounterI, onReceiveCounterR)
+                << fmt::format("CANBus REINIT, trigger: I{} | R{} : {:4d} | {:4d} ERR: {}", canBusReinitRequestI, canBusReinitRequestR,
+                               onReceiveCounterI, onReceiveCounterR, onReceiveCounterINotAvail)
                 << NL;
         canBus.re_init();
       }

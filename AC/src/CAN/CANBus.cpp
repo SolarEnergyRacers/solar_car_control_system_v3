@@ -25,9 +25,12 @@ extern bool SystemInited;
 
 bool canBusReinitRequestR = false;
 bool canBusReinitRequestI = false;
-int onReceiveCounterI = 0;
-int onReceiveCounterR = 0;
-int onReceiveCounterINotAvail = 0;
+bool canBusReinitRequestW = false;
+int counterI = 0;
+int counterR = 0;
+int counterI_notAvail = 0;
+int counterR_notAvail = 0;
+int counterW_notAvail = 0;
 
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
@@ -40,8 +43,8 @@ void onReceive(int packetSize) {
     if (canBus.is_to_ignore_packet(packetId))
       return;
 
-    onReceiveCounterI++;
-    onReceiveCounterINotAvail = 0;
+    counterI++;
+    counterI_notAvail = 0;
     canBus.setPacketTimeStamp(packetId, millis());
 
     if (CAN.available()) {
@@ -53,7 +56,7 @@ void onReceive(int packetSize) {
     }
     xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
   } else {
-    if(onReceiveCounterINotAvail++ > 8)
+    if (counterI_notAvail++ > 8)
       canBusReinitRequestI = true;
   }
 }
@@ -75,14 +78,17 @@ string CANBus::init() {
   bool hasError = false;
   canBusReinitRequestR = false;
   canBusReinitRequestI = false;
-  onReceiveCounterI = 0;
-  onReceiveCounterR = 0;
+  canBusReinitRequestW = false;
+  counterI = 0;
+  counterR = 0;
+  counterI_notAvail = 0;
+  counterR_notAvail = 0;
+  counterW_notAvail = 0;
   console << "[  ] Init CANBus...\n";
   packetsCountMax = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
-    CAN.setTimeout(400);
     xSemaphoreGive(mutex);
     hasError = true;
     console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
@@ -169,7 +175,9 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
     console << print_raw_packet("S", packet) << NL;
   try {
     if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
-      console << "++" << fmt::format("{:x}", adr) << "+";
+      console << fmt::format(" W[{:x}] ", adr);
+      counterW_notAvail = 0;
+      canBusReinitRequestW = false;
       CAN.beginPacket(adr);
       CAN.write(packet.getData_i8(0));
       CAN.write(packet.getData_i8(1));
@@ -184,7 +192,9 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
       xSemaphoreGive(mutex);
       console << "--";
     } else {
-      console << "SEMAPHORE send CANBus not free for write!" << NL;
+      console << fmt::format(" W[{:x}]FAIL ", adr);
+      if (counterW_notAvail++ > 8)
+        canBusReinitRequestW = true;
       return false;
     }
   } catch (exception &ex) {
@@ -206,22 +216,28 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      if (canBusReinitRequestR || canBusReinitRequestI) {
+      //console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
+
+      if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
         console << NL
-                << fmt::format("CANBus REINIT, trigger: I{} | R{} : {:4d} | {:4d} ERR: {}", canBusReinitRequestI, canBusReinitRequestR,
-                               onReceiveCounterI, onReceiveCounterR, onReceiveCounterINotAvail)
+                << fmt::format("CANBus REINIT, trigger: I{} | R{} | W{}: {:4d} | {:4d} ERR: {}_{}_{}", canBusReinitRequestI,
+                               canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
+                               counterW_notAvail)
                 << NL;
+        vTaskDelay_debug(10, "i-");
         canBus.re_init();
+        vTaskDelay_debug(10, "j-");
       }
       if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
-        onReceiveCounterR++;
+        counterR++;
+        counterR_notAvail = 0;
         while (rxBuffer.isAvailable()) {
           handle_rx_packet(rxBuffer.pop());
         }
         xSemaphoreGive(mutex);
       } else {
-        console << "SEMAPHORE task CANBus not free for receive!" << NL;
-        canBusReinitRequestR = true;
+        if (counterR_notAvail++ > 8)
+          canBusReinitRequestR = true;
       }
     }
     taskSuspend();

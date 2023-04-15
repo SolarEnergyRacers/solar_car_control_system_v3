@@ -27,6 +27,7 @@ string getTime();
 string getTimeStamp();
 uint16_t normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value);
 int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value);
+void vTaskDelay_debug(int delay_ms, string msg);
 
 template <size_t N> int splitString(string (&arr)[N], string str) {
   int n = 0;

@@ -117,10 +117,6 @@ bool CarControl::read_const_mode() {
 }
 
 int cyclecounter = 0;
-void vTaskDelay_debug(int delay_ms, string msg) {
-  console << msg;
-  vTaskDelay(10);
-}
 
 void CarControl::task(void *pvParams) {
   while (1) {
@@ -132,18 +128,18 @@ void CarControl::task(void *pvParams) {
       }
       vTaskDelay_debug(10, "I-");
       bool button2pressed = read_nextScreenButton();
-      vTaskDelay_debug(10, "1-");
+      // vTaskDelay_debug(10, "1-");
       read_sd_card_detect();
-      vTaskDelay_debug(10, "2-");
+      // vTaskDelay_debug(10, "2-");
       read_const_mode();
-      vTaskDelay_debug(10, "3-");
-      uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
-      canBus.writePacket(AC_BASE_ADDR | 0x00,
-                         carState.LifeSign,      // LifeSign
-                         (uint16_t)constantMode, // switch constant mode Speed / Power
-                         (uint16_t)0,            // empty
-                         (uint16_t)0             // empty
-      );
+      // // vTaskDelay_debug(10, "3-");
+      // uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
+      // canBus.writePacket(AC_BASE_ADDR | 0x00,
+      //                    carState.LifeSign,      // LifeSign
+      //                    (uint16_t)constantMode, // switch constant mode Speed / Power
+      //                    (uint16_t)0,            // empty
+      //                    (uint16_t)0             // empty
+      // );
       vTaskDelay_debug(10, "4-");
       if (carControl.verboseModeDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),

@@ -176,10 +176,6 @@ void CarControl::set_DAC() {
 }
 
 int cyclecounter = 0;
-void vTaskDelay_debug(int delay_ms, string msg) {
-  console << msg;
-  vTaskDelay(10);
-}
 
 void CarControl::task(void *pvParams) {
   while (1) {
@@ -194,11 +190,11 @@ void CarControl::task(void *pvParams) {
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       // read values from ADC/IO
       read_reference_cell_data();
-      vTaskDelay_debug(10, "0-");
+      // vTaskDelay_debug(10, "0-");
       read_speed();
-      vTaskDelay_debug(10, "1-");
+      // vTaskDelay_debug(10, "1-");
       read_potentiometer();
-      vTaskDelay_debug(10, "2-");
+      // vTaskDelay_debug(10, "2-");
       if (read_paddles())
         set_DAC();
       carState.LifeSign++;

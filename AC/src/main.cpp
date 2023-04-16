@@ -87,6 +87,8 @@ static void driverDisplayTask(void *pvParams) { driverDisplay.task(pvParams); }
 
 void app_main(void) {
   string msg;
+  carState.init_values();
+
   // init console IO and radio console
   msg = uart.init();
   console << NL << msg << NL;
@@ -239,7 +241,7 @@ void app_main(void) {
   engineerDisplay.print(msg + "\n");
 
   //--- SD card available
-  carState.init_values();
+  carState.initalize_config();
   sdCard.open_log_file();
   //------from now config ini values can be used
 

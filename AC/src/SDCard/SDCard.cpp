@@ -56,12 +56,15 @@ bool SDCard::mount() {
   }
   try {
     console << "     Mounting SD card ...\n";
-     xSemaphoreGive(spiBus.mutex);
+    // xSemaphoreGive(spiBus.mutex);
     xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
+    // SD.end();
+    console << " SD02 ";
     mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
+    console << " SD04 ";
     xSemaphoreGive(spiBus.mutex);
-    console << "xxx";
+    console << " SD06 ";;
     if (mounted) {
       console << "     SD card mounted.\n";
       uint8_t cardType = SD.cardType();

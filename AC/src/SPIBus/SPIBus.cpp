@@ -28,7 +28,7 @@ string SPIBus::init(void) {
   console << "[  ] Init 'SPI bus' with: SPI_CLK=" << SPI_CLK << ", SPI_MISO=" << SPI_MISO << ", SPI_MOSI=" << SPI_MOSI << "...\n";
 
   mutex = xSemaphoreCreateMutex();
-  spi = SPIClass(VSPI);
+  // spi = SPIClass(VSPI);
   // init mutex (it is acquired)
   spi.begin(SPI_CLK, SPI_MISO, SPI_MOSI, SPI_CS_TFT);
 

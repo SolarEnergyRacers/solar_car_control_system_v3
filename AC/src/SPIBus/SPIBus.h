@@ -25,7 +25,7 @@ class SPIBus {
 private:
 public:
   SemaphoreHandle_t mutex = NULL;
-  SPIClass spi;
+  SPIClass spi = SPIClass(VSPI);
   string init();
   string re_init();
 };

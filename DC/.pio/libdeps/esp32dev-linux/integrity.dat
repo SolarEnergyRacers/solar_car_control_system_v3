@@ -1,9 +1,9 @@
-mikalhart/Streaming@1.0.0
-https://github.com/sandeepmistry/arduino-CAN
 br3ttb/PID@1.2.1
 robtillaart/ADS1X15@0.3.9
-paulstoffregen/OneWire@2.3.7
-blemasle/MCP23017 @ 2.0.0
+davetcc/IoAbstraction@3.1.0
 fmtlib/fmt@8.1.1
-davetcc/IoAbstraction@3.0.2
+mikalhart/Streaming@1.0.0
+paulstoffregen/OneWire@2.3.7
+https://github.com/sandeepmistry/arduino-CAN
 plerup/EspSoftwareSerial@6.17.1
+blemasle/MCP23017 @ 2.0.0

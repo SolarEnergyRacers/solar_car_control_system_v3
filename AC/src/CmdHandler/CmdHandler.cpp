@@ -44,6 +44,7 @@ extern I2CBus i2cBus;
 extern CarState carState;
 extern CANBus canBus;
 extern CarControl carControl;
+extern Display display;
 extern DriverDisplay driverDisplay;
 extern EngineerDisplay engineerDisplay;
 extern SDCard sdCard;
@@ -111,17 +112,16 @@ void CmdHandler::task(void *pvParams) {
           console << NL;
           break;
         case 'R':
-          engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
+          display.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
           driverDisplay.re_init();
           break;
         case 'E':
-          driverDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_CONSOLE);
-          engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
-          driverDisplay.clear_screen(ILI9341_WHITE);
+          display.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_CONSOLE);
+          display.clear_screen(ILI9341_WHITE);
           break;
         case 'D':
-          engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
-          driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
+          display.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
+          display.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
           break;
         case 'S':
           if (input[1] == 'a') {

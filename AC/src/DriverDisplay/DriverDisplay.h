@@ -15,11 +15,16 @@
 
 using namespace std;
 
-class DriverDisplay : public Display {
+class DriverDisplay : public AbstractTask {
 public:
-  DriverDisplay() { bgColor = ILI9341_BLACK; };
-  ~DriverDisplay(){};
-  //==== overwrites from base class ==== START
+  DriverDisplay();
+  ~DriverDisplay();
+  // RTOS task
+  string init(void);
+  string re_init(void);
+  void exit(void){};
+  void task(void *pvParams);
+
   string getName() { return "DriverDisplay"; };
   bool verboseMode = false;
 
@@ -31,7 +36,7 @@ private:
   DisplayValue<LIGHT> Light = DisplayValue<LIGHT>(0, 0, "", "%s", "");
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");
   DisplayValue<bool> ConstantModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
- 
+
   DisplayValue<bool> EcoModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
 
   DisplayValue<int> Speed = DisplayValue<int>(0, 0, "", "%d", "", ILI9341_WHITE, ILI9341_BLACK);
@@ -44,7 +49,7 @@ private:
   DisplayValue<float> MotorCurrent = DisplayValue<float>(10, 180, "Motor:", "%5.1f", "A", ILI9341_ORANGE, ILI9341_BLACK);
   DisplayValue<bool> MotorOn = DisplayValue<bool>(160, 180, "-", "%3s", "", ILI9341_MAROON, ILI9341_BLACK);
   DisplayValue<float> BatteryVoltage = DisplayValue<float>(10, 200, "Bat  :", "%5.1f", "V", ILI9341_ORANGE, ILI9341_BLACK);
-  //DisplayValue<bool> BatteryOn = DisplayValue<bool>(160, 200, "-", "%3s", "", ILI9341_MAROON, ILI9341_BLACK);
+  // DisplayValue<bool> BatteryOn = DisplayValue<bool>(160, 200, "-", "%3s", "", ILI9341_MAROON, ILI9341_BLACK);
   DisplayValue<float> PhotoVoltaicCurrent = DisplayValue<float>(10, 220, "PV   :", "%5.1f", "A", ILI9341_ORANGE, ILI9341_BLACK);
   DisplayValue<bool> PhotoVoltaicOn = DisplayValue<bool>(160, 220, "-", "%3s", "", ILI9341_MAROON, ILI9341_BLACK);
 
@@ -137,12 +142,10 @@ private:
 
   //==== Driver Display definition ==== END
 
-protected:
-  DISPLAY_STATUS display_setup() override;
-  DISPLAY_STATUS display_task() override;
+public:
+  // DISPLAY_STATUS display_task();
   //==== overwrites from base class ==== END
 
-private:
   void _arrow_increase(int color);
   void _arrow_decrease(int color);
   void _hide_light();
@@ -174,6 +177,7 @@ private:
   void arrow_decrease(bool on);
 
   int getColorForInfoType(INFO_TYPE type);
+  string display_setup();
 };
 
 #endif // #ifndef SER_DRIVER_DISPLAY_C_H

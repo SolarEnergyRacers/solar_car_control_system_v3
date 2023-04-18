@@ -56,26 +56,36 @@ string Display::init() {
   return re_init();
 }
 
-string Display::re_init(void) { return _setup(); }
-
-void Display::exit() {
-  // todo
+string Display::init(Adafruit_ILI9341 *ili9341) {
+  tft = ili9341;
+  console << "[  ] Init 'Display'...\n";
+  return re_init();
 }
 
-// Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
-// Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
-Adafruit_ILI9341 Display::tft = Adafruit_ILI9341(0, 0, 0, 0, 0, 0);
+string Display::re_init(void) { return _setup(); }
 
-Display::Display() { 
-  tft.~Adafruit_ILI9341();
-  tft = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT,SPI_RST);
-  carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE; };
+// Adafruit_ILI9341 t = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
+// Adafruit_ILI9341 t = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
+
+Display::Display() {
+  // Adafruit_ILI9341 t = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
+  // Adafruit_ILI9341 t = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
+  //  tft = &t;
+  carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
+};
+Display::Display(Adafruit_ILI9341 *ili9341) {
+  // Adafruit_ILI9341 t = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
+  // Adafruit_ILI9341 t = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
+  tft = ili9341;
+  carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
+};
 
 string Display::_setup() {
   bool hasError = false;
   console << "     Setup 'ILI9341' for '" << getName() << "' with: SPI_DC=" << SPI_DC << ", SPI_CS_TFT=" << SPI_CS_TFT
           << ", SPI_RST=" << SPI_RST << NL << "     and SPI BUS: SPI_CLK=" << SPI_CLK << ", SPI_MOSI=" << SPI_MOSI
           << ", SPI_MISO=" << SPI_MISO << NL;
+  console << tft << NL;
   height = 0;
   width = 0;
   try {
@@ -86,21 +96,21 @@ string Display::_setup() {
     uint8_t rdselfdiag = 0;
 
     xSemaphoreTakeT(spiBus.mutex);
-    tft.begin();
-    tft.setRotation(1);
-    height = tft.height();
-    width = tft.width();
-    rdmode = tft.readcommand8(ILI9341_RDMODE);
-    rdmadctl = tft.readcommand8(ILI9341_RDMADCTL);
-    rdpixfmt = tft.readcommand8(ILI9341_RDPIXFMT);
-    rdimgfmt = tft.readcommand8(ILI9341_RDIMGFMT);
-    rdselfdiag = tft.readcommand8(ILI9341_RDSELFDIAG);
+    tft->begin();
+    tft->setRotation(1);
+    height = tft->height();
+    width = tft->width();
+    rdmode = tft->readcommand8(ILI9341_RDMODE);
+    rdmadctl = tft->readcommand8(ILI9341_RDMADCTL);
+    rdpixfmt = tft->readcommand8(ILI9341_RDPIXFMT);
+    rdimgfmt = tft->readcommand8(ILI9341_RDIMGFMT);
+    rdselfdiag = tft->readcommand8(ILI9341_RDSELFDIAG);
 
-    tft.setCursor(0, 0);
-    tft.setTextSize(1);
-    // tft.fillScreen(bgColor);
-    tft.setTextColor(ILI9341_BLACK);
-    // tft.setScrollMargins(0, height);
+    tft->setCursor(0, 0);
+    tft->setTextSize(1);
+    // tft->fillScreen(bgColor);
+    tft->setTextColor(ILI9341_BLACK);
+    // tft->setScrollMargins(0, height);
     xSemaphoreGive(spiBus.mutex);
     // clear_screen(bgColor);
 
@@ -122,10 +132,10 @@ string Display::_setup() {
 
 void Display::clear_screen(int bgColor) {
   xSemaphoreTakeT(spiBus.mutex);
-  tft.setRotation(0);
-  tft.fillScreen(bgColor);
-  tft.setRotation(1);
-  // tft.fillScreen(bgColor);
+  tft->setRotation(0);
+  tft->fillScreen(bgColor);
+  tft->setRotation(1);
+  // tft->fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -143,35 +153,35 @@ int Display::getPixelWidthOfTexts(int textSize, string t1, string t2) {
 void Display::print(string msg) {
   if (carState.displayStatus == DISPLAY_STATUS::ENGINEER_CONSOLE) {
     xSemaphoreTakeT(spiBus.mutex);
-    tft.setTextSize(1);
-    tft.print(msg.c_str());
+    tft->setTextSize(1);
+    tft->print(msg.c_str());
     xSemaphoreGive(spiBus.mutex);
   }
 }
 
 void Display::getCursor(int &x, int &y) {
   xSemaphoreTakeT(spiBus.mutex);
-  x = tft.getCursorX();
-  y = tft.getCursorY();
+  x = tft->getCursorX();
+  y = tft->getCursorY();
   xSemaphoreGive(spiBus.mutex);
 }
 
 void Display::setCursor(int x, int y) {
   xSemaphoreTakeT(spiBus.mutex);
-  tft.setCursor(x, y);
+  tft->setCursor(x, y);
   xSemaphoreGive(spiBus.mutex);
 }
 
 //------------------------------------------------------------------------
 void Display::setupScrollArea(uint16_t TFA, uint16_t BFA) {
   xSemaphoreTakeT(spiBus.mutex);
-  tft.writeCommand(ILI9341_VSCRDEF); // Vertical scroll definition
-  tft.write(TFA >> 8);
-  tft.write(TFA);
-  tft.write((320 - TFA - BFA) >> 8);
-  tft.write(320 - TFA - BFA);
-  tft.write(BFA >> 8);
-  tft.write(BFA);
+  tft->writeCommand(ILI9341_VSCRDEF); // Vertical scroll definition
+  tft->write(TFA >> 8);
+  tft->write(TFA);
+  tft->write((320 - TFA - BFA) >> 8);
+  tft->write(320 - TFA - BFA);
+  tft->write(BFA >> 8);
+  tft->write(BFA);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -194,9 +204,9 @@ int Display::scroll(int lines) {
 
 void Display::scrollAddress(uint16_t VSP) {
   xSemaphoreTakeT(spiBus.mutex);
-  tft.writeCommand(ILI9341_VSCRSADD); // Vertical scrolling start address
-  tft.write(VSP >> 8);
-  tft.write(VSP);
+  tft->writeCommand(ILI9341_VSCRSADD); // Vertical scrolling start address
+  tft->write(VSP >> 8);
+  tft->write(VSP);
   xSemaphoreGive(spiBus.mutex);
 }
 
@@ -231,48 +241,48 @@ float Display::write_float(int x, int y, float valueLast, float value, int textS
   int d0o = (valOld - (int)valOld) * 10;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.setTextSize(textSize);
-  tft.setTextColor(color);
-  tft.setCursor(x, y);
+  tft->setTextSize(textSize);
+  tft->setTextColor(color);
+  tft->setCursor(x, y);
   // if a change in the digit then replace the old with new value by
   // first deleting the digit area and second write the new value
   if (d0 != d0o) { // || d0o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 5, y, digitWidth * 2, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 5, y);
-    tft.printf(".%d", d0);
+    tft->fillRect(x + (digitWidth + 1) * 5, y, digitWidth * 2, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 5, y);
+    tft->printf(".%d", d0);
   }
   if (d1 != d1o || d1o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 4, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 4, y);
-    tft.print(d1);
+    tft->fillRect(x + (digitWidth + 1) * 4, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 4, y);
+    tft->print(d1);
   }
   if (d2 != d2o || d2o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 3, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 3, y);
+    tft->fillRect(x + (digitWidth + 1) * 3, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 3, y);
     if (abs(value) > 9) {
-      tft.print(d2);
+      tft->print(d2);
     }
   }
   if (d3 != d3o || d3o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 2, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 2, y);
+    tft->fillRect(x + (digitWidth + 1) * 2, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 2, y);
     if (abs(value) > 99) {
-      tft.print(d3);
+      tft->print(d3);
     }
   }
   if (d4 != d4o || d4o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 1, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 1, y);
+    tft->fillRect(x + (digitWidth + 1) * 1, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 1, y);
     if (abs(value) > 999) {
-      tft.print(d4);
+      tft->print(d4);
     }
   }
   if (sign != signOld) {
-    tft.fillRect(x, y, (digitWidth + 1), digitHeight, bgColor);
-    tft.setCursor(x, y);
-    tft.print(sign);
+    tft->fillRect(x, y, (digitWidth + 1), digitHeight, bgColor);
+    tft->setCursor(x, y);
+    tft->print(sign);
   }
-  tft.setTextSize(1);
+  tft->setTextSize(1);
   xSemaphoreGive(spiBus.mutex);
 
   return value;
@@ -299,33 +309,33 @@ int Display::write_ganz_99(int x, int y, int valueLast, int value, int textSize,
   int d2o = ((int)valLast / 10) % 10;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.setTextSize(textSize);
-  tft.setTextColor(color);
-  tft.setCursor(x, y);
+  tft->setTextSize(textSize);
+  tft->setTextColor(color);
+  tft->setCursor(x, y);
   int digitWidth = textSize * 6;
   int digitHeight = textSize * 8;
   // if a change in the digit then replace the old with new value by
   // first deleting the digit area and second write the new value
   if (d1 != d1o || justInited) { //|| d1o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 2, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 2, y);
-    tft.print(d1);
+    tft->fillRect(x + (digitWidth + 1) * 2, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 2, y);
+    tft->print(d1);
   }
   if (d2 != d2o || d2o == 0 || justInited) {
-    tft.fillRect(x + (digitWidth + 1) * 1, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 1, y);
+    tft->fillRect(x + (digitWidth + 1) * 1, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 1, y);
     if (abs(value) > 9) {
-      tft.print(d2);
+      tft->print(d2);
     }
   }
   if (sign != signOld || justInited) {
-    tft.fillRect(x, y, (digitWidth + 1), digitHeight, bgColor);
-    tft.setCursor(x, y);
+    tft->fillRect(x, y, (digitWidth + 1), digitHeight, bgColor);
+    tft->setCursor(x, y);
     // if (sign == '-') {
-    tft.print(sign);
+    tft->print(sign);
     //}
   }
-  tft.setTextSize(1);
+  tft->setTextSize(1);
   xSemaphoreGive(spiBus.mutex);
 
   return value;
@@ -350,31 +360,31 @@ int Display::write_nat_999(int x, int y, int valueLast, int value, int textSize,
   int d3o = ((int)valueLast / 100) % 10;
 
   xSemaphoreTakeT(spiBus.mutex);
-  tft.setTextSize(textSize);
-  tft.setTextColor(color);
-  tft.setCursor(x, y);
+  tft->setTextSize(textSize);
+  tft->setTextColor(color);
+  tft->setCursor(x, y);
   // if a change in the digit then replace the old with new value by
   // first deleting the digit area and second write the new value
   if (d1 != d1o) { //} || d1o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 2, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 2, y);
-    tft.print(d1);
+    tft->fillRect(x + (digitWidth + 1) * 2, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 2, y);
+    tft->print(d1);
   }
   if (d2 != d2o || d2o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 1, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 1, y);
+    tft->fillRect(x + (digitWidth + 1) * 1, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 1, y);
     if (abs(value) > 9) {
-      tft.print(d2);
+      tft->print(d2);
     }
   }
   if (d3 != d3o || d3o == 0) {
-    tft.fillRect(x + (digitWidth + 1) * 0, y, digitWidth, digitHeight, bgColor);
-    tft.setCursor(x + (digitWidth + 1) * 0, y);
+    tft->fillRect(x + (digitWidth + 1) * 0, y, digitWidth, digitHeight, bgColor);
+    tft->setCursor(x + (digitWidth + 1) * 0, y);
     if (abs(value) > 99) {
-      tft.print(d3);
+      tft->print(d3);
     }
   }
-  tft.setTextSize(1);
+  tft->setTextSize(1);
   xSemaphoreGive(spiBus.mutex);
 
   return value;
@@ -401,57 +411,57 @@ void Display::lifeSign() {
   //  return;
   // deziSecondsLast = deziSeconds;
   xSemaphoreTakeT(spiBus.mutex);
-  tft.fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
+  tft->fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
   xSemaphoreGive(spiBus.mutex);
   lifeSignState = !lifeSignState;
 }
 
 void Display::drawCentreString(const string &buf, int x, int y) { return; }
 
-void Display::task(void *pvParams) {
-  while (1) {
-    switch (carState.displayStatus) {
-    // initializing states:
-    case DISPLAY_STATUS::DRIVER_SETUP:
-      bgColor = ILI9341_BLACK;
-      carState.displayStatus = display_task();
-      break;
-    case DISPLAY_STATUS::ENGINEER_SETUP:
-      bgColor = ILI9341_ORANGE;
-      carState.displayStatus = display_task();
-      break;
-    case DISPLAY_STATUS::DRIVER_BACKGROUND:
-      carState.displayStatus = display_task();
-      break;
-    case DISPLAY_STATUS::ENGINEER_BACKGROUND:
-      carState.displayStatus = display_task();
-      break;
-    case DISPLAY_STATUS::DRIVER_DEMOSCREEN:
-      carState.displayStatus = display_task();
-      break;
-    // working states:
-    case DISPLAY_STATUS::ENGINEER_CONSOLE:
-      bgColor = ILI9341_WHITE;
-      lifeSign();
-      break;
-    case DISPLAY_STATUS::ENGINEER_RUNNING:
-      carState.displayStatus = display_task();
-      lifeSign();
-      break;
-    case DISPLAY_STATUS::DRIVER_RUNNING:
-      carState.displayStatus = display_task();
-      lifeSign();
-      break;
-    case DISPLAY_STATUS::ENGINEER_HALTED:
-      set_sleep_polling(1500);
-#if WithTaskSuspend == true
-      vTaskSuspend(getTaskHandle());
-#endif
-      break;
-    default:
-      // ignore others
-      break;
-    }
-    taskSuspend();
-  }
-}
+// void Display::task(void *pvParams) {
+//   while (1) {
+//     switch (carState.displayStatus) {
+//     // initializing states:
+//     case DISPLAY_STATUS::DRIVER_SETUP:
+//       bgColor = ILI9341_BLACK;
+//       carState.displayStatus = display_task();
+//       break;
+//     case DISPLAY_STATUS::ENGINEER_SETUP:
+//       bgColor = ILI9341_ORANGE;
+//       carState.displayStatus = display_task();
+//       break;
+//     case DISPLAY_STATUS::DRIVER_BACKGROUND:
+//       carState.displayStatus = display_task();
+//       break;
+//     case DISPLAY_STATUS::ENGINEER_BACKGROUND:
+//       carState.displayStatus = display_task();
+//       break;
+//     case DISPLAY_STATUS::DRIVER_DEMOSCREEN:
+//       carState.displayStatus = display_task();
+//       break;
+//     // working states:
+//     case DISPLAY_STATUS::ENGINEER_CONSOLE:
+//       bgColor = ILI9341_WHITE;
+//       lifeSign();
+//       break;
+//     case DISPLAY_STATUS::ENGINEER_RUNNING:
+//       carState.displayStatus = display_task();
+//       lifeSign();
+//       break;
+//     case DISPLAY_STATUS::DRIVER_RUNNING:
+//       carState.displayStatus = display_task();
+//       lifeSign();
+//       break;
+//     case DISPLAY_STATUS::ENGINEER_HALTED:
+//       //set_sleep_polling(1500);
+// #if WithTaskSuspend == true
+//       vTaskSuspend(getTaskHandle());
+// #endif
+//       break;
+//     default:
+//       // ignore others
+//       break;
+//     }
+//     //taskSuspend();
+//   }
+//}

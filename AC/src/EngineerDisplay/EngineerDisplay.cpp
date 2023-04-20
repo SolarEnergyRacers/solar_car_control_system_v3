@@ -23,13 +23,13 @@ extern Console console;
 extern SPIBus spiBus;
 extern CarState carState;
 extern Display display;
-//extern Adafruit_ILI9341 tft;
+// extern Adafruit_ILI9341 tft;
 
 EngineerDisplay::EngineerDisplay() { display.bgColor = ILI9341_LIGHTGREY; };
 EngineerDisplay::~EngineerDisplay(){};
 
 string EngineerDisplay::init() {
-  console << "[  ] Init 'Display'...\n";
+  console << "     Init '" << getName() << "'..." << NL;
   return re_init();
 }
 
@@ -37,9 +37,8 @@ string EngineerDisplay::re_init(void) { return display_setup(); }
 
 string EngineerDisplay::display_setup() {
   bool hasError = false;
-  console << "[v] '" << getName() << "' inited: screen E ILI9341 with " << display.height << " x " << display.width << "\n";
-  return fmt::format("[{}] EngineerDisplay initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", display.height, display.width,
-                     DISPLAY_STATUS_str[(int)carState.displayStatus]);
+  return fmt::format("[{}] EngineerDisplay initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", display.height,
+                     display.width, DISPLAY_STATUS_str[(int)carState.displayStatus]);
 }
 
 void EngineerDisplay::draw_display_background() {
@@ -69,73 +68,77 @@ void EngineerDisplay::draw_display_background() {
 
 void EngineerDisplay::task(void *pvParams) {
   while (1) {
-    if (carState.displayStatus == DISPLAY_STATUS::DRIVER_SETUP) {
-      switch (carState.displayStatus) {
-        // initializing states:
-      case DISPLAY_STATUS::ENGINEER_SETUP:
-        re_init();
-        display_setup();
-        justInited = true;
-        carState.displayStatus = DISPLAY_STATUS::ENGINEER_BACKGROUND;
-        break;
-      case DISPLAY_STATUS::ENGINEER_BACKGROUND:
-        display.clear_screen(display.bgColor);
-        draw_display_background();
-        set_sleep_polling(500);
-        carState.displayStatus = DISPLAY_STATUS::ENGINEER_RUNNING;
-        break;
-      // working state:
-      case DISPLAY_STATUS::ENGINEER_RUNNING:
-        // BatteryOn.Value = carState.BatteryOn;
-        PhotoVoltaicOn.Value = carState.PhotoVoltaicOn;
-        MotorOn.Value = carState.MotorOn;
-        BatteryVoltage.Value = carState.BatteryVoltage;
-        BatteryCurrent.Value = carState.BatteryCurrent;
-        Temperature1.Value = carState.T1;
-        Temperature2.Value = carState.T2;
-        Temperature3.Value = carState.T3;
-        // Temperature4.Value = carState.T4;
-        TemperatureMin.Value = carState.Tmin;
-        TemperatureMax.Value = carState.Tmax;
-        Mppt1.Value = carState.Mppt1Current;
-        Mppt2.Value = carState.Mppt2Current;
-        Mppt3.Value = carState.Mppt3Current;
+    switch (carState.displayStatus) {
+    case DISPLAY_STATUS::ENGINEER_CONSOLE:
+      break;
 
-        VoltageMin.Value = carState.Umin;
-        VoltageAvg.Value = carState.Uavg;
-        VoltageMax.Value = carState.Umax;
+      // initializing states:
+    case DISPLAY_STATUS::ENGINEER_SETUP:
+      re_init();
+      display_setup();
+      justInited = true;
+      carState.displayStatus = DISPLAY_STATUS::ENGINEER_BACKGROUND;
+      break;
+    case DISPLAY_STATUS::ENGINEER_BACKGROUND:
+      display.clear_screen(ILI9341_ORANGE);
+      draw_display_background();
+      set_sleep_polling(500);
+      carState.displayStatus = DISPLAY_STATUS::ENGINEER_RUNNING;
+      break;
 
-        // BatteryOn.showValue(display.tft);
-        PhotoVoltaicOn.showValue(display.tft);
-        MotorOn.showValue(display.tft);
+    // working state:
+    case DISPLAY_STATUS::ENGINEER_RUNNING:
+      display.lifeSign();
+      // BatteryOn.Value = carState.BatteryOn;
+      PhotoVoltaicOn.Value = carState.PhotoVoltaicOn;
+      MotorOn.Value = carState.MotorOn;
+      BatteryVoltage.Value = carState.BatteryVoltage;
+      BatteryCurrent.Value = carState.BatteryCurrent;
+      Temperature1.Value = carState.T1;
+      Temperature2.Value = carState.T2;
+      Temperature3.Value = carState.T3;
+      // Temperature4.Value = carState.T4;
+      TemperatureMin.Value = carState.Tmin;
+      TemperatureMax.Value = carState.Tmax;
+      Mppt1.Value = carState.Mppt1Current;
+      Mppt2.Value = carState.Mppt2Current;
+      Mppt3.Value = carState.Mppt3Current;
 
-        Mppt1.showValue(display.tft);
-        Mppt2.showValue(display.tft);
-        Mppt3.showValue(display.tft);
-        // Mppt4.showValue(display.tft);
+      VoltageMin.Value = carState.Umin;
+      VoltageAvg.Value = carState.Uavg;
+      VoltageMax.Value = carState.Umax;
 
-        BatteryStatus.showValue(display.tft);
-        BmsStatus.showValue(display.tft);
+      // BatteryOn.showValue(display.tft);
+      PhotoVoltaicOn.showValue(display.tft);
+      MotorOn.showValue(display.tft);
 
-        BatteryCurrent.showValue(display.tft);
-        BatteryVoltage.showValue(display.tft);
-        VoltageAvg.showValue(display.tft);
-        VoltageMin.showValue(display.tft);
-        VoltageMax.showValue(display.tft);
+      Mppt1.showValue(display.tft);
+      Mppt2.showValue(display.tft);
+      Mppt3.showValue(display.tft);
+      // Mppt4.showValue(display.tft);
 
-        Temperature1.showValue(display.tft);
-        Temperature2.showValue(display.tft);
-        Temperature3.showValue(display.tft);
-        // Temperature4.showValue(display.tft);
-        TemperatureMin.showValue(display.tft);
-        TemperatureMax.showValue(display.tft);
+      BatteryStatus.showValue(display.tft);
+      BmsStatus.showValue(display.tft);
 
-        justInited = false;
-        break;
-      default:
-        // ignore others
-        break;
-      }
+      BatteryCurrent.showValue(display.tft);
+      BatteryVoltage.showValue(display.tft);
+      VoltageAvg.showValue(display.tft);
+      VoltageMin.showValue(display.tft);
+      VoltageMax.showValue(display.tft);
+
+      Temperature1.showValue(display.tft);
+      Temperature2.showValue(display.tft);
+      Temperature3.showValue(display.tft);
+      // Temperature4.showValue(display.tft);
+      TemperatureMin.showValue(display.tft);
+      TemperatureMax.showValue(display.tft);
+
+      justInited = false;
+      break;
+
+    default:
+      // ignore others
+      break;
     }
     taskSuspend();
   }

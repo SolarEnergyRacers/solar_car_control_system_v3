@@ -13,12 +13,11 @@
 #include <fmt/core.h>
 #include <iostream>
 
-// #include <ADC.h>
 #include <CarState.h>
 #include <Console.h>
 #include <Display.h>
 #include <Helper.h>
-// #include <SDCard.h>
+#include <SDCard.h>
 #include <SPIBus.h>
 
 #include <ADS1X15.h>
@@ -36,7 +35,7 @@
 
 extern SPIBus spiBus;
 extern CarState carState;
-// extern SDCard sdCard;
+extern SDCard sdCard;
 extern Console console;
 extern bool SystemJustInited;
 
@@ -49,16 +48,11 @@ int lifeSignY = -1;
 int lifeSignRadius = 4;
 //==== Display definitions ==== END
 
-string Display::getName() { return "Display"; };
-
-string Display::init() {
-  console << "[  ] Init 'Display'...\n";
-  return re_init();
-}
+string Display::init() { return re_init(); }
 
 string Display::init(Adafruit_ILI9341 *ili9341) {
   tft = ili9341;
-  console << "[  ] Init 'Display'...\n";
+  console << "    " << getName() << " initializing with ILI9341..." << NL;
   return re_init();
 }
 
@@ -85,32 +79,25 @@ string Display::_setup() {
   console << "     Setup 'ILI9341' for '" << getName() << "' with: SPI_DC=" << SPI_DC << ", SPI_CS_TFT=" << SPI_CS_TFT
           << ", SPI_RST=" << SPI_RST << NL << "     and SPI BUS: SPI_CLK=" << SPI_CLK << ", SPI_MOSI=" << SPI_MOSI
           << ", SPI_MISO=" << SPI_MISO << NL;
-  console << tft << NL;
-  height = 0;
-  width = 0;
   try {
-    uint8_t rdmode = 0;
-    uint8_t rdmadctl = 0;
-    uint8_t rdpixfmt = 0;
-    uint8_t rdimgfmt = 0;
-    uint8_t rdselfdiag = 0;
-
     xSemaphoreTakeT(spiBus.mutex);
     tft->begin();
     tft->setRotation(1);
     height = tft->height();
     width = tft->width();
-    rdmode = tft->readcommand8(ILI9341_RDMODE);
-    rdmadctl = tft->readcommand8(ILI9341_RDMADCTL);
-    rdpixfmt = tft->readcommand8(ILI9341_RDPIXFMT);
-    rdimgfmt = tft->readcommand8(ILI9341_RDIMGFMT);
-    rdselfdiag = tft->readcommand8(ILI9341_RDSELFDIAG);
+    uint8_t rdmode = tft->readcommand8(ILI9341_RDMODE);
+    uint8_t rdmadctl = tft->readcommand8(ILI9341_RDMADCTL);
+    uint8_t rdpixfmt = tft->readcommand8(ILI9341_RDPIXFMT);
+    uint8_t rdimgfmt = tft->readcommand8(ILI9341_RDIMGFMT);
+    uint8_t rdselfdiag = tft->readcommand8(ILI9341_RDSELFDIAG);
 
     tft->setCursor(0, 0);
     tft->setTextSize(1);
     // tft->fillScreen(bgColor);
     tft->setTextColor(ILI9341_BLACK);
     // tft->setScrollMargins(0, height);
+    height = tft->height();
+    width = tft->width();
     xSemaphoreGive(spiBus.mutex);
     // clear_screen(bgColor);
 
@@ -119,6 +106,8 @@ string Display::_setup() {
     printf("     ILI9341_RDIMGFMT:   0x%x\n", rdimgfmt);
     printf("     ILI9341_RDSELFDIAG: 0x%x\n", rdselfdiag);
     printf("     ILI9341_RDMODE:     0x%x\n", rdmode);
+    printf("     ILI9341 height:     %d\n", height);
+    printf("     ILI9341 width :     %d\n", width);
   } catch (exception &ex) {
     console << fmt::format("[--] Display: Unable to initialize screen 'ILI9341': {}\n", ex.what());
     xSemaphoreGive(spiBus.mutex);
@@ -132,9 +121,9 @@ string Display::_setup() {
 
 void Display::clear_screen(int bgColor) {
   xSemaphoreTakeT(spiBus.mutex);
-  tft->setRotation(0);
-  tft->fillScreen(bgColor);
   tft->setRotation(1);
+  tft->fillScreen(bgColor);
+  // tft->setRotation(1);
   // tft->fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
 }
@@ -390,7 +379,7 @@ int Display::write_nat_999(int x, int y, int valueLast, int value, int textSize,
   return value;
 }
 
-// unsigned long deziSecondsLast = 0;
+unsigned long deziSecondsLast = 0;
 bool lifeSignState = true;
 uint64_t lifeSignLast = 0;
 void Display::lifeSign() {
@@ -403,13 +392,13 @@ void Display::lifeSign() {
     SystemJustInited = false;
   }
   int color = ILI9341_GREEN;
-  // if (!sdCard.isReadyForLog()) {
-  //   color = ILI9341_RED;
-  // }
-  // unsigned long deziSeconds = millis() / 100;
-  // if (deziSecondsLast + 1 > deziSeconds)
-  //  return;
-  // deziSecondsLast = deziSeconds;
+  if (!sdCard.isReadyForLog()) {
+    color = ILI9341_RED;
+  }
+  unsigned long deziSeconds = millis() / 100;
+  if (deziSecondsLast + 1 > deziSeconds)
+   return;
+  deziSecondsLast = deziSeconds;
   xSemaphoreTakeT(spiBus.mutex);
   tft->fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);
   xSemaphoreGive(spiBus.mutex);
@@ -417,51 +406,3 @@ void Display::lifeSign() {
 }
 
 void Display::drawCentreString(const string &buf, int x, int y) { return; }
-
-// void Display::task(void *pvParams) {
-//   while (1) {
-//     switch (carState.displayStatus) {
-//     // initializing states:
-//     case DISPLAY_STATUS::DRIVER_SETUP:
-//       bgColor = ILI9341_BLACK;
-//       carState.displayStatus = display_task();
-//       break;
-//     case DISPLAY_STATUS::ENGINEER_SETUP:
-//       bgColor = ILI9341_ORANGE;
-//       carState.displayStatus = display_task();
-//       break;
-//     case DISPLAY_STATUS::DRIVER_BACKGROUND:
-//       carState.displayStatus = display_task();
-//       break;
-//     case DISPLAY_STATUS::ENGINEER_BACKGROUND:
-//       carState.displayStatus = display_task();
-//       break;
-//     case DISPLAY_STATUS::DRIVER_DEMOSCREEN:
-//       carState.displayStatus = display_task();
-//       break;
-//     // working states:
-//     case DISPLAY_STATUS::ENGINEER_CONSOLE:
-//       bgColor = ILI9341_WHITE;
-//       lifeSign();
-//       break;
-//     case DISPLAY_STATUS::ENGINEER_RUNNING:
-//       carState.displayStatus = display_task();
-//       lifeSign();
-//       break;
-//     case DISPLAY_STATUS::DRIVER_RUNNING:
-//       carState.displayStatus = display_task();
-//       lifeSign();
-//       break;
-//     case DISPLAY_STATUS::ENGINEER_HALTED:
-//       //set_sleep_polling(1500);
-// #if WithTaskSuspend == true
-//       vTaskSuspend(getTaskHandle());
-// #endif
-//       break;
-//     default:
-//       // ignore others
-//       break;
-//     }
-//     //taskSuspend();
-//   }
-//}

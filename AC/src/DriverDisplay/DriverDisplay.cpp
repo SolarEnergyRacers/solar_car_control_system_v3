@@ -39,13 +39,13 @@ extern Console console;
 extern SPIBus spiBus;
 extern CarState carState;
 extern Display display;
-//extern Adafruit_ILI9341 tft;
+// extern Adafruit_ILI9341 tft;
 
 DriverDisplay::DriverDisplay() { display.bgColor = ILI9341_BLACK; };
 DriverDisplay::~DriverDisplay(){};
 
 string DriverDisplay::init() {
-  console << "[  ] Init 'Display'...\n";
+  console << "     Init '" << getName() << "'..." << NL;
   return re_init();
 }
 
@@ -53,9 +53,8 @@ string DriverDisplay::re_init(void) { return display_setup(); }
 
 string DriverDisplay::display_setup() {
   bool hasError = false;
-  console << "[v] '" << getName() << "' inited: screen E ILI9341 with " << display.height << " x " << display.width << "\n";
-  return fmt::format("[{}] DriverDisplay initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", display.height, display.width,
-                     DISPLAY_STATUS_str[(int)carState.displayStatus]);
+  return fmt::format("[{}] EngineerDisplay initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", display.height,
+                     display.width, DISPLAY_STATUS_str[(int)carState.displayStatus]);
 }
 
 int DriverDisplay::getColorForInfoType(INFO_TYPE type) {
@@ -366,135 +365,135 @@ void DriverDisplay::write_driver_info() {
 
 void DriverDisplay::task(void *pvParams) {
   while (1) {
-    if (carState.displayStatus == DISPLAY_STATUS::DRIVER_SETUP) {
-      switch (carState.displayStatus) {
-      // initializing states:
-      case DISPLAY_STATUS::DRIVER_SETUP:
-        re_init();
-        display_setup();
-        justInited = true;
-        carState.displayStatus = DISPLAY_STATUS::DRIVER_BACKGROUND;
-        break;
+    switch (carState.displayStatus) {
+    case DISPLAY_STATUS::ENGINEER_CONSOLE:
+      break;
 
-      case DISPLAY_STATUS::DRIVER_BACKGROUND:
-        display.clear_screen(display.bgColor);
-        draw_display_background();
+    // initializing states:
+    case DISPLAY_STATUS::DRIVER_SETUP:
+      display_setup();
+      justInited = true;
+      carState.displayStatus = DISPLAY_STATUS::DRIVER_BACKGROUND;
+      break;
 
-        BatteryVoltage.showLabel(display.tft);
-        BatteryVoltage.set_epsilon(0.1);
-        // BatteryOn.showLabel(tft);
-        PhotoVoltaicCurrent.showLabel(display.tft);
-        PhotoVoltaicCurrent.set_epsilon(0.1);
-        PhotoVoltaicOn.showLabel(display.tft);
-        MotorCurrent.showLabel(display.tft);
-        MotorCurrent.set_epsilon(0.1);
-        MotorOn.showLabel(display.tft);
-        TargetSpeedPower.showLabel(display.tft);
-        // DateTimeStamp.showLabel(display.tft);
-        set_sleep_polling(600);
-        carState.displayStatus = DISPLAY_STATUS::DRIVER_RUNNING;
-        break;
+    case DISPLAY_STATUS::DRIVER_BACKGROUND:
+      display.clear_screen(display.bgColor);
+      draw_display_background();
+      BatteryVoltage.showLabel(display.tft);
+      BatteryVoltage.set_epsilon(0.1);
+      // BatteryOn.showLabel(tft);
+      PhotoVoltaicCurrent.showLabel(display.tft);
+      PhotoVoltaicCurrent.set_epsilon(0.1);
+      PhotoVoltaicOn.showLabel(display.tft);
+      MotorCurrent.showLabel(display.tft);
+      MotorCurrent.set_epsilon(0.1);
+      MotorOn.showLabel(display.tft);
+      TargetSpeedPower.showLabel(display.tft);
+      // DateTimeStamp.showLabel(display.tft);
+      set_sleep_polling(600);
+      carState.displayStatus = DISPLAY_STATUS::DRIVER_RUNNING;
+      break;
 
-      // working state:
-      case DISPLAY_STATUS::DRIVER_RUNNING:
-        DriverInfo.Value = carState.DriverInfo;
-        if (DriverInfo.Value != DriverInfo.ValueLast || justInited) {
-          write_driver_info();
-        }
-        Speed.Value = carState.Speed;
-        if (Speed.is_changed() || justInited) {
-          write_speed();
-        }
-        if (carState.SpeedArrow == SPEED_ARROW::DECREASE) {
-          arrow_increase(false);
-          arrow_decrease(true);
-        } else if (carState.SpeedArrow == SPEED_ARROW::INCREASE) {
-          arrow_increase(true);
-          arrow_decrease(false);
-        } else {
-          arrow_increase(false);
-          arrow_decrease(false);
-        }
-        Acceleration.Value = carState.AccelerationDisplay;
-        if (Acceleration.is_changed() || justInited) {
-          write_acceleration();
-        }
-        TargetSpeedPower.Value = carState.ConstantMode == CONSTANT_MODE::SPEED ? carState.TargetSpeed : carState.TargetPower;
-        if (TargetSpeedPower.is_changed() || justInited) {
-          // write_target_value()
-          if (carState.ConstantMode == CONSTANT_MODE::SPEED)
-            TargetSpeedPower.change_format("%5.0f");
-          else
-            TargetSpeedPower.change_format("%3.1f");
-          TargetSpeedPower.showValue(display.tft);
-        }
-
-        DriveDirection.Value = carState.DriveDirection;
-        if (DriveDirection.Value != DriveDirection.ValueLast || justInited) {
-          write_drive_direction();
-        }
-        // Light.Value = carState.Light;
-        // if (Light.Value != Light.ValueLast || justInited) {
-        //   show_light();
-        // }
-        ConstantMode.Value = carState.ConstantMode;
-        ConstantModeOn.Value = carState.ConstantModeOn;
-        if (ConstantMode.Value != ConstantMode.ValueLast || ConstantModeOn.Value != ConstantModeOn.ValueLast || justInited) {
-          constant_drive_mode_show();
-        }
-
-        // if (carState.Speed + 1 < carState.TargetSpeed)
-        //   arrow(SPEED_ARROW::INCREASE);
-        // else if (carState.Speed - 1 > carState.TargetSpeed)
-        //   arrow(SPEED_ARROW::DECREASE);
-        // else
-        //   arrow(SPEED_ARROW::OFF);
-
-        StepSize.Value = carState.Potentiometer;
-        if (StepSize.Value != StepSize.ValueLast || justInited) {
-          StepSize.get_recent_overtake_last();
-          step_width_show();
-        }
-
-        // EcoModeOn.Value = carState.EcoOn;
-        // if (EcoModeOn.Value != EcoModeOn.ValueLast || justInited) {
-        //   eco_power_mode_show();
-        // }
-
-        BatteryVoltage.Value = carState.BatteryVoltage;
-        if (BatteryVoltage.is_changed() || justInited) {
-          BatteryVoltage.showValue(display.tft);
-        }
-        // BatteryOn.Value = carState.BatteryOn;
-        // if (BatteryOn.is_changed() || justInited) {
-        //   BatteryOn.showValue(tft);
-        // }
-        // TODO: PhotoVoltaicCurrent.Value = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
-        PhotoVoltaicCurrent.Value = carState.PhotoVoltaicCurrent;
-        if (PhotoVoltaicCurrent.is_changed() || justInited) {
-          PhotoVoltaicCurrent.showValue(display.tft);
-        }
-        PhotoVoltaicOn.Value = carState.PhotoVoltaicOn;
-        if (PhotoVoltaicOn.is_changed() || justInited) {
-          PhotoVoltaicOn.showValue(display.tft);
-        }
-        MotorCurrent.Value = carState.MotorCurrent;
-        if (MotorCurrent.is_changed() || justInited) {
-          MotorCurrent.showValue(display.tft);
-        }
-        MotorOn.Value = carState.MotorOn;
-        if (MotorOn.is_changed() || justInited) {
-          MotorOn.showValue(display.tft);
-        }
-        // DateTimeStamp.Value = getTime();
-        // DateTimeStamp.showValue(tft);
-        justInited = false;
-        break;
-
-      default:
-        // ignore others
-        break;
+    // working state:
+    case DISPLAY_STATUS::DRIVER_RUNNING:
+      display.lifeSign();
+      DriverInfo.Value = carState.DriverInfo;
+      if (DriverInfo.Value != DriverInfo.ValueLast || justInited) {
+        write_driver_info();
       }
+      Speed.Value = carState.Speed;
+      if (Speed.is_changed() || justInited) {
+        write_speed();
+      }
+      if (carState.SpeedArrow == SPEED_ARROW::DECREASE) {
+        arrow_increase(false);
+        arrow_decrease(true);
+      } else if (carState.SpeedArrow == SPEED_ARROW::INCREASE) {
+        arrow_increase(true);
+        arrow_decrease(false);
+      } else {
+        arrow_increase(false);
+        arrow_decrease(false);
+      }
+      Acceleration.Value = carState.AccelerationDisplay;
+      if (Acceleration.is_changed() || justInited) {
+        write_acceleration();
+      }
+      TargetSpeedPower.Value = carState.ConstantMode == CONSTANT_MODE::SPEED ? carState.TargetSpeed : carState.TargetPower;
+      if (TargetSpeedPower.is_changed() || justInited) {
+        // write_target_value()
+        if (carState.ConstantMode == CONSTANT_MODE::SPEED)
+          TargetSpeedPower.change_format("%5.0f");
+        else
+          TargetSpeedPower.change_format("%3.1f");
+        TargetSpeedPower.showValue(display.tft);
+      }
+
+      DriveDirection.Value = carState.DriveDirection;
+      if (DriveDirection.Value != DriveDirection.ValueLast || justInited) {
+        write_drive_direction();
+      }
+      // Light.Value = carState.Light;
+      // if (Light.Value != Light.ValueLast || justInited) {
+      //   show_light();
+      // }
+      ConstantMode.Value = carState.ConstantMode;
+      ConstantModeOn.Value = carState.ConstantModeOn;
+      if (ConstantMode.Value != ConstantMode.ValueLast || ConstantModeOn.Value != ConstantModeOn.ValueLast || justInited) {
+        constant_drive_mode_show();
+      }
+
+      // if (carState.Speed + 1 < carState.TargetSpeed)
+      //   arrow(SPEED_ARROW::INCREASE);
+      // else if (carState.Speed - 1 > carState.TargetSpeed)
+      //   arrow(SPEED_ARROW::DECREASE);
+      // else
+      //   arrow(SPEED_ARROW::OFF);
+
+      StepSize.Value = carState.Potentiometer;
+      if (StepSize.Value != StepSize.ValueLast || justInited) {
+        StepSize.get_recent_overtake_last();
+        step_width_show();
+      }
+
+      // EcoModeOn.Value = carState.EcoOn;
+      // if (EcoModeOn.Value != EcoModeOn.ValueLast || justInited) {
+      //   eco_power_mode_show();
+      // }
+
+      BatteryVoltage.Value = carState.BatteryVoltage;
+      if (BatteryVoltage.is_changed() || justInited) {
+        BatteryVoltage.showValue(display.tft);
+      }
+      // BatteryOn.Value = carState.BatteryOn;
+      // if (BatteryOn.is_changed() || justInited) {
+      //   BatteryOn.showValue(tft);
+      // }
+      // TODO: PhotoVoltaicCurrent.Value = carState.Mppt1Current + carState.Mppt2Current + carState.Mppt3Current;
+      PhotoVoltaicCurrent.Value = carState.PhotoVoltaicCurrent;
+      if (PhotoVoltaicCurrent.is_changed() || justInited) {
+        PhotoVoltaicCurrent.showValue(display.tft);
+      }
+      PhotoVoltaicOn.Value = carState.PhotoVoltaicOn;
+      if (PhotoVoltaicOn.is_changed() || justInited) {
+        PhotoVoltaicOn.showValue(display.tft);
+      }
+      MotorCurrent.Value = carState.MotorCurrent;
+      if (MotorCurrent.is_changed() || justInited) {
+        MotorCurrent.showValue(display.tft);
+      }
+      MotorOn.Value = carState.MotorOn;
+      if (MotorOn.is_changed() || justInited) {
+        MotorOn.showValue(display.tft);
+      }
+      // DateTimeStamp.Value = getTime();
+      // DateTimeStamp.showValue(tft);
+      justInited = false;
+      break;
+
+    default:
+      // ignore others
+      break;
     }
     taskSuspend();
   }

@@ -30,7 +30,7 @@ template <typename Enumeration> auto as_integer(Enumeration const value) -> type
 class Display {
 public:
   // RTOS task
-  virtual string getName(void);
+  string getName(void) { return "Display"; };
   string init(void);
   string init(Adafruit_ILI9341 *ili9341);
   string re_init(void);
@@ -41,21 +41,19 @@ public:
   int width;
 
 private:
-  void lifeSign();
   void setupScrollArea(uint16_t TFA, uint16_t BFA);
   void scrollAddress(uint16_t VSP);
   int scroll(int lines);
   string _setup(void);
 
 public:
-  virtual ~Display(){};
-  Display();
-  Display(Adafruit_ILI9341 *disp);
-
   Adafruit_ILI9341 *tft;
 
+  ~Display(){};
+  Display();
+  Display(Adafruit_ILI9341 *disp);
+  void lifeSign();
   void set_DisplayStatus(DISPLAY_STATUS theNewStatus) { carState.displayStatus = theNewStatus; };
-
   DISPLAY_STATUS get_DisplayStatus() { return carState.displayStatus; };
   char *get_DisplayStatus_text() { return (char *)DISPLAY_STATUS_str[(int)carState.displayStatus]; };
 

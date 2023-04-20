@@ -185,7 +185,8 @@ void CarControl::task(void *pvParams) {
         console << NL;
         cyclecounter = 0;
       }
-      vTaskDelay_debug(10, "I-");
+      
+      
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       // read values from ADC/IO

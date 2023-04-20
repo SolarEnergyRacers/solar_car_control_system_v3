@@ -45,6 +45,7 @@ string AbstractTask::init_t(int core_id, int priority, int stack_size, int sleep
   this->priority = priority;
   this->stack_size = stack_size;
   set_sleep_polling(sleep_polling_ms);
+  console << "[  ] " << getName() << " initializing ..." << NL;
   return init();
 }
 

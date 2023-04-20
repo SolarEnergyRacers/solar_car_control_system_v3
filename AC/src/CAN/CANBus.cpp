@@ -84,7 +84,6 @@ string CANBus::init() {
   counterI_notAvail = 0;
   counterR_notAvail = 0;
   counterW_notAvail = 0;
-  console << "[  ] Init CANBus...\n";
   packetsCountMax = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
@@ -216,7 +215,7 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      //console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
+      // console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
 
       if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
         console << NL

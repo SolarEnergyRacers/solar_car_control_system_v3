@@ -21,7 +21,7 @@ using namespace std;
 
 string OneWireBus::init(void) {
   bool hasError = false;
-  console << "[  ] Init 'OneWireBus'...\n";
+  console << "[  ] Init '" << getName() << "'..." << NL;
 
   mutex = xSemaphoreCreateMutex();
   oneWire = OneWire(ONEWIRE_PIN);

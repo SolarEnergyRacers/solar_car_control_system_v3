@@ -65,8 +65,6 @@ string CmdHandler::re_init() { return init(); }
 
 string CmdHandler::init() {
   bool hasError = false;
-  console << "[  ] Init 'CmdHandler'...\n";
-  // nothing to do, i2c bus is getting initialized externally
   return fmt::format("[{}] CmdHandler initialized.", hasError ? "--" : "ok");
 }
 

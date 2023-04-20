@@ -36,7 +36,7 @@ enum class LIGHT { OFF, L1, L2 };
 static const char *LIGHT_str[] = {"OFF", "L1", "L2"};
 
 enum class DISPLAY_STATUS {
-  DRIVER_HALTED,
+    DRIVER_HALTED,
   DRIVER_SETUP,
   DRIVER_BACKGROUND,
   DRIVER_RUNNING,

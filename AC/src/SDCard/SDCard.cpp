@@ -27,16 +27,16 @@ extern Console console;
 extern SPIBus spiBus;
 extern SDCard sdCard;
 
-string SDCard::re_init() { return init(); }
+string SDCard::init() { return re_init(); }
 
-string SDCard::init() {
+string SDCard::re_init() {
   bool hasError = false;
-  console << "[  ] Init 'SDCard'...\n";
-
+  console << "[  ] Init '" << getName() << "'..." << NL;
+  
   if (!mount())
     hasError = true;
 
-  return fmt::format("[{}] SDCard initialized.", hasError ? "--" : "ok");
+  return fmt::format("[{}] SDCard           initialized.", hasError ? "--" : "ok");
 }
 
 // https://github.com/espressif/arduino-esp32/issues/5676

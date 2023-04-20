@@ -58,18 +58,10 @@ string Display::init(Adafruit_ILI9341 *ili9341) {
 
 string Display::re_init(void) { return _setup(); }
 
-// Adafruit_ILI9341 t = Adafruit_ILI9341(&spiBus.spi, SPI_DC, SPI_CS_TFT, SPI_RST);
-// Adafruit_ILI9341 t = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
-
 Display::Display() {
-  // Adafruit_ILI9341 t = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
-  // Adafruit_ILI9341 t = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
-  //  tft = &t;
   carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
 };
 Display::Display(Adafruit_ILI9341 *ili9341) {
-  // Adafruit_ILI9341 t = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
-  // Adafruit_ILI9341 t = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
   tft = ili9341;
   carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
 };
@@ -123,8 +115,6 @@ void Display::clear_screen(int bgColor) {
   xSemaphoreTakeT(spiBus.mutex);
   tft->setRotation(1);
   tft->fillScreen(bgColor);
-  // tft->setRotation(1);
-  // tft->fillScreen(bgColor);
   xSemaphoreGive(spiBus.mutex);
 }
 

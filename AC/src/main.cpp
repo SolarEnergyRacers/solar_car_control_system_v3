@@ -84,6 +84,7 @@ static void cmdHandlerTask(void *pvParams) { cmdHandler.task(pvParams); }
 static void engineerDisplayTask(void *pvParams) { engineerDisplay.task(pvParams); }
 static void driverDisplayTask(void *pvParams) { driverDisplay.task(pvParams); }
 
+// Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
 Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
 Display display = Display(&ili9341);
 
@@ -110,26 +111,23 @@ void app_main(void) {
 
   //------------------------------------------------------------
   // Global Display
-  // Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
-  // Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
-  // Display display = Display(&ili9341);
   msg = display.init();
   console << msg << NL;
   display.clear_screen(0xffff);
   display.print("Start AC Init Procedure:\n\n");
 
-  //------------------------------------------------------------
-  // SC card
-  // sdCardDetectHandler();
-  msg = sdCard.init();
-  console << msg << "\n";
-  display.print(msg + "\n");
+  // //------------------------------------------------------------
+  // // SC card
+  // // sdCardDetectHandler();
+  // msg = sdCard.init();
+  // console << msg << "\n";
+  // display.print(msg + "\n");
 
-  //--- SD card available
-  carState.initalize_config();
-  sdCard.open_log_file();
-  //------from now config ini values can be used
-  vTaskDelay(10);
+  // //--- SD card available
+  // carState.initalize_config();
+  // sdCard.open_log_file();
+  // //------from now config ini values can be used
+  // vTaskDelay(10);
 
   //------------------------------------------------------------
   // CAN Bus
@@ -222,6 +220,19 @@ void app_main(void) {
   msg = carControl.report_task_init();
   console << msg << NL;
   display.print(msg + "\n");
+  vTaskDelay(10);
+
+  //------------------------------------------------------------
+  // SC card
+  // sdCardDetectHandler();
+  msg = sdCard.init();
+  console << msg << "\n";
+  display.print(msg + "\n");
+
+  //--- SD card available
+  carState.initalize_config();
+  sdCard.open_log_file();
+  //------from now config ini values can be used
   vTaskDelay(10);
 
   stringstream ss;

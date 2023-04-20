@@ -56,10 +56,10 @@ bool SDCard::mount() {
   }
   try {
     console << "     Mounting SD card ...\n";
-    // xSemaphoreGive(spiBus.mutex);
+    xSemaphoreGive(spiBus.mutex);
     xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
-    // SD.end();
+    //SD.end();
     console << " SD02 ";
     mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
     console << " SD04 ";

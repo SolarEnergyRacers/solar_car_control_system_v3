@@ -112,7 +112,7 @@ public:
 
     TargetSpeed = 0;
     TargetPower = 0;
-    EngineerInfo = "%";
+    EngineerInfo = "";
     DriverInfo = "starting...";
     DriverInfoType = INFO_TYPE::STATUS;
     Light = LIGHT::OFF;

@@ -27,7 +27,7 @@ public:
   // Class member and functions
   bool read_nextScreenButton();
   bool read_sd_card_detect();
-  bool read_const_mode();
+  bool read_const_mode_and_mountrequest();
   bool verboseMode = false;
   bool verboseModeDebug = false;
 

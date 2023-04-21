@@ -32,7 +32,7 @@ public:
   // prepare log
   bool open_log_file();
   // close log file, unmount the card, end the SD and disable logging
-  void unmount();
+  bool unmount();
 
   bool verboseMode = false;
   bool verboseModeDebug = false;

@@ -13,6 +13,7 @@
 class OneWireBus {
 private:
 public:
+  string getName(void) { return "OneWire"; };
   SemaphoreHandle_t mutex = NULL;
   OneWire oneWire;
   string init();

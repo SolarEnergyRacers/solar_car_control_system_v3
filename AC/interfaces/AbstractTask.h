@@ -23,10 +23,8 @@ private:
   uint32_t stack_size;
   uint32_t sleep_polling;
 
-protected:
-  void set_sleep_polling(uint32_t sleep_polling_ms) { sleep_polling = sleep_polling_ms / portTICK_PERIOD_MS; };
-
 public:
+  void set_sleep_polling(uint32_t sleep_polling_ms) { sleep_polling = sleep_polling_ms / portTICK_PERIOD_MS; };
   string init_t(int core_id, int priority = 1, int stack_size = 10000, int sleep_polling_ms = 300);
   virtual string init(void) = 0;
   virtual string getName(void) = 0;

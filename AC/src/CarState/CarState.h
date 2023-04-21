@@ -155,7 +155,7 @@ public:
   int8_t AccelerationDisplay; // Display Value (-99...+99)
   // #SAFETY-END#
 
-  //bool BatteryOn;      // IO-In
+  // bool BatteryOn;      // IO-In
   bool PhotoVoltaicOn; // IO-in
   bool MotorOn;        // IO-In
   bool EcoOn;          // IO-In
@@ -217,9 +217,9 @@ public:
 
   // auxiliary variables - read from ser4config.ini
   // [Main]
-  string LogFilename; // telemetry data: %stamp% get replaced by datetime stamp if period != 0
-  int LogFilePeriod;  // [h], after that a new log file is created, 0 - never
-  int LogInterval;    // [ms]
+  string LogFilename = "/SER4DATA.CSV"; // telemetry data: %stamp% get replaced by datetime stamp if period != 0
+  int LogFilePeriod;                    // [h], after that a new log file is created, 0 - never
+  int LogInterval = 1000;               // [ms]
 
   // [TaskTimings]
   int SleepTimeIOExt = 400; // [ms]

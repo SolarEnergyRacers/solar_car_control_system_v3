@@ -18,6 +18,7 @@ private:
   void printDirectory(File dir, int numTabs);
 
 public:
+  string getName() { return "SDCard"; };
   string init();
   string re_init();
   bool isMounted() { return carState.SdCardDetect && mounted; }
@@ -25,7 +26,7 @@ public:
   // write a string into the dataFile
   void write(string msg);
   // prints the directory tree of the card
-  string directory();
+  void directory();
   // mount the card
   bool mount();
   // prepare log

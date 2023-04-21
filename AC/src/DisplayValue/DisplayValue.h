@@ -82,22 +82,22 @@ public:
   // check if there is a vaue difference between current and last
   bool is_changed() { return abs(Value - ValueLast) > _epsilon; }
 
-  void showLabel(Adafruit_ILI9341 tft) {
+  void showLabel(Adafruit_ILI9341 *tft) {
     char label[15];
     snprintf(label, 15, "%s", Label.c_str());
     int16_t x1, y1;
     uint16_t w, h;
     vWidth = atoi(Format.substr(1, 1).c_str()) * TextSize * 6 + 4;
     xSemaphoreTakeT(spiBus.mutex);
-    tft.setTextSize(TextSize);
-    tft.setTextColor(TextColor);
-    tft.setCursor(X, Y);
-    tft.print(label);
-    tft.getTextBounds(label, X, Y, &x1, &y1, &w, &h);
+    tft->setTextSize(TextSize);
+    tft->setTextColor(TextColor);
+    tft->setCursor(X, Y);
+    tft->print(label);
+    tft->getTextBounds(label, X, Y, &x1, &y1, &w, &h);
     if (h == 0)
       h = TextSize * 8;
-    tft.setCursor(X + w + vWidth, Y);
-    tft.printf("%s", Unit.c_str());
+    tft->setCursor(X + w + vWidth, Y);
+    tft->printf("%s", Unit.c_str());
     xSemaphoreGive(spiBus.mutex);
     vX = x1 + w;
     vY = y1;
@@ -106,41 +106,41 @@ public:
   }
   char buffer[20];
 
-  void showValue(Adafruit_ILI9341 tft) { showValue(Value, tft); }
+  void showValue(Adafruit_ILI9341 *tft) { showValue(Value, tft); }
 
-  void showValue(string s, Adafruit_ILI9341 tft) {
+  void showValue(string s, Adafruit_ILI9341 *tft) {
     if (s.compare(ValueLast) == 0 || !IsInited) {
       _showValue(tft, Value.c_str());
     }
   }
 
-  void showValue(bool b, Adafruit_ILI9341 tft) {
+  void showValue(bool b, Adafruit_ILI9341 *tft) {
     if (b != ValueLast || !IsInited) {
       _showValue(tft, Value ? "ON" : "OFF");
     }
   }
 
-  void showValue(int s, Adafruit_ILI9341 tft) {
+  void showValue(int s, Adafruit_ILI9341 *tft) {
     if (is_changed() || !IsInited) {
       snprintf(buffer, 20, Format.c_str(), Value);
       _showValue(tft, buffer);
     }
   }
 
-  void showValue(float s, Adafruit_ILI9341 tft) {
+  void showValue(float s, Adafruit_ILI9341 *tft) {
     if (is_changed() || !IsInited) {
       snprintf(buffer, 20, Format.c_str(), Value);
       _showValue(tft, buffer);
     }
   }
 
-  void _showValue(Adafruit_ILI9341 tft, const char *value) {
+  void _showValue(Adafruit_ILI9341 *tft, const char *value) {
     xSemaphoreTakeT(spiBus.mutex);
-    tft.setTextSize(TextSize);
-    tft.setTextColor(TextColor);
-    tft.fillRect(vX, vY, vWidth, vHeight, BgColor);
-    tft.setCursor(vX, vY);
-    tft.print(value);
+    tft->setTextSize(TextSize);
+    tft->setTextColor(TextColor);
+    tft->fillRect(vX, vY, vWidth, vHeight, BgColor);
+    tft->setCursor(vX, vY);
+    tft->print(value);
     xSemaphoreGive(spiBus.mutex);
 
     ValueLast = Value;

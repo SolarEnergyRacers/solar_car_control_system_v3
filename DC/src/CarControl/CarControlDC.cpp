@@ -149,8 +149,6 @@ bool CarControl::read_paddles() {
         carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
       }
     }
-
-
   }
 
   if (accelerationDisplayLast != carState.AccelerationDisplay) {
@@ -177,25 +175,37 @@ void CarControl::set_DAC() {
   }
 }
 
+int cyclecounter = 0;
+
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
+      cyclecounter++;
+      if (cyclecounter > 50) {
+        cyclecounter = 0;
+      }
+      
+      
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       // read values from ADC/IO
       read_reference_cell_data();
+      vTaskDelay(10);
       read_speed();
+      // vTaskDelay(10, "1-");
       read_potentiometer();
+      vTaskDelay(10);
       if (read_paddles())
         set_DAC();
       carState.LifeSign++;
-
+      vTaskDelay(10);
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          carState.Potentiometer, // Potentiometer value
                          carState.Acceleration,  // HAL-paddle Acceleration ADC value
                          carState.Deceleration   // HAL-paddle Deceleration ADC value
       );
+      vTaskDelay(10);
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
       canBus.writePacket(DC_BASE_ADDR | 0x01,
                          (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
@@ -212,7 +222,7 @@ void CarControl::task(void *pvParams) {
                          false,                                   // empty
                          false                                    // empty
       );
-
+      vTaskDelay(10);
       if (carControl.verboseModeDebug) {
         console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
                                canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
@@ -225,20 +235,6 @@ void CarControl::task(void *pvParams) {
                                carState.MotorOn, carState.ConstantModeOn)
                 << NL;
       }
-      //  one data row per second
-      //  if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-      //    // if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
-      //    //   sdCard.write(record);
-      //    //   millisNextStampCsv = millis() + carState.LogInterval;
-      //    // }
-      //    if (carControl.verboseModeCarControlMax) {
-      //      string record = carState.csv();
-      //      if (millis() > millisNextStampSnd) {
-      //        console << "d: " + record << NL;
-      //        millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-      //      }
-      //    }
-      //  }
     }
     taskSuspend();
   }

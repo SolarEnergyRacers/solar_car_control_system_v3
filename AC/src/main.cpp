@@ -60,7 +60,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 150;
+int base_offset_suspend = 0;
 bool SystemInited = false;
 bool SystemJustInited = true;
 uint64_t life_sign = 0;
@@ -72,12 +72,11 @@ CmdHandler cmdHandler;
 Console console;
 DriverDisplay driverDisplay;
 EngineerDisplay engineerDisplay;
-GPInputOutput gpio; // I2C Interrupts, ESP32 GPInputOutput pin settings
+GPInputOutput gpio;
 I2CBus i2cBus;
 SDCard sdCard;
 SPIBus spiBus;
-Uart uart; // SERIAL
-// OneWireBus oneWireBus;
+Uart uart;
 
 static void canBusTask(void *pvParams) { canBus.task(pvParams); }
 static void carControlTask(void *pvParams) { carControl.task(pvParams); }
@@ -85,23 +84,17 @@ static void cmdHandlerTask(void *pvParams) { cmdHandler.task(pvParams); }
 static void engineerDisplayTask(void *pvParams) { engineerDisplay.task(pvParams); }
 static void driverDisplayTask(void *pvParams) { driverDisplay.task(pvParams); }
 
+// Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
+Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
+Display display = Display(&ili9341);
+
 void app_main(void) {
   string msg;
+  carState.init_values();
+
   // init console IO and radio console
   msg = uart.init();
-  console << NL << msg << NL;
-  delay(1000);
-  console << NL << "------------------------------------------------------------" << NL;
-  console << "esp32dev + free RTOS" << NL;
-  console << "Solar Energy Car Racers SER4 Controller: v" << VERSION << ", build time: " << __DATE__ << " " << __TIME__ << NL;
-  console << "ARDUINO:              " << ARDUINO << NL;
-  console << "SER4TYPE:             " << SER4TYPE << NL;
-  console << "Main running on core: " << xPortGetCoreID() << NL;
-  console << "------------------------------------------------------------" << NL;
-  // init arduino library
-  // initArduino();
-  console << "------------------------------------------------------------" << NL;
-  chip_info();
+
   console << "------------------------------------------------------------" << NL;
   console << "-- gpio pin settings ---------------------------------------" << NL;
   msg = gpio.init();
@@ -111,38 +104,40 @@ void app_main(void) {
   console << "-- init bus systems ----------------------------------------" << NL;
   msg = spiBus.init();
   console << msg << NL;
-  // msg = oneWireBus.init();
-  // console << msg << NL;
   msg = i2cBus.init();
   console << msg << NL;
   i2cBus.verboseModeI2C = false;
   delay(200);
 
-  // Engineer Display
-  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 300);
+  //------------------------------------------------------------
+  // Global Display
+  msg = display.init();
   console << msg << NL;
-  engineerDisplay.verboseMode = false;
-  console << "[  ] Create " << engineerDisplay.getName() << " ...";
-  xTaskCreatePinnedToCore(engineerDisplayTask,             /* task function. */
-                          engineerDisplay.getInfo(),       /* name of task. */
-                          engineerDisplay.getStackSize(),  /* stack size of task */
-                          NULL,                            /* parameter of the task */
-                          engineerDisplay.getPriority(),   /* priority of the task */
-                          engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
-                          engineerDisplay.getCoreId());    /* pin task to core id */
-  engineerDisplay.clear_screen(0xffff);
-  console << " done." << NL;
-  msg = carControl.report_task_init();
-  console << msg << NL;
-  engineerDisplay.print(msg + "\n");
+  display.clear_screen(0xffff);
+  display.print("Start AC Init Procedure:\n\n");
+
+  // //------------------------------------------------------------
+  // // SC card
+  // // sdCardDetectHandler();
+  // msg = sdCard.init();
+  // console << msg << "\n";
+  // display.print(msg + "\n");
+
+  // //--- SD card available
+  // carState.initalize_config();
+  // sdCard.open_log_file();
+  // //------from now config ini values can be used
+  // vTaskDelay(10);
+
+  //------------------------------------------------------------
   // CAN Bus
-  msg = canBus.init_t(1, 1, 10000, base_offset_suspend + 90);
+  msg = canBus.init_t(0, 22, 10000, base_offset_suspend + 90);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
   canBus.verboseModeCanOut = false;
   canBus.verboseModeCanOutNative = false;
-  console << "[  ] Create " << canBus.getName() << " task ...";
+  console << "[  ] " << canBus.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(canBusTask,             /* task function. */
                           canBus.getInfo(),       /* name of task. */
                           canBus.getStackSize(),  /* stack size of task */
@@ -150,19 +145,16 @@ void app_main(void) {
                           canBus.getPriority(),   /* priority of the task */
                           canBus.getTaskHandle(), /* task handle to keep track of created task */
                           canBus.getCoreId());    /* pin task to core id */
-  console << " done." << NL;
   msg = canBus.report_task_init();
   console << msg << NL;
-  engineerDisplay.print(msg + "\n");
+  display.print(msg + "\n");
+  vTaskDelay(10);
 
-  delay(10);
-
-#if COMMANDHANDLER_ON
   //------------------------------------------------------------
   // CMD Handler
   msg = cmdHandler.init_t(1, 1, 10000, base_offset_suspend + 300);
   console << msg << NL;
-  console << "[  ] Create " << cmdHandler.getName() << " task ...";
+  console << "[  ] " << cmdHandler.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(cmdHandlerTask,             /* task function. */
                           cmdHandler.getInfo(),       /* name of task. */
                           cmdHandler.getStackSize(),  /* stack size of task */
@@ -170,53 +162,35 @@ void app_main(void) {
                           cmdHandler.getPriority(),   /* priority of the task */
                           cmdHandler.getTaskHandle(), /* task handle to keep track of created task */
                           cmdHandler.getCoreId());    /* pin task to core id */
-  console << " done." << NL;
   msg = cmdHandler.report_task_init();
   console << msg << NL;
-  engineerDisplay.print(msg + "\n");
-#endif
-
-  delay(10);
+  display.print(msg + "\n");
+  vTaskDelay(10);
 
   //------------------------------------------------------------
-  // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 100);
+  // Engineer Display
+  engineerDisplay.verboseMode = false;
+  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 300);
   console << msg << NL;
-  carControl.verboseMode = false;
-  carControl.verboseModeDebug = false;
-  console << "[  ] Create " << carControl.getName() << " task ...";
-  xTaskCreatePinnedToCore(carControlTask,             /* task function. */
-                          carControl.getInfo(),       /* name of task. */
-                          carControl.getStackSize(),  /* stack size of task */
-                          NULL,                       /* parameter of the task */
-                          carControl.getPriority(),   /* priority of the task */
-                          carControl.getTaskHandle(), /* task handle to keep track of created task */
-                          carControl.getCoreId());    /* pin task to core id */
-  console << " done." << NL;
-  msg = carControl.report_task_init();
+  console << "     " << engineerDisplay.getName() << " create task ...";
+  xTaskCreatePinnedToCore(engineerDisplayTask,             /* task function. */
+                          engineerDisplay.getInfo(),       /* name of task. */
+                          engineerDisplay.getStackSize(),  /* stack size of task */
+                          NULL,                            /* parameter of the task */
+                          engineerDisplay.getPriority(),   /* priority of the task */
+                          engineerDisplay.getTaskHandle(), /* task handle to keep track of created task */
+                          engineerDisplay.getCoreId());    /* pin task to core id */
+  msg = engineerDisplay.report_task_init();
   console << msg << NL;
-  engineerDisplay.print(msg + "\n");
-
-  //--let the bootscreen visible for a moment ------------------
-  engineerDisplay.print(".\nWaiting for start of life display: ");
-  int waitAtConsoleView = 3;
-  while (waitAtConsoleView-- > 0) {
-    engineerDisplay.print(to_string(waitAtConsoleView));
-    delay(1000);
-    engineerDisplay.print("-");
-  }
-  engineerDisplay.print("start");
-  engineerDisplay.set_DisplayStatus(DISPLAY_STATUS::ENGINEER_HALTED);
-
-  delay(10);
+  display.print(msg + "\n");
+  vTaskDelay(10);
 
   //------------------------------------------------------------
   // Driver Display
-  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 110);
-  console << msg << NL;
   driverDisplay.verboseMode = false;
-  driverDisplay.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
-  console << "[  ] Create " << driverDisplay.getName() << " task ...";
+  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 300);
+  console << msg << NL;
+  console << "     " << driverDisplay.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(driverDisplayTask,             /* task function. */
                           driverDisplay.getInfo(),       /* name of task. */
                           driverDisplay.getStackSize(),  /* stack size of task */
@@ -224,41 +198,67 @@ void app_main(void) {
                           driverDisplay.getPriority(),   /* priority of the task */
                           driverDisplay.getTaskHandle(), /* task handle to keep track of created task */
                           driverDisplay.getCoreId());    /* pin task to core id */
-  console << " done." << NL;
-  msg = carControl.report_task_init();
-  console << msg << driverDisplay.get_DisplayStatus_text() << NL;
-  engineerDisplay.print(msg + "\n");
-
-  delay(10);
+  msg = driverDisplay.report_task_init();
+  console << msg << NL;
+  display.print(msg + "\n");
+  vTaskDelay(10);
 
   //------------------------------------------------------------
-  // Driver Display
+  // Car Control AC
+  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 100);
+  console << msg << NL;
+  carControl.verboseMode = false;
+  carControl.verboseModeDebug = false;
+  console << "[  ] " << carControl.getName() << " create task ..." << NL;
+  xTaskCreatePinnedToCore(carControlTask,             /* task function. */
+                          carControl.getInfo(),       /* name of task. */
+                          carControl.getStackSize(),  /* stack size of task */
+                          NULL,                       /* parameter of the task */
+                          carControl.getPriority(),   /* priority of the task */
+                          carControl.getTaskHandle(), /* task handle to keep track of created task */
+                          carControl.getCoreId());    /* pin task to core id */
+  msg = carControl.report_task_init();
+  console << msg << NL;
+  display.print(msg + "\n");
+  vTaskDelay(10);
+
+  //------------------------------------------------------------
+  // SC card
   // sdCardDetectHandler();
   msg = sdCard.init();
   console << msg << "\n";
-  engineerDisplay.print(msg + "\n");
-
+  display.print(msg + "\n");
+  vTaskDelay(100);
   //--- SD card available
-  carState.init_values();
+  carState.initalize_config();
   sdCard.open_log_file();
   //------from now config ini values can be used
 
-  delay(10);
-
-  console << "------------------------------------------------------------" << NL;
-  if (i2cBus.isDC()) {
-    console << "Initialization ready as DriveController" << NL;
-  } else {
-    console << "Initialization ready as AuxiliaryController" << NL;
+  stringstream ss;
+  ss << NL;
+  ss << "----------------------------------------------------" << NL;
+  ss << "Initialization ready as AuxiliaryController" << NL;
+  ss << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
+  ss << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
+  ss << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
+  ss << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
+  ss << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  ss << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
+  ss << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
+  ss << "----------------------------------------------------" << NL;
+  vTaskDelay(10);
+  console << ss.str();
+  display.print(ss.str());
+  //--let the bootscreen visible for a moment ------------------
+  display.print("\nWaiting for start of life system: ");
+  int waitAtConsoleView = 3;
+  while (waitAtConsoleView-- > 0) {
+    display.print(to_string(waitAtConsoleView));
+    delay(1000);
+    display.print("-");
   }
-  console << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
-  console << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
-  console << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
-  console << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
-  console << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
-  console << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
-  console << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
-  console << "------------------------------------------------------------" << NL;
-  delay(1000);
+  console << NL;
+  display.print("start\n");
+  display.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
   SystemInited = true;
 }

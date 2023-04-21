@@ -12,18 +12,21 @@
 // #include <Wire.h>
 // #include <AbstractTask.h>
 
-class EngineerDisplay : public Display {
+class EngineerDisplay : public AbstractTask {
 public:
-  EngineerDisplay() { bgColor = ILI9341_LIGHTGREY; };
-  ~EngineerDisplay(){};
-  //==== overwrites from base class ==== START
+  EngineerDisplay();
+  ~EngineerDisplay();
+  // RTOS task
+  string init(void);
+  string re_init(void);
+  void exit(void){};
+  void task(void *pvParams);
+
   string getName(void) { return "EngineerDisplay"; };
   bool verboseMode = false;
 
 protected:
-  //==== overwrites from base class ==== START
-  DISPLAY_STATUS display_setup() override;
-  DISPLAY_STATUS display_task() override;
+  // DISPLAY_STATUS display_task();
   //==== overwrites from base class ==== END
 
 private:
@@ -35,7 +38,7 @@ private:
   //==== Driver Display definitions ==== START
   // Stati [On/Off]
   DisplayValue<bool> MotorOn = DisplayValue<bool>(4, 10, "MC   :", "%3s", "", ILI9341_BLUE);
-  //DisplayValue<bool> BatteryOn = DisplayValue<bool>(4, 30, "Bat  :", "%3s", "", ILI9341_BLUE);
+  // DisplayValue<bool> BatteryOn = DisplayValue<bool>(4, 30, "Bat  :", "%3s", "", ILI9341_BLUE);
   DisplayValue<bool> PhotoVoltaicOn = DisplayValue<bool>(4, 50, "PV   :", "%3s", "", ILI9341_BLUE);
 
   // MPPTs 1...3 [A]
@@ -70,6 +73,7 @@ private:
   //==== Driver Display definition ==buf[== END
 
   void draw_display_background();
+  string display_setup();
 };
 
 #endif // SER_ENGINEER_DISPLAY_H DISPLAY_H

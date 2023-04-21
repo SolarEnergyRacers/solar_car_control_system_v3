@@ -14,7 +14,7 @@
 
 #include <Console.h>
 #include <Helper.h>
-//#include <RTC.h>
+// #include <RTC.h>
 
 extern Console console;
 // extern RTC rtc;
@@ -83,4 +83,9 @@ int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int ma
   value = (int)round((value - minOriginValue) * k);
   value = value < minViewValue ? minViewValue : value;
   return value;
+}
+
+void vTaskDelay(int delay_ms, string msg) {
+  console << msg;
+  vTaskDelay(10);
 }

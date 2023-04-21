@@ -25,33 +25,35 @@ template <typename Enumeration> auto as_integer(Enumeration const value) -> type
   return static_cast<typename std::underlying_type<Enumeration>::type>(value);
 }
 
-class Display : public AbstractTask {
+// class Display : public AbstractTask, public Adafruit_ILI9341(SPIClass *spiClass, int8_t dc, int8_t cs, int8_t rst) {}
+// class Display : public AbstractTask, public Adafruit_ILI9341(SPIClass *spiClass, int8_t dc, int8_t cs, int8_t rst) {}
+class Display {
 public:
   // RTOS task
-  virtual string getName(void);
+  string getName(void) { return "Display"; };
   string init(void);
+  string init(Adafruit_ILI9341 *ili9341);
   string re_init(void);
-  void exit(void);
-  void task(void *pvParams);
+  // void exit(void);
+  // void task(void *pvParams);
+  int bgColor = 0x0;
+  int height;
+  int width;
 
 private:
-  void lifeSign();
   void setupScrollArea(uint16_t TFA, uint16_t BFA);
   void scrollAddress(uint16_t VSP);
   int scroll(int lines);
   string _setup(void);
 
-protected:
-  int bgColor = 0x0;
-
 public:
-  virtual ~Display(){};
-  Display(); // { carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE; };
+  Adafruit_ILI9341 *tft;
 
-  static Adafruit_ILI9341 tft;
-
+  ~Display(){};
+  Display();
+  Display(Adafruit_ILI9341 *disp);
+  void lifeSign();
   void set_DisplayStatus(DISPLAY_STATUS theNewStatus) { carState.displayStatus = theNewStatus; };
-
   DISPLAY_STATUS get_DisplayStatus() { return carState.displayStatus; };
   char *get_DisplayStatus_text() { return (char *)DISPLAY_STATUS_str[(int)carState.displayStatus]; };
 
@@ -64,13 +66,7 @@ public:
   int getPixelWidthOfText(int textSize, string t1);
   int getPixelWidthOfTexts(int textSize, string t1, string t2);
 
-protected:
-  int height;
-  int width;
-  // handler called for inherited classes
-  virtual DISPLAY_STATUS display_setup() { return DISPLAY_STATUS::ENGINEER_HALTED; };
-  virtual DISPLAY_STATUS display_task() { return DISPLAY_STATUS::ENGINEER_HALTED; };
-
+public:
   // workers
   float write_float(int x, int y, float valueLast, float value, int textSize, int color);
   int write_nat_999(int x, int y, int valueLast, int value, int textSize, int color);

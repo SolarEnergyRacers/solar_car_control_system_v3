@@ -23,25 +23,42 @@ extern I2CBus i2cBus;
 extern CANBus canBus;
 extern bool SystemInited;
 
+bool canBusReinitRequestR = false;
+bool canBusReinitRequestI = false;
+bool canBusReinitRequestW = false;
+int counterI = 0;
+int counterR = 0;
+int counterI_notAvail = 0;
+int counterR_notAvail = 0;
+int counterW_notAvail = 0;
+
+BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
 
   if (!SystemInited)
     return;
 
-  int packetId = CAN.packetId();
-  if (canBus.is_to_ignore_packet(packetId))
-    return;
+  if (xSemaphoreTakeFromISR(canBus.mutex, &xHigherPriorityTaskWoken) == pdTRUE) {
+    int packetId = CAN.packetId();
+    if (canBus.is_to_ignore_packet(packetId))
+      return;
 
-  canBus.setPacketTimeStamp(packetId, millis());
+    counterI++;
+    counterI_notAvail = 0;
+    canBus.setPacketTimeStamp(packetId, millis());
 
-  if (CAN.available()) {
-    uint64_t rxData = 0l;
-    for (int i = 0; i < packetSize && i < 8; i++) {
-      rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
+    if (CAN.available()) {
+      uint64_t rxData = 0l;
+      for (int i = 0; i < packetSize && i < 8; i++) {
+        rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
+      }
+      canBus.push(CANPacket(packetId, rxData));
     }
-    canBus.push(CANPacket(packetId, rxData));
+    xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
+  } else {
+    if (counterI_notAvail++ > 8)
+      canBusReinitRequestI = true;
   }
-  // xSemaphoreGive(canBus.mutex);
 }
 
 bool CANBus::isPacketToRenew(uint16_t packetId) {
@@ -55,36 +72,38 @@ CANBus::CANBus() {
   init_ages();
 }
 
-string CANBus::re_init() {
-  CAN.end();
-  return CANBus::init();
-}
+string CANBus::re_init() { return CANBus::init(); }
 
 string CANBus::init() {
   bool hasError = false;
-  console << "[  ] Init CANBus...\n";
+  canBusReinitRequestR = false;
+  canBusReinitRequestI = false;
+  canBusReinitRequestW = false;
+  counterI = 0;
+  counterR = 0;
+  counterI_notAvail = 0;
+  counterR_notAvail = 0;
+  counterW_notAvail = 0;
   packetsCountMax = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
-    xSemaphoreGive(canBus.mutex);
-    console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
+    xSemaphoreGive(mutex);
     hasError = true;
+    console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   } else {
-    xSemaphoreGive(canBus.mutex);
+    CAN.onReceive(onReceive);
+    xSemaphoreGive(mutex);
     console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   }
-  xSemaphoreTakeT(canBus.mutex);
-  CAN.onReceive(onReceive);
-  xSemaphoreGive(canBus.mutex);
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
 
 void CANBus::exit() {
   // Exit needs to be implemented for Task, here or in AbstractTask
-  xSemaphoreTakeT(canBus.mutex);
+  xSemaphoreTakeT(mutex);
   CAN.end();
-  xSemaphoreGive(canBus.mutex);
+  xSemaphoreGive(mutex);
 }
 
 void CANBus::push(CANPacket packet) {
@@ -105,17 +124,17 @@ void CANBus::push(CANPacket packet) {
 bool CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // Target Speed [float as value\*1000]
                          uint16_t data_u16_1, // Target Power [float as value\*1000]
-                         int8_t data_i8_4,    // Constant Mode OFF [0] / Speed [1] / Power [2]
-                         uint8_t data_u8_5,   // Display Acceleration
+                         int8_t data_i8_4,    // Display Acceleration
+                         uint8_t data_u8_5,   // empty
                          uint8_t data_u8_6,   // Display Speed
                          bool b_56,           // Fwd [1] / Bwd [0]
                          bool b_57,           // Button Lvl Brake Pedal
                          bool b_58,           // MC Off [0] / On [1]
-                         bool b_59,           //
-                         bool b_60,           //
-                         bool b_61,           //
-                         bool b_62,           //
-                         bool b_63            //
+                         bool b_59,           // Constant Mode Off [false], On [true]
+                         bool b_60,           // empty
+                         bool b_61,           // empty
+                         bool b_62,           // empty
+                         bool b_63            // empty
 ) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
@@ -154,18 +173,29 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
   if (canBus.verboseModeCanOutNative)
     console << print_raw_packet("S", packet) << NL;
   try {
-    xSemaphoreTakeT(mutex);
-    CAN.beginPacket(adr);
-    CAN.write(packet.getData_i8(0));
-    CAN.write(packet.getData_i8(1));
-    CAN.write(packet.getData_i8(2));
-    CAN.write(packet.getData_i8(3));
-    CAN.write(packet.getData_i8(4));
-    CAN.write(packet.getData_i8(5));
-    CAN.write(packet.getData_i8(6));
-    CAN.write(packet.getData_i8(7));
-    CAN.endPacket();
-    xSemaphoreGive(mutex);
+    if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+      console << fmt::format(" W[{:x}] ", adr);
+      counterW_notAvail = 0;
+      canBusReinitRequestW = false;
+      CAN.beginPacket(adr);
+      CAN.write(packet.getData_i8(0));
+      CAN.write(packet.getData_i8(1));
+      CAN.write(packet.getData_i8(2));
+      CAN.write(packet.getData_i8(3));
+      CAN.write(packet.getData_i8(4));
+      CAN.write(packet.getData_i8(5));
+      CAN.write(packet.getData_i8(6));
+      CAN.write(packet.getData_i8(7));
+      CAN.endPacket();
+      console << "-.";
+      xSemaphoreGive(mutex);
+      console << "--";
+    } else {
+      console << fmt::format(" W[{:x}]FAIL ", adr);
+      if (counterW_notAvail++ > 8)
+        canBusReinitRequestW = true;
+      return false;
+    }
   } catch (exception &ex) {
     xSemaphoreGive(mutex);
     console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
@@ -175,7 +205,7 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
 }
 
 string CANBus::print_raw_packet(string msg, CANPacket packet) {
-  return fmt::format("C{}-{}-[{:02d}|{:02d}] {} CAN.PacketId=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
+  return fmt::format("C{}-{}-[{:02d}|{:02d}]={}=CAN.PacketId=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
                      "{:02x} - {:02x} - {:02x}",
                      xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePackets(), getMaxPacketsBufferUsage(), msg, packet.getId(),
                      packet.getData_u64(), packet.getData_u8(7), packet.getData_u8(6), packet.getData_u8(5), packet.getData_u8(4),
@@ -185,12 +215,29 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      // handle recieved message with CANBus
-      xSemaphoreTakeT(canBus.mutex);
-      while (rxBuffer.isAvailable()) {
-        handle_rx_packet(rxBuffer.pop());
+      // console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
+
+      if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
+        console << NL
+                << fmt::format("CANBus REINIT, trigger: I{} | R{} | W{}: {:4d} | {:4d} ERR: {}_{}_{}", canBusReinitRequestI,
+                               canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
+                               counterW_notAvail)
+                << NL;
+        vTaskDelay(10, "i-");
+        canBus.re_init();
+        vTaskDelay(10, "j-");
       }
-      xSemaphoreGive(canBus.mutex);
+      if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
+        counterR++;
+        counterR_notAvail = 0;
+        while (rxBuffer.isAvailable()) {
+          handle_rx_packet(rxBuffer.pop());
+        }
+        xSemaphoreGive(mutex);
+      } else {
+        if (counterR_notAvail++ > 8)
+          canBusReinitRequestR = true;
+      }
     }
     taskSuspend();
   }

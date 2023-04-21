@@ -1,0 +1,287 @@
+// ---------------------------------------------------------------
+// Drive Controller 2023.02.26 (AC siehe unten -------------------):
+
+E (1815150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x400EC9C4:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1820150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1820150) task_wdt:  - IDLE (CPU 1)
+E (1820150) task_wdt: Tasks currently running:
+E (1820150) task_wdt: CPU 0: IDLE
+E (1820150) task_wdt: CPU 1: CarControl
+E (1820150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1820150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1825150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1825150) task_wdt:  - IDLE (CPU 1)
+E (1825150) task_wdt: Tasks currently running:
+E (1825150) task_wdt: CPU 0: IDLE
+E (1825150) task_wdt: CPU 1: CarControl
+E (1825150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1825150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A97:0x3FFC2B20 0x40086A92:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1830150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1830150) task_wdt:  - IDLE (CPU 1)
+E (1830150) task_wdt: Tasks currently running:
+E (1830150) task_wdt: CPU 0: IDLE
+E (1830150) task_wdt: CPU 1: CarControl
+E (1830150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1830150) task_wdt: Print CPU 1 backtrace
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1835150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1835150) task_wdt:  - IDLE (CPU 1)
+E (1835150) task_wdt: Tasks currently running:
+E (1835150) task_wdt: CPU 0: IDLE
+E (1835150) task_wdt: CPU 1: CarControl
+E (1835150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1835150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1840150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1840150) task_wdt:  - IDLE (CPU 1)
+E (1840150) task_wdt: Tasks currently running:
+E (1840150) task_wdt: CPU 0: IDLE
+E (1840150) task_wdt: CPU 1: CarControl
+E (1840150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1840150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1845150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1845150) task_wdt:  - IDLE (CPU 1)
+E (1845150) task_wdt: Tasks currently running:
+E (1845150) task_wdt: CPU 0: IDLE
+E (1845150) task_wdt: CPU 1: CarControl
+E (1845150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1845150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1850150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1850150) task_wdt:  - IDLE (CPU 1)
+E (1850150) task_wdt: Tasks currently running:
+E (1850150) task_wdt: CPU 0: IDLE
+E (1850150) task_wdt: CPU 1: CarControl
+E (1850150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1850150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1855150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1855150) task_wdt:  - IDLE (CPU 1)
+E (1855150) task_wdt: Tasks currently running:
+E (1855150) task_wdt: CPU 0: IDLE
+E (1855150) task_wdt: CPU 1: CarControl
+E (1855150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1855150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1860150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1860150) task_wdt:  - IDLE (CPU 1)
+E (1860150) task_wdt: Tasks currently running:
+E (1860150) task_wdt: CPU 0: IDLE
+E (1860150) task_wdt: CPU 1: CarControl
+E (1860150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1860150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A4D:0x3FFC2B20 0x400ECFC7:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1865150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1865150) task_wdt:  - IDLE (CPU 1)
+E (1865150) task_wdt: Tasks currently running:
+E (1865150) task_wdt: CPU 0: IDLE
+E (1865150) task_wdt: CPU 1: CarControl
+E (1865150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1865150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A97:0x3FFC2B20 0x40086A92:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+E (1870150) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (1870150) task_wdt:  - IDLE (CPU 1)
+E (1870150) task_wdt: Tasks currently running:
+E (1870150) task_wdt: CPU 0: IDLE
+E (1870150) task_wdt: CPU 1: CarControl
+E (1870150) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x400F70AE:0x3FFB07E0 0x40082D65:0x3FFB0800 0x401347A7:0x3FFB9F50 0x400F78E3:0x3FFB9F70 0x40087FD5:0x3FFB9F90 0x400896A1:0x3FFB9FB0
+
+E (1870150) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x40082509:0x3FFB0DE0 0x40082D65:0x3FFB0E00 0x40086A97:0x3FFC2B20 0x40086A92:0x3FFC2B40 0x400EC9DD:0x3FFC2B60 0x400D3382:0x3FFC2B80 0x400D3569:0x3FFC2C00 0x400D5BD2:0x3FFC2C60 0x400DD274:0x3FFC2DA0 0x400896A1:0x3FFC2DC0
+
+
+
+// ---------------------------------------------------------------
+Auxiliary Controller, 2023.02.26
+
+C0-11412-[00|02] R CAN.PacketId=0x661-data: 0148000000000000 -- 01 - 48 - 00 - 00 - 00 - 00 - 00 - 00
+C0-11412-[01|02] R CAN.PacketId=0x660-data: 00000000285713cb -- 00 - 00 - 00 - 00 - 28 - 57 - 13 - cb
+C0-11412-[00|02] R CAN.PacketId=0x661-data: 0148000000000000 -- 01 - 48 - 00 - 00 - 00 - 00 - 00 - 00
+C0-11412-[01|02] R CAN.PacketId=0x660-data: 00000000285713cb -- 00 - 00 - 00 - 00 - 28 - 57 - 13 - cb
+C0-11412-[00|02] R CAN.PacketId=0x661-data: 0148000000000000 -- 01 - 48 - 00 - 00 - 00 - 00 - 00 - 00
+C0-11412-[01|02] R CAN.PacketId=0x660-data: 00000000285713cc -- 00 - 00 - 00 - 00 - 28 - 57 - 13 - cc
+C0-11412-[00|02] R CAN.PacketId=0x661-data: 0148000000000000 -- 01 - 48 - 00 - 00 - 00 - 00 - 00 - 00
+E (11418164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11418164) task_wdt:  - IDLE (CPU 1)
+E (11418164) task_wdt: Tasks currently running:
+E (11418164) task_wdt: CPU 0: IDLE
+E (11418164) task_wdt: CPU 1: CarControl
+E (11418164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+E (11418164) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x400823CD:0x3FFB0E70 0x40082C29:0x3FFB0E90 0x40086911:0x3FFC6490 0x400F8EAE:0x3FFC64B0 0x400F8D4D:0x3FFC64D0 0x400D2D8A:0x3FFC64F0 0x400D2E5F:0x3FFC6570 0x400D5493:0x3FFC65A0 0x400E4640:0x3FFC6670 0x40089565:0x3FFC6690
+
+E (11423164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11423164) task_wdt:  - IDLE (CPU 1)
+E (11423164) task_wdt: Tasks currently running:
+E (11423164) task_wdt: CPU 0: IDLE
+E (11423164) task_wdt: CPU 1: CarControl
+E (11423164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+E (11423164) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x400823CD:0x3FFB0E70 0x40082C29:0x3FFB0E90 0x40086911:0x3FFC6490 0x400F8EAE:0x3FFC64B0 0x400F8D4D:0x3FFC64D0 0x400D2D8A:0x3FFC64F0 0x400D2E5F:0x3FFC6570 0x400D5493:0x3FFC65A0 0x400E4640:0x3FFC6670 0x40089565:0x3FFC6690
+
+E (11428164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11428164) task_wdt:  - IDLE (CPU 1)
+E (11428164) task_wdt: Tasks currently running:
+E (11428164) task_wdt: CPU 0: IDLE
+E (11428164) task_wdt: CPU 1: CarControl
+E (11428164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+E (11428164) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x400823CD:0x3FFB0E70 0x40082C29:0x3FFB0E90 0x40086911:0x3FFC6490 0x400F8EAE:0x3FFC64B0 0x400F8D4D:0x3FFC64D0 0x400D2D8A:0x3FFC64F0 0x400D2E5F:0x3FFC6570 0x400D5493:0x3FFC65A0 0x400E4640:0x3FFC6670 0x40089565:0x3FFC6690
+
+E (11433164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11433164) task_wdt:  - IDLE (CPU 1)
+E (11433164) task_wdt: Tasks currently running:
+E (11433164) task_wdt: CPU 0: IDLE
+E (11433164) task_wdt: CPU 1: CarControl
+E (11433164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+E (11433164) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x400823CD:0x3FFB0E70 0x40082C29:0x3FFB0E90 0x40086911:0x3FFC6490 0x400F8EAE:0x3FFC64B0 0x400F8D4D:0x3FFC64D0 0x400D2D8A:0x3FFC64F0 0x400D2E5F:0x3FFC6570 0x400D5493:0x3FFC65A0 0x400E4640:0x3FFC6670 0x40089565:0x3FFC6690
+
+E (11438164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11438164) task_wdt:  - IDLE (CPU 1)
+E (11438164) task_wdt: Tasks currently running:
+E (11438164) task_wdt: CPU 0: IDLE
+E (11438164) task_wdt: CPU 1: CarControl
+E (11438164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+E (11438164) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x400823CD:0x3FFB0E70 0x40082C29:0x3FFB0E90 0x40086911:0x3FFC6490 0x400F8EAE:0x3FFC64B0 0x400F8D4D:0x3FFC64D0 0x400D2D8A:0x3FFC64F0 0x400D2E5F:0x3FFC6570 0x400D5493:0x3FFC65A0 0x400E4640:0x3FFC6670 0x40089565:0x3FFC6690
+
+E (11443164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11443164) task_wdt:  - IDLE (CPU 1)
+E (11443164) task_wdt: Tasks currently running:
+E (11443164) task_wdt: CPU 0: IDLE
+E (11443164) task_wdt: CPU 1: CarControl
+E (11443164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+E (11443164) task_wdt: Print CPU 1 backtrace
+
+
+Backtrace: 0x400823CD:0x3FFB0E70 0x40082C29:0x3FFB0E90 0x40086911:0x3FFC6490 0x400F8EAE:0x3FFC64B0 0x400F8D4D:0x3FFC64D0 0x400D2D8A:0x3FFC64F0 0x400D2E5F:0x3FFC6570 0x400D5493:0x3FFC65A0 0x400E4640:0x3FFC6670 0x40089565:0x3FFC6690
+
+E (11448164) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+E (11448164) task_wdt:  - IDLE (CPU 1)
+E (11448164) task_wdt: Tasks currently running:
+E (11448164) task_wdt: CPU 0: IDLE
+E (11448164) task_wdt: CPU 1: CarControl
+E (11448164) task_wdt: Print CPU 0 (current core) backtrace
+
+
+Backtrace: 0x40106216:0x3FFB0870 0x40082C29:0x3FFB0890 0x401487C3:0x3FFBB020 0x40106A4B:0x3FFBB040 0x40087E99:0x3FFBB060 0x40089565:0x3FFBB080
+
+
+
+

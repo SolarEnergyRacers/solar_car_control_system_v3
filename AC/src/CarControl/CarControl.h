@@ -18,7 +18,7 @@ class CarControl : public AbstractTask {
 
 public:
   // RTOS task
-  string getName(void) { return "CarControl"; };
+  string getName(void) { return "CarControlAC"; };
   string init(void);
   string re_init(void);
   void exit(void);

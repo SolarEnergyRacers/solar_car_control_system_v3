@@ -12,7 +12,7 @@
 
 #include <FS.h>
 #include <SD.h>
-#include <SD_MMC.h>
+// #include <SD_MMC.h>
 #include <SPI.h>
 
 #include <ADS1X15.h>
@@ -27,16 +27,16 @@ extern Console console;
 extern SPIBus spiBus;
 extern SDCard sdCard;
 
-string SDCard::re_init() { return init(); }
+string SDCard::init() { return re_init(); }
 
-string SDCard::init() {
+string SDCard::re_init() {
   bool hasError = false;
-  console << "[  ] Init 'SDCard'...\n";
+  console << "[  ] Init '" << getName() << "'..." << NL;
 
   if (!mount())
     hasError = true;
 
-  return fmt::format("[{}] SDCard initialized.", hasError ? "--" : "ok");
+  return fmt::format("[{}] SDCard           initialized.", hasError ? "--" : "ok");
 }
 
 // https://github.com/espressif/arduino-esp32/issues/5676
@@ -56,26 +56,38 @@ bool SDCard::mount() {
   }
   try {
     console << "     Mounting SD card ...\n";
-    xSemaphoreTakeT(spiBus.mutex);
-    // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); fails!
-    mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
     xSemaphoreGive(spiBus.mutex);
+    xSemaphoreTakeT(spiBus.mutex);
+    // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
+    // SD.end();
+    console << " SD02 ";
+    mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
+    console << " SD04 ";
+    xSemaphoreGive(spiBus.mutex);
+    console << " SD06 ";
+    ;
     if (mounted) {
       console << "     SD card mounted.\n";
       uint8_t cardType = SD.cardType();
-      if (cardType == CARD_NONE) {
-        console << "No SD card attached.\n";
-        return false;
-      }
 
-      console << "SD Card Type: ";
-      if (cardType == CARD_MMC) {
+      console << "     SD Card Type: ";
+      switch (cardType) {
+      case CARD_NONE: {
+        console << "No SD card attached.\n";
+        uint64_t cardSizeXX = SD.cardSize() / (1024 * 1024);
+        console << "SD Card Size: " << cardSizeXX << "MB\n";
+      }
+        return true;
+      case CARD_MMC:
         console << "MMC";
-      } else if (cardType == CARD_SD) {
+        break;
+      case CARD_SD:
         console << "SDSC";
-      } else if (cardType == CARD_SDHC) {
+        break;
+      case CARD_SDHC:
         console << "SDHC";
-      } else {
+        break;
+      default:
         console << "UNKNOWN";
       }
 
@@ -84,81 +96,84 @@ bool SDCard::mount() {
 
       return true;
     }
-    console << "     ERROR: Unable to mount SD card.\n";
   } catch (exception &ex) {
     xSemaphoreGive(spiBus.mutex);
     console << "     ERROR: Unable to mount SD card: " << ex.what() << "\n";
   }
+  console << "     ERROR: Unable to mount SD card.\n";
   return false;
 }
 
 bool SDCard::open_log_file() {
-  if (carState.LogFilename.length() > 0 && mount()) {
-    try {
-      xSemaphoreTakeT(spiBus.mutex);
-      dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
-      xSemaphoreGive(spiBus.mutex);
-      if (dataFile != 0) {
-        console << "     Log file opend for append.\n";
-        return true;
-      }
-      console << "     ERROR opening '" << carState.LogFilename << "'\n";
-    } catch (exception &ex) {
-      xSemaphoreGive(spiBus.mutex);
-      console << "     ERROR opening '" << carState.LogFilename << "': " << ex.what() << "\n";
+  if (carState.LogFilename.length() < 1) {
+    console << "ERROR empty open_log_file name." << NL;
+    return false;
+  }
+  if (!isMounted()) {
+    console << "ERROR at open_log_file '" << carState.LogFilename << "': SD card not mounted.\n";
+    return false;
+  }
+  try {
+    // xSemaphoreTakeT(spiBus.mutex);
+    dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
+    // xSemaphoreGive(spiBus.mutex);
+    if (dataFile != 0) {
+      console << "     Log file opend for append.\n";
+      return true;
     }
-  } else {
-    console << "ERROR at open_log_file: SD card not mounted.\n";
+    console << "     ERROR opening '" << carState.LogFilename << "'\n";
+  } catch (exception &ex) {
+    // xSemaphoreGive(spiBus.mutex);
+    console << "     ERROR opening '" << carState.LogFilename << "': " << ex.what() << "\n";
   }
   return false;
 }
 
 void SDCard::unmount() {
   if (!carState.SdCardDetect) {
+    console << "     No SD card detected!\n";
     mounted = false;
     return;
   }
   if (isReadyForLog()) {
     try {
-      xSemaphoreTakeT(spiBus.mutex);
+      // xSemaphoreTakeT(spiBus.mutex);
       dataFile.flush();
       dataFile.close();
       SD.end();
-      xSemaphoreGive(spiBus.mutex);
+      // xSemaphoreGive(spiBus.mutex);
       console << "     Log file closed.\n";
     } catch (exception &ex) {
-      xSemaphoreGive(spiBus.mutex);
+      // xSemaphoreGive(spiBus.mutex);
       console << "     ERROR closing log file: " << ex.what() << "\n";
     }
   }
   if (isMounted()) {
     try {
-      xSemaphoreTakeT(spiBus.mutex);
+      // xSemaphoreTakeT(spiBus.mutex);
       SD.end();
-      xSemaphoreGive(spiBus.mutex);
+      // xSemaphoreGive(spiBus.mutex);
       console << "     SD card unmounted.\n";
     } catch (exception &ex) {
-      xSemaphoreGive(spiBus.mutex);
+      // xSemaphoreGive(spiBus.mutex);
       console << "     ERROR unmounting SD card: " << ex.what() << "\n";
     }
     mounted = false;
+  } else {
+    console << "     SD card already unmounted.\n";
   }
 }
 
-string SDCard::directory() {
+void SDCard::directory() {
   if (!isMounted()) {
-    mount();
+    console << "SD card not mounted." << NL;
   }
 
-  if (isMounted()) {
-    stringstream ss("SD-Card content:\n");
-    File root = SD.open("/");
-    printDirectory(root, 1);
-    root.close();
-    ss << "~~~~~~~~~~~~~~~~\n";
-    return ss.str();
-  }
-  return "ERROR at directory: SD card not mounted.";
+  console << "SD-Card content:" << NL;
+  File root = SD.open("/");
+  printDirectory(root, 1);
+  root.close();
+  console << "~~~~~~~~~~~~~~~~" << NL;
 }
 
 void SDCard::printDirectory(File dir, int numTabs) {
@@ -192,12 +207,12 @@ void SDCard::write(string msg) {
   }
   if (isReadyForLog()) {
     try {
-      xSemaphoreTakeT(spiBus.mutex);
+      // xSemaphoreTakeT(spiBus.mutex);
       dataFile.print(msg.c_str());
       dataFile.flush();
-      xSemaphoreGive(spiBus.mutex);
+      // xSemaphoreGive(spiBus.mutex);
     } catch (exception &ex) {
-      xSemaphoreGive(spiBus.mutex);
+      // xSemaphoreGive(spiBus.mutex);
       mounted = false; // prepare for complete re_init
       console << "     ERROR writing SD card: " << ex.what() << "\n";
     }

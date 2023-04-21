@@ -223,9 +223,9 @@ void CANBus::task(void *pvParams) {
                                canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
                                counterW_notAvail)
                 << NL;
-        vTaskDelay_debug(10, "i-");
+        vTaskDelay(10, "i-");
         canBus.re_init();
-        vTaskDelay_debug(10, "j-");
+        vTaskDelay(10, "j-");
       }
       if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
         counterR++;

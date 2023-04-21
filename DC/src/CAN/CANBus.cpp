@@ -176,7 +176,6 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
     console << print_raw_packet("S", packet) << NL;
   try {
     if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
-      console << fmt::format(" W[{:x}] ", adr);
       counterW_notAvail = 0;
       canBusReinitRequestW = false;
       CAN.beginPacket(adr);
@@ -189,9 +188,7 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
       CAN.write(packet.getData_i8(6));
       CAN.write(packet.getData_i8(7));
       CAN.endPacket();
-      console << "-.";
       xSemaphoreGive(mutex);
-      console << "--";
     } else {
       console << fmt::format(" W[{:x}]FAIL ", adr);
       if (counterW_notAvail++ > 8)
@@ -225,9 +222,9 @@ void CANBus::task(void *pvParams) {
                                canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
                                counterW_notAvail)
                 << NL;
-        vTaskDelay_debug(10, "i-");
+        vTaskDelay(10, "i-");
         canBus.re_init();
-        vTaskDelay_debug(10, "j-");
+        vTaskDelay(10, "j-");
       }
       if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
         counterR++;

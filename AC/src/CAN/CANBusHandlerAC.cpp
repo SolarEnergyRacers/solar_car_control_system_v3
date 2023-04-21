@@ -154,8 +154,9 @@ int CANBus::handle_rx_packet(CANPacket packet) {
                              "accelDispl={:3d}, constMode={:5s}({}), direction={}, breakPedal={}, MotorOn={}",
                              canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.TargetSpeed,
                              carState.TargetPower, carState.Speed, carState.AccelerationDisplay,
-                             CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn, DRIVE_DIRECTION_str[(int)(carState.DriveDirection)],
-                             carState.BreakPedal, carState.MotorOn, carState.ConstantModeOn)
+                             CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn,
+                             DRIVE_DIRECTION_str[(int)(carState.DriveDirection)], carState.BreakPedal, carState.MotorOn,
+                             carState.ConstantModeOn)
               << NL;
     break;
   case DC_BASE_ADDR | 0x02:

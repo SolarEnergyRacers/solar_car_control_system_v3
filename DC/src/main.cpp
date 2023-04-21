@@ -243,8 +243,8 @@ void app_main(void) {
   console << msg << NL;
 
   vTaskDelay(10);
-  stringstream ss("------------------------------------------------------------");
-  ss << NL;
+  stringstream ss;
+  ss << "----------------------------------------------------" << NL;
   ss << "Initialization ready as DriveController" << NL;
   ss << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
   ss << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
@@ -257,8 +257,7 @@ void app_main(void) {
   ss << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
   ss << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
   ss << fmt::format("- constSpeed.verboseModePID     = {}", constSpeed.verboseModePID) << NL;
-  ss << "------------------------------------------------------------" << NL;
-  vTaskDelay(10);
+  ss << "----------------------------------------------------" << NL;vTaskDelay(10);
   console << ss.str();
   SystemInited = true;
 }

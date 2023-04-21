@@ -182,7 +182,6 @@ void CarControl::task(void *pvParams) {
     if (SystemInited) {
       cyclecounter++;
       if (cyclecounter > 50) {
-        console << NL;
         cyclecounter = 0;
       }
       
@@ -191,22 +190,22 @@ void CarControl::task(void *pvParams) {
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       // read values from ADC/IO
       read_reference_cell_data();
-      // vTaskDelay_debug(10, "0-");
+      vTaskDelay(10);
       read_speed();
-      // vTaskDelay_debug(10, "1-");
+      // vTaskDelay(10, "1-");
       read_potentiometer();
-      // vTaskDelay_debug(10, "2-");
+      vTaskDelay(10);
       if (read_paddles())
         set_DAC();
       carState.LifeSign++;
-      vTaskDelay_debug(10, "3-");
+      vTaskDelay(10);
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          carState.Potentiometer, // Potentiometer value
                          carState.Acceleration,  // HAL-paddle Acceleration ADC value
                          carState.Deceleration   // HAL-paddle Deceleration ADC value
       );
-      vTaskDelay_debug(10, "4-");
+      vTaskDelay(10);
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
       canBus.writePacket(DC_BASE_ADDR | 0x01,
                          (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
@@ -223,13 +222,12 @@ void CarControl::task(void *pvParams) {
                          false,                                   // empty
                          false                                    // empty
       );
-      vTaskDelay_debug(10, "5-");
+      vTaskDelay(10);
       if (carControl.verboseModeDebug) {
         console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
                                canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
                                carState.Potentiometer, carState.Acceleration, carState.Deceleration)
                 << NL;
-        vTaskDelay_debug(10, "6-");
         console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, cMod={:1d}, speed={:3d}, "
                                "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}",
                                DC_BASE_ADDR | 0x01, (uint16_t)(carState.TargetSpeed * 1000), (uint16_t)(carState.TargetSpeed * 1000),
@@ -237,7 +235,6 @@ void CarControl::task(void *pvParams) {
                                carState.MotorOn, carState.ConstantModeOn)
                 << NL;
       }
-      vTaskDelay_debug(10, "X.");
     }
     taskSuspend();
   }

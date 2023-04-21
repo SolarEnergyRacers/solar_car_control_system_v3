@@ -85,7 +85,7 @@ int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int ma
   return value;
 }
 
-void vTaskDelay_debug(int delay_ms, string msg) {
+void vTaskDelay(int delay_ms, string msg) {
   console << msg;
   vTaskDelay(10);
 }

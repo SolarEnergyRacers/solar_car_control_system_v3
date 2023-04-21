@@ -228,12 +228,11 @@ void app_main(void) {
   msg = sdCard.init();
   console << msg << "\n";
   display.print(msg + "\n");
-
+  vTaskDelay(100);
   //--- SD card available
   carState.initalize_config();
   sdCard.open_log_file();
   //------from now config ini values can be used
-  vTaskDelay(10);
 
   stringstream ss;
   ss << NL;

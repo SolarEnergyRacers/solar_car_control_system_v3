@@ -62,18 +62,18 @@ bool CarControl::read_nextScreenButton() {
   if (!SystemInited)
     return false;
 
-  int button1pressed = !digitalRead(ESP32_AC_BUTTON_AC_NEXT);
-  if (!button1pressed)
+  int button_nextScreen_pressed = !digitalRead(ESP32_AC_BUTTON_AC_NEXT);
+  if (!button_nextScreen_pressed)
     return false;
 
   switch (carState.displayStatus) {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::DRIVER_SETUP;
-    console << "Switch Next Screen toggle: switch from eng --> driver\n";
+    console << "Switch Next Screen toggle: switch from eng --> driver" << NL;
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::ENGINEER_SETUP;
-    console << "Switch Next Screen toggle: switch from driver --> engineer\n";
+    console << "Switch Next Screen toggle: switch from driver --> engineer" << NL;
     break;
   default:
     break;
@@ -105,8 +105,8 @@ bool CarControl::read_const_mode() {
   if (!SystemInited)
     return false;
 
-  bool button2pressed = !digitalRead(ESP32_AC_BUTTON_CONST_MODE); // switch constant mode (Speed, Power)
-  if (!button2pressed)
+  bool button_nextScreen_pressed = !digitalRead(ESP32_AC_BUTTON_CONST_MODE); // switch constant mode (Speed, Power)
+  if (!button_nextScreen_pressed)
     return false;
 
   carState.ConstantMode = (carState.ConstantMode == CONSTANT_MODE::POWER) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
@@ -124,13 +124,12 @@ void CarControl::task(void *pvParams) {
         // console << "." << NL;
         cyclecounter = 0;
       }
-      // vTaskDelay_debug(10, "I-");
-      bool button2pressed = read_nextScreenButton();
-      // vTaskDelay_debug(10, "1-");
+      bool button_nextScreen_pressed = read_nextScreenButton();
+      vTaskDelay(10);
       read_sd_card_detect();
-      // vTaskDelay_debug(10, "2-");
+      vTaskDelay(10);
       read_const_mode();
-      // // vTaskDelay_debug(10, "3-");
+      vTaskDelay(10);
       // uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       // canBus.writePacket(AC_BASE_ADDR | 0x00,
       //                    carState.LifeSign,      // LifeSign
@@ -138,31 +137,28 @@ void CarControl::task(void *pvParams) {
       //                    (uint16_t)0,            // empty
       //                    (uint16_t)0             // empty
       // );
-      // vTaskDelay_debug(10, "4-");
+      // vTaskDelay(10);
       if (carControl.verboseModeDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
-                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button2pressed)
+                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
-      // vTaskDelay_debug(10, "5-");
       //  one data row per second
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
         // console << fmt::format("ready:{},next={}, millis={}\n", sdCard.isReadyForLog(), millisNextStampCsv, millis());
         string record = carState.csv();
-        // vTaskDelay_debug(10, "6-");
-        //  if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
-        //    if (sdCard.verboseModeDebug)
-        //      console << "d: " << record << NL;
-        //    sdCard.write(record);
-        //    millisNextStampCsv = millis() + carState.LogInterval;
-        //  }
-        // vTaskDelay_debug(10, "7-");
+        if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
+          if (sdCard.verboseModeDebug)
+            console << "d: " << record << NL;
+          sdCard.write(record);
+          millisNextStampCsv = millis() + carState.LogInterval;
+        }
+        vTaskDelay(10);
         if (sdCard.verboseModeDebug) {
           if (millis() > millisNextStampSnd) {
             millisNextStampSnd = millis() + carState.CarDataSendPeriod;
           }
         }
       }
-      // vTaskDelay_debug(10, "X.");
     }
     taskSuspend();
   }

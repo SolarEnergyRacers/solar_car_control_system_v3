@@ -25,8 +25,8 @@ string SPIBus::re_init() { return init(); }
 
 string SPIBus::init(void) {
   bool hasError = false;
-  console << "     " << getName() << " initializing with: SPI_CLK=" << SPI_CLK << ", SPI_MISO=" << SPI_MISO << ", SPI_MOSI=" << SPI_MOSI << "..."
-          << NL;
+  console << "     " << getName() << " initializing with: SPI_CLK=" << SPI_CLK << ", SPI_MISO=" << SPI_MISO << ", SPI_MOSI=" << SPI_MOSI
+          << "..." << NL;
 
   mutex = xSemaphoreCreateMutex();
   // spi = SPIClass(VSPI);

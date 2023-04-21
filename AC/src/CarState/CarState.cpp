@@ -58,7 +58,7 @@ void CarState::init_values() {
   Fan = false;
 
   // read from SER4CONFIG.INI file
-  //initalize_config();
+  // initalize_config();
   console << print("State after reading SER4CONFIG.INI") << NL;
 }
 
@@ -117,7 +117,7 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Deceleration .......... " << Deceleration << NL;
   ss << "Acceleration Display... " << AccelerationDisplay << NL;
   ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << NL;
-  //ss << "Battery On............. " << BatteryOn << NL;
+  // ss << "Battery On............. " << BatteryOn << NL;
   ss << "Battery Voltage ....... " << BatteryVoltage << NL;
   ss << "Battery Current........ " << BatteryCurrent << NL;
   ss << "Battery Errors ........." << batteryErrorsAsString(true) << NL;
@@ -193,7 +193,7 @@ const string CarState::serialize(string msg) {
   cJSON_AddNumberToObject(dynData, "acceleration", Acceleration);
   cJSON_AddNumberToObject(dynData, "deceleration", Deceleration);
   cJSON_AddNumberToObject(dynData, "accelerationDisplay", AccelerationDisplay);
-  //cJSON_AddBoolToObject(dynData, "batteryOn", BatteryOn);
+  // cJSON_AddBoolToObject(dynData, "batteryOn", BatteryOn);
   cJSON_AddNumberToObject(dynData, "batteryVoltage", floor(BatteryVoltage * 1000.0 + .5) / 1000.0);
   cJSON_AddNumberToObject(dynData, "batteryCurrent", floor(BatteryCurrent * 1000.0 + .5) / 1000.0);
   cJSON_AddBoolToObject(dynData, "pvOn", PhotoVoltaicOn);
@@ -247,7 +247,7 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "deceleration, ";
     ss << "accelerationDisplay, ";
 
-    //ss << "batteryOn, ";
+    // ss << "batteryOn, ";
     ss << "batteryVoltage, ";
     ss << "batteryCurrent, ";
     ss << "batteryErrors, ";
@@ -300,7 +300,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << Deceleration << ", ";
   ss << AccelerationDisplay << ", ";
 
-  //ss << BatteryOn << ", ";
+  // ss << BatteryOn << ", ";
   ss << floor(BatteryVoltage * 1000.0 + .5) / 1000.0 << ", ";
   ss << floor(BatteryCurrent * 1000.0 + .5) / 1000.0 << ", ";
   ss << batteryErrorsAsString() << ", ";

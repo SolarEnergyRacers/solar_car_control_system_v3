@@ -58,9 +58,7 @@ string Display::init(Adafruit_ILI9341 *ili9341) {
 
 string Display::re_init(void) { return _setup(); }
 
-Display::Display() {
-  carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
-};
+Display::Display() { carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE; };
 Display::Display(Adafruit_ILI9341 *ili9341) {
   tft = ili9341;
   carState.displayStatus = DISPLAY_STATUS::ENGINEER_CONSOLE;
@@ -387,7 +385,7 @@ void Display::lifeSign() {
   }
   unsigned long deziSeconds = millis() / 100;
   if (deziSecondsLast + 1 > deziSeconds)
-   return;
+    return;
   deziSecondsLast = deziSeconds;
   xSemaphoreTakeT(spiBus.mutex);
   tft->fillCircle(lifeSignX, lifeSignY, lifeSignRadius, lifeSignState ? ILI9341_DARKGREEN : color);

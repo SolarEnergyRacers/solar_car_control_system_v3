@@ -32,7 +32,7 @@ string SDCard::init() { return re_init(); }
 string SDCard::re_init() {
   bool hasError = false;
   console << "[  ] Init '" << getName() << "'..." << NL;
-  
+
   if (!mount())
     hasError = true;
 
@@ -59,12 +59,13 @@ bool SDCard::mount() {
     xSemaphoreGive(spiBus.mutex);
     xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
-    //SD.end();
+    // SD.end();
     console << " SD02 ";
     mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
     console << " SD04 ";
     xSemaphoreGive(spiBus.mutex);
-    console << " SD06 ";;
+    console << " SD06 ";
+    ;
     if (mounted) {
       console << "     SD card mounted.\n";
       uint8_t cardType = SD.cardType();
@@ -104,22 +105,26 @@ bool SDCard::mount() {
 }
 
 bool SDCard::open_log_file() {
-  if (carState.LogFilename.length() > 0 && mount()) {
-    try {
-      // xSemaphoreTakeT(spiBus.mutex);
-      dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
-      // xSemaphoreGive(spiBus.mutex);
-      if (dataFile != 0) {
-        console << "     Log file opend for append.\n";
-        return true;
-      }
-      console << "     ERROR opening '" << carState.LogFilename << "'\n";
-    } catch (exception &ex) {
-      // xSemaphoreGive(spiBus.mutex);
-      console << "     ERROR opening '" << carState.LogFilename << "': " << ex.what() << "\n";
+  if (carState.LogFilename.length() < 1) {
+    console << "ERROR empty open_log_file name." << NL;
+    return false;
+  }
+  if (!isMounted()) {
+    console << "ERROR at open_log_file '" << carState.LogFilename << "': SD card not mounted.\n";
+    return false;
+  }
+  try {
+    // xSemaphoreTakeT(spiBus.mutex);
+    dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
+    // xSemaphoreGive(spiBus.mutex);
+    if (dataFile != 0) {
+      console << "     Log file opend for append.\n";
+      return true;
     }
-  } else {
-    console << "ERROR at open_log_file: SD card not mounted.\n";
+    console << "     ERROR opening '" << carState.LogFilename << "'\n";
+  } catch (exception &ex) {
+    // xSemaphoreGive(spiBus.mutex);
+    console << "     ERROR opening '" << carState.LogFilename << "': " << ex.what() << "\n";
   }
   return false;
 }
@@ -154,23 +159,21 @@ void SDCard::unmount() {
       console << "     ERROR unmounting SD card: " << ex.what() << "\n";
     }
     mounted = false;
+  } else {
+    console << "     SD card already unmounted.\n";
   }
 }
 
-string SDCard::directory() {
+void SDCard::directory() {
   if (!isMounted()) {
-    mount();
+    console << "SD card not mounted." << NL;
   }
 
-  if (isMounted()) {
-    stringstream ss("SD-Card content:\n");
-    File root = SD.open("/");
-    printDirectory(root, 1);
-    root.close();
-    ss << "~~~~~~~~~~~~~~~~\n";
-    return ss.str();
-  }
-  return "ERROR at directory: SD card not mounted.";
+  console << "SD-Card content:" << NL;
+  File root = SD.open("/");
+  printDirectory(root, 1);
+  root.close();
+  console << "~~~~~~~~~~~~~~~~" << NL;
 }
 
 void SDCard::printDirectory(File dir, int numTabs) {

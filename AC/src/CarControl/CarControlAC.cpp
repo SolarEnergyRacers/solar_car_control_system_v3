@@ -132,6 +132,8 @@ bool CarControl::read_const_mode_and_mountrequest() {
 }
 
 int cyclecounter = 0;
+unsigned long carStateLifeSignLast=0;
+uint8_t carStateConstantModeLast=0;
 
 void CarControl::task(void *pvParams) {
   while (1) {
@@ -147,14 +149,18 @@ void CarControl::task(void *pvParams) {
       vTaskDelay(10);
       read_const_mode_and_mountrequest();
       vTaskDelay(10);
-#ifdef CAN_OUT_AC
+#ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
-      canBus.writePacket(AC_BASE_ADDR | 0x00,
-                         carState.LifeSign,      // LifeSign
-                         (uint16_t)constantMode, // switch constant mode Speed / Power
-                         (uint16_t)0,            // empty
-                         (uint16_t)0             // empty
-      );
+      if (carStateLifeSignLast != carState.LifeSign || carStateConstantModeLast != constantMode) {
+        canBus.writePacket(AC_BASE_ADDR | 0x00,
+                           carState.LifeSign,      // LifeSign
+                           (uint16_t)constantMode, // switch constant mode Speed / Power
+                           (uint16_t)0,            // empty
+                           (uint16_t)0             // empty
+        );
+        carStateLifeSignLast = carState.LifeSign;
+        carStateConstantModeLast = constantMode;
+      }
       vTaskDelay(10);
 #endif
       if (carControl.verboseModeDebug)

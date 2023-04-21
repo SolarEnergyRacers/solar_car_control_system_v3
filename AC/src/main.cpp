@@ -228,9 +228,12 @@ void app_main(void) {
   msg = sdCard.init();
   console << msg << "\n";
   display.print(msg + "\n");
-  vTaskDelay(100);
+  vTaskDelay(500);
   //--- SD card available
   carState.initalize_config();
+  carState.initalize_config();
+  console << carState.print("State after reading SER4CNFG.INI") << NL;
+
   sdCard.open_log_file();
   //------from now config ini values can be used
 

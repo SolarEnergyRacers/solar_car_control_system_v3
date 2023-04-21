@@ -67,8 +67,8 @@ bool CarState::initalize_config() {
     ConfigFile cf = ConfigFile(FILENAME_SER4CONFIG);
     // [Main]
     LogFilename = cf.get("Main", "LogFilename", "/SER4DATA.CSV");
-    LogFilePeriod = cf.get("Main", "LogFilePeriod", 1000);
-    LogInterval = cf.get("Main", "LogInterval", 1);
+    LogFilePeriod = cf.get("Main", "LogFilePeriod", 24);
+    LogInterval = cf.get("Main", "LogInterval", 1000);
     // [PID]
     Kp = cf.get("PID", "Kp", 15);
     Ki = cf.get("PID", "Ki", 5);
@@ -235,7 +235,7 @@ const string CarState::csv(string msg, bool withHeader) {
   // timeStamp.erase(timeStamp.end() - 1);
   string tempStr = getCleanString(DriverInfo);
 
-  stringstream ss("");
+  stringstream ss;
   if (withHeader) {
     // header
     ss << "Epoch, ";
@@ -291,14 +291,14 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << NL;
   }
   // data
-  ss << "XXXXXXX"; // ss << esp32time.getEpoch() << ", " ;
+  ss << "(hh:mm:ss)" << ", "; // ss << esp32time.getEpoch() << ", " ;
   ss << millis() / 1000 << ", ";
   ss << msg.c_str() << ", ";
   ss << Potentiometer << ", ";
-  ss << Speed << ", ";
+  ss << (int)Speed << ", ";
   ss << Acceleration << ", ";
   ss << Deceleration << ", ";
-  ss << AccelerationDisplay << ", ";
+  ss << (int)AccelerationDisplay << ", ";
 
   // ss << BatteryOn << ", ";
   ss << floor(BatteryVoltage * 1000.0 + .5) / 1000.0 << ", ";

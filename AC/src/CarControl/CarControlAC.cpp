@@ -178,19 +178,20 @@ void CarControl::task(void *pvParams) {
       }
       //  log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-        millisNextStampCsv = millis() + carState.LogInterval;
         string record = carState.csv();
         if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
+          millisNextStampCsv = millis() + carState.LogInterval;
           if (sdCard.verboseModeDebug)
-            console << "d: " << record << NL;
+            console << "d: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
           sdCard.write(record);
         }
         vTaskDelay(10);
-        // if (sdCard.verboseModeDebug) {
-        if (millis() > millisNextStampSnd) {
-          millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+        if (sdCard.verboseModeDebug) {
+          if (millis() > millisNextStampSnd) {
+            // send serail2 --> radio
+            millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+          }
         }
-        // }
       }
     }
     taskSuspend();

@@ -214,12 +214,12 @@ void SDCard::write(string msg) {
   }
   if (isReadyForLog()) {
     try {
-      // xSemaphoreTakeT(spiBus.mutex);
+      xSemaphoreTakeT(spiBus.mutex);
       dataFile.print(msg.c_str());
       dataFile.flush();
-      // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
     } catch (exception &ex) {
-      // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
       mounted = false; // prepare for complete re_init
       carState.EngineerInfo = "ERROR writing SD card";
       console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;

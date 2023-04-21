@@ -75,6 +75,10 @@ public:
     return Value;
   }
 
+  int getTextColor() { return TextColor; };
+  int getBgColor() { return BgColor; };
+  int getTextSize() { return TextSize; };
+
   void change_format(string fmt) { Format = fmt; }
 
   void set_epsilon(T theEpsilon) { _epsilon = theEpsilon; }
@@ -106,29 +110,29 @@ public:
   }
   char buffer[20];
 
-  void showValue(Adafruit_ILI9341 *tft) { showValue(Value, tft); }
+  void showValue(Adafruit_ILI9341 *tft, bool force = false) { showValue(Value, tft, force); }
 
-  void showValue(string s, Adafruit_ILI9341 *tft) {
-    if (s.compare(ValueLast) == 0 || !IsInited) {
+  void showValue(string s, Adafruit_ILI9341 *tft, bool force = false) {
+    if (s.compare(ValueLast) == 0 || !IsInited || force) {
       _showValue(tft, Value.c_str());
     }
   }
 
-  void showValue(bool b, Adafruit_ILI9341 *tft) {
-    if (b != ValueLast || !IsInited) {
+  void showValue(bool b, Adafruit_ILI9341 *tft, bool force = false) {
+    if (b != ValueLast || !IsInited || force) {
       _showValue(tft, Value ? "ON" : "OFF");
     }
   }
 
-  void showValue(int s, Adafruit_ILI9341 *tft) {
-    if (is_changed() || !IsInited) {
+  void showValue(int s, Adafruit_ILI9341 *tft, bool force = false) {
+    if (is_changed() || !IsInited || force) {
       snprintf(buffer, 20, Format.c_str(), Value);
       _showValue(tft, buffer);
     }
   }
 
-  void showValue(float s, Adafruit_ILI9341 *tft) {
-    if (is_changed() || !IsInited) {
+  void showValue(float s, Adafruit_ILI9341 *tft, bool force = false) {
+    if (is_changed() || !IsInited || force) {
       snprintf(buffer, 20, Format.c_str(), Value);
       _showValue(tft, buffer);
     }

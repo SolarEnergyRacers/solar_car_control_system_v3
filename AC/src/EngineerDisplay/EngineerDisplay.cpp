@@ -41,6 +41,26 @@ string EngineerDisplay::display_setup() {
                      display.width, DISPLAY_STATUS_str[(int)carState.displayStatus]);
 }
 
+void EngineerDisplay::write_engineer_info(bool force) {
+  if (EngineerInfo.Value != EngineerInfo.ValueLast || justInited || force) {
+    string msg = EngineerInfo.get_recent_overtake_last();
+    int color = EngineerInfo.getTextColor(); // getColorForInfoType(carState.EngineerInfoType);
+    int len = msg.length();
+    int textSize = EngineerInfo.getTextSize();
+    if (len > 7 * 53)
+      msg = msg.substr(0, 7 * 53 - 3) + "...";
+    xSemaphoreTakeT(spiBus.mutex);
+    display.tft->fillRect(4, 212, 316, 28, EngineerInfo.getBgColor());
+    // display.tft->setFont(&FreeSans18pt7b);
+    display.tft->setTextSize(textSize);
+    display.tft->setTextWrap(true);
+    display.tft->setTextColor(color);
+    display.tft->setCursor(4, 212);
+    display.tft->print(msg.c_str());
+    xSemaphoreGive(spiBus.mutex);
+  }
+}
+
 void EngineerDisplay::draw_display_background() {
   PhotoVoltaicOn.showLabel(display.tft);
   MotorOn.showLabel(display.tft);
@@ -49,6 +69,7 @@ void EngineerDisplay::draw_display_background() {
   Mppt2.showLabel(display.tft);
   Mppt3.showLabel(display.tft);
   // Mppt4.showLabel(display.tft);
+  EngineerInfo.showLabel(display.tft);
   BatteryStatus.showLabel(display.tft);
   BmsStatus.showLabel(display.tft);
   Temperature1.showLabel(display.tft);
@@ -62,6 +83,7 @@ void EngineerDisplay::draw_display_background() {
   VoltageAvg.showLabel(display.tft);
   VoltageMin.showLabel(display.tft);
   VoltageMax.showLabel(display.tft);
+  EngineerInfo.showLabel(display.tft);
 }
 
 // void EngineerDisplay::print(string msg) { Display::print(msg); }
@@ -98,6 +120,7 @@ void EngineerDisplay::task(void *pvParams) {
       Temperature2.Value = carState.T2;
       Temperature3.Value = carState.T3;
       // Temperature4.Value = carState.T4;
+      EngineerInfo.Value = carState.EngineerInfo;
       TemperatureMin.Value = carState.Tmin;
       TemperatureMax.Value = carState.Tmax;
       Mppt1.Value = carState.Mppt1Current;
@@ -132,6 +155,9 @@ void EngineerDisplay::task(void *pvParams) {
       // Temperature4.showValue(display.tft);
       TemperatureMin.showValue(display.tft);
       TemperatureMax.showValue(display.tft);
+
+      //EngineerInfo.showValue(display.tft, true);
+      write_engineer_info();
 
       justInited = false;
       break;

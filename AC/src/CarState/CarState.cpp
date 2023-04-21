@@ -51,6 +51,7 @@ void CarState::init_values() {
   ConstantModeOn = false;
   TargetSpeed = 0;
   TargetPower = 0;
+  EngineerInfo = "none";
   DriverInfo = "No DC connection!";
   DriverInfoType = INFO_TYPE::STATUS;
   Light = LIGHT::OFF;

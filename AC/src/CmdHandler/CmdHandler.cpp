@@ -129,7 +129,7 @@ void CmdHandler::task(void *pvParams) {
           }
           break;
         case 'V':
-          state = carState.csv("Recent State", input[1] == '+' ? true : false); // with header
+          state = carState.csv("Recent State", input[1] == '+' ? true : false); // +: with header
           sdCard.write(state);
           console << state;
           break;

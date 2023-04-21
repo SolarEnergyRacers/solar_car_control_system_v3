@@ -14,9 +14,7 @@
 
 #include <CANBus.h>
 #include <CarControl.h>
-// #include <CarSpeed.h>
 #include <CarState.h>
-// #include <ConfigFile.h>
 #include <Console.h>
 #include <DriverDisplay.h>
 #include <EngineerDisplay.h>
@@ -90,14 +88,16 @@ bool CarControl::read_sd_card_detect() {
   carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
 
   if (carState.SdCardDetect && !sdCardDetectOld) {
-    console << "SD card detected, try to start logging...\n";
+    carState.EngineerInfo = "SD card detected, try to start logging...";
+    console << "     " << carState.EngineerInfo << NL;
     string msg = sdCard.init();
-    console << msg << "\n";
+    console << msg << NL;
     string state = carState.csv("Recent State", true); // with header
     sdCard.write(state);
     sdCard.open_log_file();
   } else if (!carState.SdCardDetect && sdCardDetectOld) {
-    console << "SD card removed.\n";
+    carState.EngineerInfo = "SD card removed.";
+    console << "     " << carState.EngineerInfo << NL;
   }
   return carState.SdCardDetect;
 }
@@ -132,8 +132,9 @@ bool CarControl::read_const_mode_and_mountrequest() {
 }
 
 int cyclecounter = 0;
-unsigned long carStateLifeSignLast=0;
-uint8_t carStateConstantModeLast=0;
+unsigned long carStateLifeSignLast = 0;
+uint8_t carStateConstantModeLast = 0;
+string carStateEngineerInfoLast = "";
 
 void CarControl::task(void *pvParams) {
   while (1) {
@@ -167,13 +168,15 @@ void CarControl::task(void *pvParams) {
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
                                canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
-      // clear engineer info
-      if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
-        // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
-        millisNextEngineerInfoCleanup = millis() + 10000;
-        carState.EngineerInfo = "";
+      // self destroying engineer info
+      if (carState.EngineerInfo.compare(carStateEngineerInfoLast) != 0) {
+        carStateEngineerInfoLast = carState.EngineerInfo;
+        millisNextEngineerInfoCleanup = millis() + 4000;
       }
-      //  one data row per second
+      if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
+        carStateEngineerInfoLast = carState.EngineerInfo = "";
+      }
+      //  log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
         millisNextStampCsv = millis() + carState.LogInterval;
         string record = carState.csv();

@@ -9,11 +9,10 @@
 #include <string>
 
 #include <CarState.h>
-// #include <ConfigFile.h>
+#include <ConfigFile.h>
 #include <Console.h>
 // #include <ESP32Time.h>
 #include <Helper.h>
-// #include <IOExt.h>
 // #include <RTC.h>
 // #include <SDCard.h>
 #include <definitions.h>
@@ -59,41 +58,41 @@ void CarState::init_values() {
   Fan = false;
 
   // read from SER4CONFIG.INI file
-  // initalize_config();
-  console << print("State after reading SER4CONFIG.INI") << NL;
+  initalize_config();
+  console << print("State after reading SER4CNFG.INI") << NL;
 }
 
 bool CarState::initalize_config() {
-  // try {
-  //   ConfigFile cf = ConfigFile(FILENAME_SER4CONFIG);
-  //   // [Main]
-  //   LogFilename = cf.get("Main", "LogFilename", "/SER4DATA.CSV");
-  //   LogFilePeriod = cf.get("Main", "LogFilePeriod", 1000);
-  //   LogInterval = cf.get("Main", "LogInterval", 1);
-  //   // [PID]
-  //   Kp = cf.get("PID", "Kp", 15);
-  //   Ki = cf.get("PID", "Ki", 5);
-  //   Kd = cf.get("PID", "Kd", 0.05);
-  //   // [Dynamic]
-  //   PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
-  //   PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
-  //   ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
-  //   ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
-  //   ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
-  //   ButtonControlModeIncreaseHeigh = cf.get("Dynamic", "ButtonControlModeIncreaseHeigh", 10);
-  //   ButtonControlModeIncrease = ButtonControlModeIncreaseLow;
-  //   // [Communication]
-  //   CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 3000);
-  //   Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);
-  //   Serial2Baudrate = cf.get("Communication", "Serial2Baudrate", 9600);
-  //   // [Telemetry]
-  //   SendInterval = cf.get("Telemetry", "", 1000);
-  //   MaxCachedRecords = cf.get("Telemetry", "MaxCachedRecords", 100);
+  try {
+    ConfigFile cf = ConfigFile(FILENAME_SER4CONFIG);
+    // [Main]
+    LogFilename = cf.get("Main", "LogFilename", "/SER4DATA.CSV");
+    LogFilePeriod = cf.get("Main", "LogFilePeriod", 1000);
+    LogInterval = cf.get("Main", "LogInterval", 1);
+    // [PID]
+    Kp = cf.get("PID", "Kp", 15);
+    Ki = cf.get("PID", "Ki", 5);
+    Kd = cf.get("PID", "Kd", 0.05);
+    // [Dynamic]
+    PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
+    PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
+    ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
+    ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
+    // ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
+    // ButtonControlModeIncreaseHeigh = cf.get("Dynamic", "ButtonControlModeIncreaseHeigh", 10);
+    // ButtonControlModeIncrease = ButtonControlModeIncreaseLow;
+    // [Communication]
+    CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 3000);
+    Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);
+    Serial2Baudrate = cf.get("Communication", "Serial2Baudrate", 9600);
+    // [Telemetry]
+    SendInterval = cf.get("Telemetry", "", 1000);
+    MaxCachedRecords = cf.get("Telemetry", "MaxCachedRecords", 100);
 
-  // } catch (exception &ex) {
-  //   console << "WARN: No config file: '" << FILENAME_SER4CONFIG << "' found or readable: " << ex.what() << NL;
-  //   return false;
-  // }
+  } catch (exception &ex) {
+    console << "WARN: No config file: '" << FILENAME_SER4CONFIG << "' found or readable: " << ex.what() << NL;
+    return false;
+  }
   return true;
 }
 

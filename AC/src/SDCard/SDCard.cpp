@@ -50,9 +50,9 @@ bool SDCard::mount() {
     carState.EngineerInfo = "No SD card detected!.";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
-    xSemaphoreTakeT(spiBus.mutex);
-    SD.end();
-    xSemaphoreGive(spiBus.mutex);
+    // xSemaphoreTakeT(spiBus.mutex);
+    // SD.end();
+    // xSemaphoreGive(spiBus.mutex);
     return false;
   }
   try {

@@ -165,7 +165,7 @@ void app_main(void) {
   vTaskDelay(10);
 
   // Car Control AC
-  msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 100);
+  msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 90);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -188,7 +188,7 @@ void app_main(void) {
   vTaskDelay(10);
 
   // IOExt
-  msg = ioExt.init_t(1, 10, 10000, base_offset_suspend + 150);
+  msg = ioExt.init_t(1, 10, 10000, base_offset_suspend + 90);
   console << msg << NL;
   ioExt.verboseModeDIn = false;
   ioExt.verboseModeDInHandler = false;
@@ -208,7 +208,7 @@ void app_main(void) {
   vTaskDelay(10);
 
   // ADC
-  msg = adc.init_t(1, 20, 10000, base_offset_suspend + 100);
+  msg = adc.init_t(1, 20, 10000, base_offset_suspend + 90);
   console << msg << NL;
   adc.verboseModeADC = false;
   adc.verboseModeADCDebug = false;

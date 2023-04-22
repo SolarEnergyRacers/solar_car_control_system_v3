@@ -26,10 +26,11 @@ public:
 
   // Class member and functions
   bool read_nextScreenButton();
+  bool update_sd_card_detect();
   bool read_sd_card_detect();
   bool read_const_mode_and_mountrequest();
-  bool verboseMode = false;
-  bool verboseModeDebug = false;
+  bool verboseModeCarControl = false;
+  bool verboseModeCarControlDebug = false;
 
 private:
   int valueDisplayLast = INT_MAX;

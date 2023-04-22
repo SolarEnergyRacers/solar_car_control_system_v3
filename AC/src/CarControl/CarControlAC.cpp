@@ -47,10 +47,8 @@ string CarControl::re_init() { return init(); }
 string CarControl::init() {
   bool hasError = false;
   justInited = true;
-  // mutex = xSemaphoreCreateMutex();
-  // xSemaphoreGive(mutex);
   carState.AccelerationDisplay = -99;
-  return fmt::format("[{}] CarControl initialized.", hasError ? "--" : "ok");
+  return fmt::format("[{}] {} initialized.", hasError ? "--" : "ok", getName());
 }
 
 void CarControl::exit(void) {
@@ -85,20 +83,23 @@ bool CarControl::read_sd_card_detect() {
     return false;
 
   bool sdCardDetectOld = carState.SdCardDetect;
-  carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
+  sdCard.update_sd_card_detect();
+  //console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
 
   if (carState.SdCardDetect && !sdCardDetectOld) {
     carState.EngineerInfo = "SD card detected, try to start logging...";
     console << "     " << carState.EngineerInfo << NL;
     string msg = sdCard.init();
     console << msg << NL;
-    string state = carState.csv("Recent State", true); // with header
-    sdCard.write(state);
-    sdCard.open_log_file();
+    if (sdCard.check_log_file()) {
+      string state = carState.csv("Recent State", true); // with header
+      sdCard.write_log_line(state);
+    }
   } else if (!carState.SdCardDetect && sdCardDetectOld) {
     carState.EngineerInfo = "SD card removed.";
     console << "     " << carState.EngineerInfo << NL;
   }
+
   return carState.SdCardDetect;
 }
 
@@ -116,9 +117,8 @@ bool CarControl::read_const_mode_and_mountrequest() {
       sdCard.unmount();
     } else {
       sdCard.mount();
-      vTaskDelay(300);
       string state = carState.csv("Recent State just after mounting", true); // with header
-      sdCard.write(state);
+      sdCard.write_log(state);
     }
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:
@@ -145,11 +145,11 @@ void CarControl::task(void *pvParams) {
         cyclecounter = 0;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       read_sd_card_detect();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       read_const_mode_and_mountrequest();
-      vTaskDelay(10);
+      // vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       if (carStateLifeSignLast != carState.LifeSign || carStateConstantModeLast != constantMode) {
@@ -162,9 +162,9 @@ void CarControl::task(void *pvParams) {
         carStateLifeSignLast = carState.LifeSign;
         carStateConstantModeLast = constantMode;
       }
-      vTaskDelay(10);
+      // vTaskDelay(10);
 #endif
-      if (carControl.verboseModeDebug)
+      if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
                                canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
@@ -179,19 +179,19 @@ void CarControl::task(void *pvParams) {
       //  log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
         string record = carState.csv();
-        if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
+        if (sdCard.isMounted() && millis() > millisNextStampCsv) {
           millisNextStampCsv = millis() + carState.LogInterval;
-          if (sdCard.verboseModeDebug)
+          if (sdCard.verboseModeSdCard)
             console << "d: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
-          sdCard.write(record);
+          sdCard.write_log_line(record);
         }
-        vTaskDelay(10);
-        if (sdCard.verboseModeDebug) {
-          if (millis() > millisNextStampSnd) {
-            // send serail2 --> radio
-            millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-          }
-        }
+        // vTaskDelay(10);
+        // if (verboseModeRadioSend) {
+        //   if (millis() > millisNextStampSnd) {
+        //     // send serail2 --> radio
+        //     millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+        //   }
+        // }
       }
     }
     taskSuspend();

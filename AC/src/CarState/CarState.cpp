@@ -103,19 +103,18 @@ const char *getCleanString(string str) {
 
 const string CarState::print(string msg, bool withColors) {
   stringstream ss(msg);
-  string tempStr = getCleanString(DriverInfo);
   ss << "====SER4 Car Status====" << VERSION << "==";
   // ss << t.tm_year << "." << t.tm_mon << "." << t.tm_mday << "_" << t.tm_hour << ":" << t.tm_min << ":" << t.tm_sec;
   ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
   if (msg.length() > 0)
     ss << msg << NL;
   ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << NL;
-  ss << "otentiometer .......... " << Potentiometer << NL;
-  ss << "Speed ................. " << Speed << NL;
+  ss << "otentiometer .......... " << (int)Potentiometer << NL;
+  ss << "Speed ................. " << (int)Speed << NL;
   ss << "Acceleration locked ... " << BOOL_str[(int)(AccelerationLocked)] << NL;
-  ss << "Acceleration .......... " << Acceleration << NL;
-  ss << "Deceleration .......... " << Deceleration << NL;
-  ss << "Acceleration Display... " << AccelerationDisplay << NL;
+  ss << "Acceleration .......... " << (int)Acceleration << NL;
+  ss << "Deceleration .......... " << (int)Deceleration << NL;
+  ss << "Acceleration Display... " << (int)AccelerationDisplay << NL;
   ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << NL;
   // ss << "Battery On............. " << BatteryOn << NL;
   ss << "Battery Voltage ....... " << BatteryVoltage << NL;
@@ -128,7 +127,7 @@ const string CarState::print(string msg, bool withColors) {
   ss << "MPPT3 Current ......... " << Mppt3Current << NL;
   ss << "Photo Voltaic Current . " << PhotoVoltaicCurrent << NL;
   ss << "Photo Reference Cell .. " << ReferenceSolarCell << NL;
-  ss << "Acceleration Display .. " << AccelerationDisplay << NL;
+  ss << "Acceleration Display .. " << (int)AccelerationDisplay << NL;
   ss << "Break pedal pressed ... " << BOOL_str[(int)(BreakPedal)] << NL;
   ss << "Photo Voltaic On ...... " << PhotoVoltaicOn << NL;
   ss << "Motor On .............. " << MotorOn << NL;
@@ -141,8 +140,10 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Target Speed .......... " << TargetSpeed << NL;
   ss << "Target Power .......... " << TargetPower << NL;
   ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << NL;
-  ss << "Info Last ............. "
-     << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << tempStr << NL;
+  ss << "EngineerInfo Last ..... "
+     << "[NORMAL] " << getCleanString(EngineerInfo) << NL;
+  ss << "DriverInfo Last ....... "
+     << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << getCleanString(DriverInfo) << NL;
   ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << NL;
   ss << "Light ................. " << LIGHT_str[(int)(Light)] << NL;
   ss << "IO .................... " << printIOs("", false) << NL;
@@ -178,9 +179,9 @@ const string CarState::print(string msg, bool withColors) {
 const string CarState::serialize(string msg) {
   string timeStamp = getDateTime();
   // timeStamp.erase(timeStamp.end() - 1);
-  string tempStr = getCleanString(DriverInfo);
 
   cJSON *carData = cJSON_CreateObject();
+  cJSON *cfgData = cJSON_CreateObject();
   cJSON *dynData = cJSON_CreateObject();
   cJSON *ctrData = cJSON_CreateObject();
 
@@ -221,19 +222,27 @@ const string CarState::serialize(string msg) {
   cJSON_AddStringToObject(ctrData, "constantMode", CONSTANT_MODE_str[(int)(ConstantMode)]);
   cJSON_AddNumberToObject(ctrData, "targetSpeed", TargetSpeed);
   cJSON_AddNumberToObject(ctrData, "targetPower", TargetPower);
-  cJSON_AddStringToObject(ctrData, "driverInfo", fmt::format("[{}] {}", INFO_TYPE_str[(int)DriverInfoType], tempStr).c_str());
+  cJSON_AddStringToObject(ctrData, "driverInfo",
+                          fmt::format("[{}] {}", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo)).c_str());
   cJSON_AddStringToObject(ctrData, "speedArrow", SPEED_ARROW_str[(int)SpeedArrow]);
   cJSON_AddStringToObject(ctrData, "light", LIGHT_str[(int)(Light)]);
   cJSON_AddBoolToObject(dynData, "greenLight", GreenLight);
   cJSON_AddBoolToObject(dynData, "fan", Fan);
   cJSON_AddStringToObject(ctrData, "io:", printIOs("", false).c_str());
-  return fmt::format("{}\n", cJSON_PrintUnformatted(carData));
+
+  cJSON_AddItemToObject(carData, "configData", cfgData);
+  cJSON_AddNumberToObject(cfgData, "pid Kp", Kp);
+  cJSON_AddNumberToObject(cfgData, "pid Ki", Ki);
+  cJSON_AddNumberToObject(cfgData, "pid Kp", Kp);
+  cJSON_AddStringToObject(cfgData, "logfile", LogFilename.c_str());
+
+  // return fmt::format("{}\n", cJSON_PrintUnformatted(carData));
+  return fmt::format("{}\n", cJSON_Print(carData));
 }
 
 const string CarState::csv(string msg, bool withHeader) {
   string timeStamp = getDateTime();
   // timeStamp.erase(timeStamp.end() - 1);
-  string tempStr = getCleanString(DriverInfo);
 
   stringstream ss;
   if (withHeader) {
@@ -280,6 +289,7 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "Ki, ";
     ss << "Kd, ";
     ss << "targetPower, ";
+    ss << "engineerInfo, ";
     ss << "driverInfo, ";
     ss << "speedArrow, ";
     ss << "light, ";
@@ -287,17 +297,18 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "fan, ";
     ss << "io, ";
     ss << "timeStampDate, ";
-    ss << "timeStampTime, ";
-    ss << NL;
+    ss << "timeStampTime ";
+    // ss << NL;
   }
   // data
-  ss << "(hh:mm:ss)" << ", "; // ss << esp32time.getEpoch() << ", " ;
-  ss << millis() / 1000 << ", ";
+  ss << "(hh:mm:ss)"
+     << ", "; // ss << esp32time.getEpoch() << ", " ;
+  ss << millis() / 1000. << ", ";
   ss << msg.c_str() << ", ";
-  ss << Potentiometer << ", ";
+  ss << (int)Potentiometer << ", ";
   ss << (int)Speed << ", ";
-  ss << Acceleration << ", ";
-  ss << Deceleration << ", ";
+  ss << (int)Acceleration << ", ";
+  ss << (int)Deceleration << ", ";
   ss << (int)AccelerationDisplay << ", ";
 
   // ss << BatteryOn << ", ";
@@ -333,14 +344,15 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << Ki << ", ";
   ss << Kd << ", ";
   ss << TargetPower << ", ";
-  ss << fmt::format("\"{}: {}\"", INFO_TYPE_str[(int)DriverInfoType], tempStr) << ", ";
+  ss << fmt::format("\"EngInf {}: {}\"", "", getCleanString(EngineerInfo)) << ", ";
+  ss << fmt::format("\"DrvInf {}: {}\"", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo)) << ", ";
   ss << SPEED_ARROW_str[(int)SpeedArrow] << ", ";
   ss << LIGHT_str[(int)(Light)] << ", ";
   ss << GreenLight << ", ";
   ss << Fan << ", ";
   ss << printIOs("", false).c_str() << ", ";
-  ss << timeStamp.c_str() << ", ";
-  ss << NL;
+  ss << timeStamp.c_str();
+  // ss << NL;
   return ss.str();
 }
 

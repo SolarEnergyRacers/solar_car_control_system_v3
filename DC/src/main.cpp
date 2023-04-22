@@ -142,8 +142,7 @@ void app_main(void) {
   console << " done." << NL;
   msg = canBus.report_task_init();
   console << msg << NL;
-
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
 #if COMMANDHANDLER_ON
   // CMD Handler
@@ -160,9 +159,8 @@ void app_main(void) {
   console << " done." << NL;
   msg = cmdHandler.report_task_init();
   console << msg << NL;
+  // vTaskDelay(10);
 #endif
-
-  vTaskDelay(10);
 
   // Car Control AC
   msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 90);
@@ -184,8 +182,7 @@ void app_main(void) {
   msg = dac.init();
   console << msg << NL;
   dac.verboseModeDAC = false;
-
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   // IOExt
   msg = ioExt.init_t(1, 10, 10000, base_offset_suspend + 90);
@@ -204,8 +201,7 @@ void app_main(void) {
   console << " done." << NL;
   msg = ioExt.report_task_init();
   console << msg << NL;
-
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   // ADC
   msg = adc.init_t(1, 20, 10000, base_offset_suspend + 90);
@@ -223,8 +219,7 @@ void app_main(void) {
   console << " done." << NL;
   msg = adc.report_task_init();
   console << msg << NL;
-
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   // Constant speed (PID)
   msg = constSpeed.init_t(1, 15, 10000, base_offset_suspend + 150);
@@ -241,8 +236,8 @@ void app_main(void) {
   console << " done." << NL;
   msg = constSpeed.report_task_init();
   console << msg << NL;
+  // vTaskDelay(10);
 
-  vTaskDelay(10);
   stringstream ss;
   ss << "----------------------------------------------------" << NL;
   ss << "Initialization ready as DriveController" << NL;

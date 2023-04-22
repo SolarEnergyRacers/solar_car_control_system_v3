@@ -35,6 +35,7 @@ extern bool SystemInited;
 
 using namespace std;
 
+unsigned long millisNextCanSend = millis();
 unsigned long millisNextStampCsv = millis();
 unsigned long millisNextStampSnd = millis();
 unsigned long millisNextEngineerInfoCleanup = millis();
@@ -84,7 +85,7 @@ bool CarControl::read_sd_card_detect() {
 
   bool sdCardDetectOld = carState.SdCardDetect;
   sdCard.update_sd_card_detect();
-  //console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
+  // console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
 
   if (carState.SdCardDetect && !sdCardDetectOld) {
     carState.EngineerInfo = "SD card detected, try to start logging...";
@@ -131,7 +132,7 @@ bool CarControl::read_const_mode_and_mountrequest() {
   return true;
 }
 
-int cyclecounter = 0;
+// int cyclecounter = 0;
 unsigned long carStateLifeSignLast = 0;
 uint8_t carStateConstantModeLast = 0;
 string carStateEngineerInfoLast = "";
@@ -139,10 +140,15 @@ string carStateEngineerInfoLast = "";
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      cyclecounter++;
-      if (cyclecounter > 50) {
-        // console << "." << NL;
-        cyclecounter = 0;
+      // cyclecounter++;
+      // if (cyclecounter > 50) {
+      //   console << "." << NL;
+      //   cyclecounter = 0;
+      // }
+      bool refreshTimeOut = false;
+      if (millis() > millisNextCanSend) {
+        millisNextCanSend = millis() + 1000;
+        refreshTimeOut = true;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
       // vTaskDelay(10);
@@ -152,7 +158,7 @@ void CarControl::task(void *pvParams) {
       // vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
-      if (carStateLifeSignLast != carState.LifeSign || carStateConstantModeLast != constantMode) {
+      if (refreshTimeOut || carStateLifeSignLast != carState.LifeSign || carStateConstantModeLast != constantMode) {
         canBus.writePacket(AC_BASE_ADDR | 0x00,
                            carState.LifeSign,      // LifeSign
                            (uint16_t)constantMode, // switch constant mode Speed / Power

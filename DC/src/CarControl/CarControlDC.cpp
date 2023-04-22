@@ -173,7 +173,7 @@ void CarControl::set_DAC() {
   }
 }
 
-int cyclecounter = 0;
+// int cyclecounter = 0;
 unsigned long carStateLifeSignLast = 0;
 uint16_t carStatePotentiometerLast = 0;
 uint16_t carStateAccelerationLast = 0;
@@ -191,10 +191,10 @@ bool carStateConstantModeOnLast = false;
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      cyclecounter++;
-      if (cyclecounter > 50) {
-        cyclecounter = 0;
-      }
+      // cyclecounter++;
+      // if (cyclecounter > 50) {
+      //   cyclecounter = 0;
+      // }
 
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
@@ -208,14 +208,16 @@ void CarControl::task(void *pvParams) {
       if (read_paddles())
         set_DAC();
 
+      bool refreshTimeOut = false;
       if (millis() > millisNextLifeSignIncrement) {
         // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
         millisNextLifeSignIncrement = millis() + 1000;
         carState.LifeSign++;
+        refreshTimeOut = true;
       }
 
       vTaskDelay(10);
-      if (carStateLifeSignLast != carState.LifeSign || carStatePotentiometerLast != carState.Potentiometer ||
+      if (refreshTimeOut || carStateLifeSignLast != carState.LifeSign || carStatePotentiometerLast != carState.Potentiometer ||
           carStateAccelerationLast != carState.Acceleration || carStateDecelerationLast != carState.Deceleration) {
         canBus.writePacket(DC_BASE_ADDR | 0x00,
                            carState.LifeSign,      // LifeSign
@@ -230,7 +232,8 @@ void CarControl::task(void *pvParams) {
         vTaskDelay(10);
       }
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
-      if (carStateTargetSpeedLast != (uint16_t)carState.TargetSpeed || carStateTargetPowerLast != (uint16_t)(carState.TargetPower * 1000) ||
+      if (refreshTimeOut || carStateTargetSpeedLast != (uint16_t)carState.TargetSpeed ||
+          carStateTargetPowerLast != (uint16_t)(carState.TargetPower * 1000) ||
           carStateAccelerationDisplayLast != carState.AccelerationDisplay || carStateSpeedLast != carState.Speed ||
           driveDirectionLast != driveDirection || carStateBreakPedalLast != carState.BreakPedal ||
           carStateMotorOnLast != carState.MotorOn || carStateConstantModeOnLast != carState.MotorOn) {
@@ -243,7 +246,7 @@ void CarControl::task(void *pvParams) {
                            driveDirection,                          // Fwd [1] / Bwd [0]
                            carState.BreakPedal,                     // Button Lvl Brake Pedal
                            carState.MotorOn,                        // MC Off [0] / On [1]
-                           carState.MotorOn,                        // Constant Mode Off [false], On [true]
+                           carState.ConstantModeOn,                 // Constant Mode Off [false], On [true]
                            false,                                   // empty
                            false,                                   // empty
                            false,                                   // empty

@@ -17,8 +17,7 @@
 
 #include <CarControl.h>
 #include <Console.h>
-// #include <DriverDisplay.h>
-// #include <EngineerDisplay.h>
+#include <ConstSpeed.h>
 #include <Helper.h>
 #include <I2CBus.h>
 #include <IOExt.h>
@@ -29,6 +28,7 @@ extern I2CBus i2cBus;
 extern IOExt ioExt;
 extern CarState carState;
 extern CarControl carControl;
+extern ConstSpeed constSpeed;
 extern bool SystemInited;
 
 void breakPedalHandler() {
@@ -61,6 +61,7 @@ void buttenResetHandler() {
   if (carState.getPin(PinDI_Button_Reset)->value != 0)
     return;
   carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+  constSpeed.re_init();
   if (ioExt.verboseModeDInHandler)
     console << "ConstantModeOn: " << carState.ConstantModeOn << ", mode: " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]
             << " - buttenResetHandler " << NL;

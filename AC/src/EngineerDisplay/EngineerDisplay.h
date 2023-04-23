@@ -23,7 +23,7 @@ public:
   void task(void *pvParams);
 
   string getName(void) { return "EngineerDisplay"; };
-  bool verboseMode = false;
+  bool verboseModeEngineer = false;
 
 protected:
   // DISPLAY_STATUS display_task();

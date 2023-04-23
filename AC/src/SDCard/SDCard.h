@@ -22,19 +22,22 @@ public:
   string init();
   string re_init();
   bool isMounted() { return carState.SdCardDetect && mounted; }
-  bool isReadyForLog() { return isMounted() && dataFile != 0; }
   // write a string into the dataFile
-  void write(string msg);
+  void write_log(string msg);
+  void write_log_line(string msg);
   // prints the directory tree of the card
   void directory();
+  // read hardware detect of sd card
+  bool update_sd_card_detect();
   // mount the card
   bool mount();
   // prepare log
+  bool check_log_file();
   bool open_log_file();
+  void close_log_file();
   // close log file, unmount the card, end the SD and disable logging
   bool unmount();
 
-  bool verboseMode = false;
-  bool verboseModeDebug = false;
+  bool verboseModeSdCard = false;
 };
 #endif // SOLAR_CAR_CONTROL_SYSTEM_SDCARD_H

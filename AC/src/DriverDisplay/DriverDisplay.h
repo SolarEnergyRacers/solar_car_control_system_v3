@@ -25,8 +25,8 @@ public:
   void exit(void){};
   void task(void *pvParams);
 
-  string getName() { return "DriverDisplay"; };
-  bool verboseMode = false;
+  string getName(void) { return "DriverDisplay"; };
+  bool verboseModeDriver = false;
 
 private:
   // int x, int y, string label, string format, string unit, int textColor, int bgColor, int textSize

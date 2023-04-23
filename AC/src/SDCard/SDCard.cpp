@@ -27,38 +27,49 @@ extern Console console;
 extern SPIBus spiBus;
 extern SDCard sdCard;
 
-string SDCard::init() { return re_init(); }
+string SDCard::re_init() { return init(); }
 
-string SDCard::re_init() {
-  bool hasError = false;
+string SDCard::init() {
+  bool hasError = true;
   console << "[  ] Init '" << getName() << "'..." << NL;
-
-  if (!mount())
-    hasError = true;
-
+  if (update_sd_card_detect()) {
+    carState.EngineerInfo = "SD card detected";
+    console << "     " << carState.EngineerInfo << NL;
+    hasError = !mount();
+    // if (!hasError)
+    //   hasError = !check_log_file();
+  } else {
+    carState.EngineerInfo = "No SD card detected during init!";
+    console << "     " << carState.EngineerInfo << NL;
+  }
   return fmt::format("[{}] SDCard           initialized.", hasError ? "--" : "ok");
 }
 
 // https://github.com/espressif/arduino-esp32/issues/5676
 // https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/examples/SPI_Multiple_Buses/SPI_Multiple_Buses.ino
 
+bool SDCard::update_sd_card_detect() {
+  carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
+  // console << ":" << carState.SdCardDetect << "_";
+  return carState.SdCardDetect;
+}
+
 bool SDCard::mount() {
   if (isMounted()) {
     return true;
   }
   if (!carState.SdCardDetect) {
-    carState.EngineerInfo = "No SD card detected!.";
+    carState.EngineerInfo = "No SD card detected!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
-    xSemaphoreTakeT(spiBus.mutex);
-    SD.end();
-    xSemaphoreGive(spiBus.mutex);
+    // xSemaphoreTakeT(spiBus.mutex);
+    // SD.end();
+    // xSemaphoreGive(spiBus.mutex);
     return false;
   }
   try {
-    carState.EngineerInfo = "Mounting SD card ...";
+    carState.EngineerInfo = "Mounting SD card...";
     console << "     " << carState.EngineerInfo << NL;
-    // xSemaphoreGive(spiBus.mutex);
     xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
     mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
@@ -67,15 +78,11 @@ bool SDCard::mount() {
       carState.EngineerInfo = "SD card mounted";
       console << "     " << carState.EngineerInfo << NL;
       uint8_t cardType = SD.cardType();
-
       console << "     SD Card Type: ";
       switch (cardType) {
-      case CARD_NONE: {
-        console << "No SD card attached" << NL_ARGMAX;
-        uint64_t cardSizeXX = SD.cardSize() / (1024 * 1024);
-        console << "SD Card Size: " << cardSizeXX << "MB" << NL;
-      }
-        return true;
+      case CARD_NONE:
+        console << "CARD_NONE";
+        break;
       case CARD_MMC:
         console << "MMC";
         break;
@@ -88,42 +95,61 @@ bool SDCard::mount() {
       default:
         console << "UNKNOWN";
       }
-
       uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-      console << "SD Card Size: " << cardSize << "MB" << NL;
-
+      console << NL << "     SD Card Size: " << cardSize << "MB" << NL;
       return true;
     }
   } catch (exception &ex) {
     xSemaphoreGive(spiBus.mutex);
     carState.EngineerInfo = "ERROR: Unable to mount sdCard";
-    console << "     " << carState.EngineerInfo << ex.what() << NL;
+    console << "     " << carState.EngineerInfo << ", exception: " << ex.what() << NL;
   }
-  carState.EngineerInfo = "ERROR: Unable to mount sdCard.";
+  carState.EngineerInfo = "ERROR: Unable to mount sdCard";
   console << "     " << carState.EngineerInfo << NL;
   return false;
 }
 
+void SDCard::close_log_file() {
+  xSemaphoreTakeT(spiBus.mutex);
+  dataFile.flush();
+  dataFile.close();
+  xSemaphoreGive(spiBus.mutex);
+  // dataFile = NULL;
+}
+
 bool SDCard::open_log_file() {
+  xSemaphoreTakeT(spiBus.mutex);
+  dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
+  xSemaphoreGive(spiBus.mutex);
+  if (dataFile != 0)
+    return true;
+  return false;
+}
+
+bool SDCard::check_log_file() {
   if (carState.LogFilename.length() < 1) {
-    console << "ERROR empty open_log_file name." << NL;
+    carState.EngineerInfo = "ERROR empty open_log_file name";
+    console << "     " << carState.EngineerInfo << NL;
     return false;
   }
-  if (!isMounted()) {
-    console << "ERROR at open_log_file '" << carState.LogFilename << "': SD card not mounted.\n";
+  if (!mount()) {
+    carState.EngineerInfo = "ERROR at open_log_file: SD card not mounted";
+    console << "     " << carState.EngineerInfo << NL;
     return false;
   }
   try {
-    // xSemaphoreTakeT(spiBus.mutex);
-    dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
-    // xSemaphoreGive(spiBus.mutex);
-    if (dataFile != 0) {
-      console << "     Log file opend for append.\n";
+    bool isSuccess = open_log_file();
+    close_log_file();
+    if (isSuccess) {
+      carState.EngineerInfo = "Log file opend for append";
+      console << "     " << carState.EngineerInfo << NL;
       return true;
     }
-    console << "     ERROR opening '" << carState.LogFilename << "'\n";
+    carState.EngineerInfo = "ERROR opening logfile";
+    console << "     " << carState.EngineerInfo << ": " << carState.LogFilename << NL;
   } catch (exception &ex) {
-    // xSemaphoreGive(spiBus.mutex);
+    xSemaphoreGive(spiBus.mutex);
+    carState.EngineerInfo = "ERROR opening logfile, exception";
     console << "     ERROR opening '" << carState.LogFilename << "': " << ex.what() << NL;
   }
   return false;
@@ -131,44 +157,30 @@ bool SDCard::open_log_file() {
 
 bool SDCard::unmount() {
   if (!carState.SdCardDetect) {
-    carState.EngineerInfo = "No SD card detected!.";
+    carState.EngineerInfo = "No SD card detected to unmount!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
     return false;
   }
-  if (isReadyForLog()) {
-    try {
-      // xSemaphoreTakeT(spiBus.mutex);
-      dataFile.flush();
-      dataFile.close();
-      SD.end();
-      // xSemaphoreGive(spiBus.mutex);
-      carState.EngineerInfo = "Log file closed.";
-      console << "     " << carState.EngineerInfo << NL;
-    } catch (exception &ex) {
-      // xSemaphoreGive(spiBus.mutex);
-      carState.EngineerInfo = "ERROR closing log file";
-      console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
-    }
-  }
   if (isMounted()) {
     try {
-      // xSemaphoreTakeT(spiBus.mutex);
+      xSemaphoreTakeT(spiBus.mutex);
       SD.end();
-      // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
       carState.EngineerInfo = "SD card unmounted.";
       console << "     " << carState.EngineerInfo << NL;
+      mounted = false;
     } catch (exception &ex) {
-      // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
       carState.EngineerInfo = "ERROR unmounting SD card: ";
       console << "     " << carState.EngineerInfo << ex.what() << NL;
+      return false;
     }
-    mounted = false;
   } else {
     carState.EngineerInfo = "SD card already unmounted.";
     console << "     " << carState.EngineerInfo << NL;
   }
-  return !mounted;
+  return true;
 }
 
 void SDCard::directory() {
@@ -205,24 +217,22 @@ void SDCard::printDirectory(File dir, int numTabs) {
   }
 }
 
-void SDCard::write(string msg) {
-  if (!isReadyForLog()) {
-    if (!isReadyForLog()) {
-      // give it a shot
-      open_log_file();
-    }
-  }
-  if (isReadyForLog()) {
+void SDCard::write_log_line(string msg) { write_log(msg + NL); }
+
+void SDCard::write_log(string msg) {
+  if (isMounted()) {
     try {
-      // xSemaphoreTakeT(spiBus.mutex);
+      open_log_file();
+      xSemaphoreTakeT(spiBus.mutex);
       dataFile.print(msg.c_str());
       dataFile.flush();
-      // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
     } catch (exception &ex) {
-      // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
       mounted = false; // prepare for complete re_init
       carState.EngineerInfo = "ERROR writing SD card";
       console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
     }
   }
+  close_log_file();
 }

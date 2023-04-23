@@ -53,7 +53,7 @@ string DriverDisplay::re_init(void) { return display_setup(); }
 
 string DriverDisplay::display_setup() {
   bool hasError = false;
-  return fmt::format("[{}] EngineerDisplay initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", display.height,
+  return fmt::format("[{}] {} initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", getName(), display.height,
                      display.width, DISPLAY_STATUS_str[(int)carState.displayStatus]);
 }
 

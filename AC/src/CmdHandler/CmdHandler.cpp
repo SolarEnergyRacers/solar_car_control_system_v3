@@ -128,9 +128,13 @@ void CmdHandler::task(void *pvParams) {
             console << carState.print("Recent State") << NL;
           }
           break;
+        case 'J':
+          state = carState.serialize("Recent State");
+          console << state;
+          break;
         case 'V':
           state = carState.csv("Recent State", input[1] == '+' ? true : false); // +: with header
-          sdCard.write(state);
+          sdCard.write_log(state);
           console << state;
           break;
         case 'M':
@@ -141,6 +145,10 @@ void CmdHandler::task(void *pvParams) {
           break;
         case 'U':
           sdCard.unmount();
+          break;
+        case 'F':
+          carState.initalize_config();
+          console << carState.print("State after reading SER4CNFG.INI") << NL;
           break;
         case 'H':
           console << "Not implemented yet!" << NL;
@@ -158,9 +166,10 @@ void CmdHandler::task(void *pvParams) {
           break;
         case 'I':
           // console << "Received: '" << input << "' --> ";
-          // if (input[1] == 's') {
-          //   //console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
-          //   i2cBus.scan_i2c_devices();
+          if (input[1] == 's') {
+            console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
+            i2cBus.scan_i2c_devices();
+          }
           // } else if (input[1] == 'i') {
           //   ioExt.verboseModeDigitalIn = !ioExt.verboseModeDigitalIn;
           //   console << "set verboseModeDigitalIn: " << ioExt.verboseModeDigitalIn << NL;
@@ -174,8 +183,8 @@ void CmdHandler::task(void *pvParams) {
           //   dac.verboseModeDAC = !dac.verboseModeDAC;
           //   console << "set verboseModeDAC: " << dac.verboseModeDAC << NL;
           // } else if (input[1] == 'c') {
-          //   carControl.verboseMode = !carControl.verboseMode;
-          //   console << "set verboseMode for acc-/dec-controls: " << carControl.verboseMode << NL;
+          //   carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
+          //   console << "set verboseModeCarControl for acc-/dec-controls: " << carControl.verboseModeCarControl << NL;
           // } else if (input[1] == 'R') {
           //   console << ioExt.re_init() << NL;
           //   msg = ioExt.re_init();
@@ -200,8 +209,8 @@ void CmdHandler::task(void *pvParams) {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
           } else if (input[1] == 'S') {
-            sdCard.verboseModeDebug = !sdCard.verboseModeDebug;
-            console << "set verboseModeDebug: " << sdCard.verboseModeDebug << NL;
+            sdCard.verboseModeSdCard = !sdCard.verboseModeSdCard;
+            console << "set verboseModeSdCard: " << sdCard.verboseModeSdCard << NL;
           } else {
             string arr[4];
             splitString(arr, &input[1]);
@@ -221,13 +230,13 @@ void CmdHandler::task(void *pvParams) {
           break;
         case 'O':
           if (input[1] == 'o') {
-            carControl.verboseMode = !carControl.verboseMode;
-            console << "set verboseMode: " << carControl.verboseMode << NL;
+            carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
+            console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
           } else if (input[1] == 'O') {
-            carControl.verboseModeDebug = !carControl.verboseModeDebug;
-            console << "set verboseModeDebug: " << carControl.verboseModeDebug << NL;
+            carControl.verboseModeCarControlDebug = !carControl.verboseModeCarControlDebug;
+            console << "set verboseModeCarControlDebug: " << carControl.verboseModeCarControlDebug << NL;
           } else {
-            console << "set verboseMode CarControl needs a specifier: o,O." << NL;
+            console << "set verboseModeCarControl CarControl needs a specifier: o,O." << NL;
           }
           break;
         case 'T': {

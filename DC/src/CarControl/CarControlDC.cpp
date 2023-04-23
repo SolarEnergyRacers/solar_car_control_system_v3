@@ -194,12 +194,12 @@ void CarControl::task(void *pvParams) {
     if (SystemInited) {
       bool force = false;
       if (millis() > millisNextCanSend) {
-        millisNextCanSend = millis() + 5000;
+        millisNextCanSend = millis() + 1000;
         force = true;
       }
       if (millis() > millisNextLifeSignIncrement) {
         // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
-        millisNextLifeSignIncrement = millis() + 5000;
+        millisNextLifeSignIncrement = millis() + 1000;
         carState.LifeSign++;
       }
       

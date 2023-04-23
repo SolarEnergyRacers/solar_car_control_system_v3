@@ -141,7 +141,7 @@ void CarControl::task(void *pvParams) {
 
       bool refreshRequest = false;
       if (millis() > millisNextCanSend) {
-        millisNextCanSend = millis() + 5000;
+        millisNextCanSend = millis() + 1000;
         // console << "." << NL;
         refreshRequest = true;
       }

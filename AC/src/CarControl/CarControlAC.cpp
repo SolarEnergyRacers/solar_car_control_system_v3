@@ -14,9 +14,7 @@
 
 #include <CANBus.h>
 #include <CarControl.h>
-// #include <CarSpeed.h>
 #include <CarState.h>
-// #include <ConfigFile.h>
 #include <Console.h>
 #include <DriverDisplay.h>
 #include <EngineerDisplay.h>
@@ -37,6 +35,7 @@ extern bool SystemInited;
 
 using namespace std;
 
+unsigned long millisNextCanSend = millis();
 unsigned long millisNextStampCsv = millis();
 unsigned long millisNextStampSnd = millis();
 unsigned long millisNextEngineerInfoCleanup = millis();
@@ -49,10 +48,8 @@ string CarControl::re_init() { return init(); }
 string CarControl::init() {
   bool hasError = false;
   justInited = true;
-  // mutex = xSemaphoreCreateMutex();
-  // xSemaphoreGive(mutex);
   carState.AccelerationDisplay = -99;
-  return fmt::format("[{}] CarControl initialized.", hasError ? "--" : "ok");
+  return fmt::format("[{}] {} initialized.", hasError ? "--" : "ok", getName());
 }
 
 void CarControl::exit(void) {
@@ -87,18 +84,23 @@ bool CarControl::read_sd_card_detect() {
     return false;
 
   bool sdCardDetectOld = carState.SdCardDetect;
-  carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
+  sdCard.update_sd_card_detect();
+  // console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
 
   if (carState.SdCardDetect && !sdCardDetectOld) {
-    console << "SD card detected, try to start logging...\n";
+    carState.EngineerInfo = "SD card detected, try to start logging...";
+    console << "     " << carState.EngineerInfo << NL;
     string msg = sdCard.init();
-    console << msg << "\n";
-    string state = carState.csv("Recent State", true); // with header
-    sdCard.write(state);
-    sdCard.open_log_file();
+    console << msg << NL;
+    if (sdCard.check_log_file()) {
+      string state = carState.csv("Recent State", true); // with header
+      sdCard.write_log_line(state);
+    }
   } else if (!carState.SdCardDetect && sdCardDetectOld) {
-    console << "SD card removed.\n";
+    carState.EngineerInfo = "SD card removed.";
+    console << "     " << carState.EngineerInfo << NL;
   }
+
   return carState.SdCardDetect;
 }
 
@@ -116,9 +118,8 @@ bool CarControl::read_const_mode_and_mountrequest() {
       sdCard.unmount();
     } else {
       sdCard.mount();
-      vTaskDelay(300);
       string state = carState.csv("Recent State just after mounting", true); // with header
-      sdCard.write(state);
+      sdCard.write_log(state);
     }
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:
@@ -131,15 +132,18 @@ bool CarControl::read_const_mode_and_mountrequest() {
   return true;
 }
 
-int cyclecounter = 0;
+// int cyclecounter = 0;
+string carStateEngineerInfoLast = "";
 
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      cyclecounter++;
-      if (cyclecounter > 50) {
+
+      bool refreshRequest = false;
+      if (millis() > millisNextCanSend) {
+        millisNextCanSend = millis() + 1000;
         // console << "." << NL;
-        cyclecounter = 0;
+        refreshRequest = true;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
       vTaskDelay(10);
@@ -147,40 +151,44 @@ void CarControl::task(void *pvParams) {
       vTaskDelay(10);
       read_const_mode_and_mountrequest();
       vTaskDelay(10);
-#ifdef CAN_OUT_AC
+#ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          (uint16_t)constantMode, // switch constant mode Speed / Power
                          (uint16_t)0,            // empty
-                         (uint16_t)0             // empty
+                         (uint16_t)0,            // empty
+                         refreshRequest          // force or not
       );
       vTaskDelay(10);
 #endif
-      if (carControl.verboseModeDebug)
+      if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
                                canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
-      // clear engineer info
-      if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
-        // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
-        millisNextEngineerInfoCleanup = millis() + 10000;
-        carState.EngineerInfo = "";
+      // self destroying engineer info
+      if (carState.EngineerInfo.compare(carStateEngineerInfoLast) != 0) {
+        carStateEngineerInfoLast = carState.EngineerInfo;
+        millisNextEngineerInfoCleanup = millis() + 4000;
       }
-      //  one data row per second
+      if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
+        carStateEngineerInfoLast = carState.EngineerInfo = "";
+      }
+      //  log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-        millisNextStampCsv = millis() + carState.LogInterval;
         string record = carState.csv();
-        if (sdCard.isReadyForLog() && millis() > millisNextStampCsv) {
-          if (sdCard.verboseModeDebug)
-            console << "d: " << record << NL;
-          sdCard.write(record);
+        if (sdCard.isMounted() && millis() > millisNextStampCsv) {
+          millisNextStampCsv = millis() + carState.LogInterval;
+          if (sdCard.verboseModeSdCard)
+            console << "d: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
+          sdCard.write_log_line(record);
         }
-        vTaskDelay(10);
-        // if (sdCard.verboseModeDebug) {
-        if (millis() > millisNextStampSnd) {
-          millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-        }
+        // vTaskDelay(10);
+        // if (verboseModeRadioSend) {
+        //   if (millis() > millisNextStampSnd) {
+        //     // send serail2 --> radio
+        //     millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+        //   }
         // }
       }
     }

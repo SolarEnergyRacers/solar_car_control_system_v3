@@ -380,7 +380,7 @@ void Display::lifeSign() {
     SystemJustInited = false;
   }
   int color = ILI9341_GREEN;
-  if (!sdCard.isReadyForLog()) {
+  if (!sdCard.isMounted()) {
     color = ILI9341_RED;
   }
   unsigned long deziSeconds = millis() / 100;

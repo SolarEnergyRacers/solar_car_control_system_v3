@@ -37,7 +37,7 @@ string EngineerDisplay::re_init(void) { return display_setup(); }
 
 string EngineerDisplay::display_setup() {
   bool hasError = false;
-  return fmt::format("[{}] EngineerDisplay initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", display.height,
+  return fmt::format("[{}] {} initialized.  Screen 'ILI9341' {}x{}.     Status: {}", hasError ? "--" : "ok", getName(), display.height,
                      display.width, DISPLAY_STATUS_str[(int)carState.displayStatus]);
 }
 
@@ -156,7 +156,7 @@ void EngineerDisplay::task(void *pvParams) {
       TemperatureMin.showValue(display.tft);
       TemperatureMax.showValue(display.tft);
 
-      //EngineerInfo.showValue(display.tft, true);
+      // EngineerInfo.showValue(display.tft, true);
       write_engineer_info();
 
       justInited = false;

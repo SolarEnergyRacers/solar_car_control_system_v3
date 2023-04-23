@@ -133,42 +133,34 @@ bool CarControl::read_const_mode_and_mountrequest() {
 }
 
 // int cyclecounter = 0;
-unsigned long carStateLifeSignLast = 0;
-uint8_t carStateConstantModeLast = 0;
 string carStateEngineerInfoLast = "";
 
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      // cyclecounter++;
-      // if (cyclecounter > 50) {
-      //   console << "." << NL;
-      //   cyclecounter = 0;
-      // }
-      bool refreshTimeOut = false;
+
+      bool refreshRequest = false;
       if (millis() > millisNextCanSend) {
-        millisNextCanSend = millis() + 1000;
-        refreshTimeOut = true;
+        millisNextCanSend = millis() + 5000;
+        // console << "." << NL;
+        refreshRequest = true;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
-      // vTaskDelay(10);
+      vTaskDelay(10);
       read_sd_card_detect();
-      // vTaskDelay(10);
+      vTaskDelay(10);
       read_const_mode_and_mountrequest();
-      // vTaskDelay(10);
+      vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
-      if (refreshTimeOut || carStateLifeSignLast != carState.LifeSign || carStateConstantModeLast != constantMode) {
-        canBus.writePacket(AC_BASE_ADDR | 0x00,
-                           carState.LifeSign,      // LifeSign
-                           (uint16_t)constantMode, // switch constant mode Speed / Power
-                           (uint16_t)0,            // empty
-                           (uint16_t)0             // empty
-        );
-        carStateLifeSignLast = carState.LifeSign;
-        carStateConstantModeLast = constantMode;
-      }
-      // vTaskDelay(10);
+      canBus.writePacket(AC_BASE_ADDR | 0x00,
+                         carState.LifeSign,      // LifeSign
+                         (uint16_t)constantMode, // switch constant mode Speed / Power
+                         (uint16_t)0,            // empty
+                         (uint16_t)0,            // empty
+                         refreshRequest          // force or not
+      );
+      vTaskDelay(10);
 #endif
       if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),

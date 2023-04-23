@@ -35,7 +35,12 @@ extern DAC dac;
 // ------------------
 // FreeRTOS functions
 
-string ConstSpeed::re_init() { return init(); }
+string ConstSpeed::re_init() {
+  //pid = NULL;
+  pid.SetMode(MANUAL);
+  pid.SetMode(AUTOMATIC);
+  return init();
+}
 
 string ConstSpeed::init() {
   bool hasError = false;

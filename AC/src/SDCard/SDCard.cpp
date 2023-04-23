@@ -50,7 +50,7 @@ string SDCard::init() {
 
 bool SDCard::update_sd_card_detect() {
   carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
-  //console << ":" << carState.SdCardDetect << "_";
+  // console << ":" << carState.SdCardDetect << "_";
   return carState.SdCardDetect;
 }
 

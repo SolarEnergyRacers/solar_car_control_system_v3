@@ -37,8 +37,8 @@ extern DAC dac;
 
 string ConstSpeed::re_init() {
   //pid = NULL;
-  pid.SetMode(MANUAL);
-  pid.SetMode(AUTOMATIC);
+  // pid.SetMode(MANUAL);
+  // pid.SetMode(AUTOMATIC);
   return init();
 }
 

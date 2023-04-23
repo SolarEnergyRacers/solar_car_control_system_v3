@@ -65,7 +65,13 @@ public:
   void setData_i8(uint8_t index, int8_t value) { this->data.data_i8[index] = value; }
   int8_t getData_i8(uint8_t index) { return this->data.data_i8[index]; }
 
-  void setData_b(uint8_t index, bool value) { if(value){this->data.b64 |= BIT64(index);}else{this->data.b64 &= ~BIT64(index);} }
+  void setData_b(uint8_t index, bool value) {
+    if (value) {
+      this->data.b64 |= BIT64(index);
+    } else {
+      this->data.b64 &= ~BIT64(index);
+    }
+  }
   bool getData_b(uint8_t index) { return this->data.b64 & BIT64(index); }
 };
 

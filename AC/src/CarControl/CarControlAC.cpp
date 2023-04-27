@@ -134,16 +134,17 @@ bool CarControl::read_const_mode_and_mountrequest() {
 
 // int cyclecounter = 0;
 string carStateEngineerInfoLast = "";
-
+uint16_t carStateLifeSignLast = 0;
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
 
       bool refreshRequest = false;
-      if (millis() > millisNextCanSend) {
+      if (millis() > millisNextCanSend || carStateLifeSignLast != carState.LifeSign) {
         millisNextCanSend = millis() + 1000;
-        // console << "." << NL;
+        //console << "." << NL;
         refreshRequest = true;
+        carStateLifeSignLast = carState.LifeSign;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
       vTaskDelay(10);

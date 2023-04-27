@@ -268,27 +268,27 @@ void CmdHandler::task(void *pvParams) {
 #endif
         } break;
         case 'K':
-#if CARSPEED_ON
-          console << "Received: '" << input.c_str() << "' --> ";
-          if (input[1] == 'v') {
-            carSpeed.verboseModePID = !carSpeed.verboseModePID;
-          } else {
-            string arr[4];
-            int count = splitString(arr, &input[1]);
-            if (count == 0) {
-              console << "PID parameters: ";
-            } else {
-              float Kp = atof(arr[0].c_str());
-              float Ki = atof(arr[1].c_str());
-              float Kd = atof(arr[2].c_str());
-              carSpeed.update_pid(Kp, Ki, Kd);
-              console << "PID set parameters: ";
-            }
-            console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
-          }
-#else
-          console << "Car speed control deactivated\n";
-#endif
+// #if CARSPEED_ON
+//           console << "Received: '" << input.c_str() << "' --> ";
+//           if (input[1] == 'v') {
+//             carSpeed.verboseModePID = !carSpeed.verboseModePID;
+//           } else {
+//             string arr[4];
+//             int count = splitString(arr, &input[1]);
+//             if (count == 0) {
+//               console << "PID parameters: ";
+//             } else {
+//               float Kp = atof(arr[0].c_str());
+//               float Ki = atof(arr[1].c_str());
+//               float Kd = atof(arr[2].c_str());
+//               carSpeed.update_pid(Kp, Ki, Kd);
+//               console << "PID set parameters: ";
+//             }
+//             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
+//           }
+// #else
+          console << "Car speed control settings only on DC possible\n";
+// #endif
           break;
         //-------- DRIVER INFO COMMANDS --------------------
         case 's':

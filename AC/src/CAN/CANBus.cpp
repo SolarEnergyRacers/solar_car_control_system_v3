@@ -44,8 +44,10 @@ BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive_worker(TimerHandle_t pxTimer) {
   if (xSemaphoreTakeFromISR(canBus.mutex, &xHigherPriorityTaskWoken) == pdTRUE) {
     int packetId = CAN.packetId();
-    if (canBus.is_to_ignore_packet(packetId))
+    if (canBus.is_to_ignore_packet(packetId)){
+      xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
       return;
+    }
 
     counterI++;
     counterI_notAvail = 0;

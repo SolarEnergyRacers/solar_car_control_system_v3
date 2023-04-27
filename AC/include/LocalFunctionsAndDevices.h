@@ -2,7 +2,7 @@
 #ifndef LocalFunctionsAndDevices_H
 #define LocalFunctionsAndDevices_H
 
-#define CARSPEED_ON false     // car pid speed controller
+#define CARSPEED_ON true     // car pid speed controller
 #define DS_ON false           // 1-Wire Digital Thermometer (DS18B20)
 #define INT_ON false          // interrupt for I/O Expander (MCP23014)
 #define PWM_ON false          // 16-channel, 12-bit PWM Fm, I2C (PCA9685)

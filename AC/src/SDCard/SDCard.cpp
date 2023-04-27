@@ -114,7 +114,7 @@ void SDCard::close_log_file() {
   dataFile.flush();
   dataFile.close();
   xSemaphoreGive(spiBus.mutex);
-  // dataFile = NULL;
+  // dataFile = 0;
 }
 
 bool SDCard::open_log_file() {
@@ -227,12 +227,11 @@ void SDCard::write_log(string msg) {
       dataFile.print(msg.c_str());
       dataFile.flush();
       xSemaphoreGive(spiBus.mutex);
+      close_log_file();
     } catch (exception &ex) {
       xSemaphoreGive(spiBus.mutex);
-      mounted = false; // prepare for complete re_init
       carState.EngineerInfo = "ERROR writing SD card";
       console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
     }
   }
-  close_log_file();
 }

@@ -174,35 +174,17 @@ void CarControl::set_DAC() {
   }
 }
 
-// int cyclecounter = 0;
-// unsigned long carStateLifeSignLast = 0;
-// uint16_t carStatePotentiometerLast = 0;
-// uint16_t carStateAccelerationLast = 0;
-// uint16_t carStateDecelerationLast = 0;
-
-// uint16_t carStateTargetSpeedLast = 0;
-// uint16_t carStateTargetPowerLast = 0;
-// int8_t carStateAccelerationDisplayLast = 0;
-// uint8_t carStateSpeedLast = 0;
-// bool driveDirectionLast = false;
-// bool carStateBreakPedalLast = false;
-// bool carStateMotorOnLast = false;
-// bool carStateConstantModeOnLast = false;
-
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
       bool force = false;
-      if (millis() > millisNextCanSend) {
-        millisNextCanSend = millis() + 1000;
-        force = true;
-      }
       if (millis() > millisNextLifeSignIncrement) {
         // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
         millisNextLifeSignIncrement = millis() + 1000;
         carState.LifeSign++;
+        force = true;
       }
-      
+            
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       read_reference_cell_data();

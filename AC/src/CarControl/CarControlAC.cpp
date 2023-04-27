@@ -139,11 +139,11 @@ void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
 
-      bool refreshRequest = false;
+      bool force = false;
       if (millis() > millisNextCanSend || carStateLifeSignLast != carState.LifeSign) {
         millisNextCanSend = millis() + 1000;
-        //console << "." << NL;
-        refreshRequest = true;
+        // console << "." << NL;
+        force = true;
         carStateLifeSignLast = carState.LifeSign;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
@@ -159,7 +159,7 @@ void CarControl::task(void *pvParams) {
                          (uint16_t)constantMode, // switch constant mode Speed / Power
                          (uint16_t)0,            // empty
                          (uint16_t)0,            // empty
-                         refreshRequest          // force or not
+                         force                   // force or not
       );
       vTaskDelay(10);
 #endif

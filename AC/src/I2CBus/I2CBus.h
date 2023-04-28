@@ -20,11 +20,11 @@
 
 using namespace std;
 
-#define _Master_ 0x00
-#define _ExtIO_ I2C_ADDRESS_MCP23017_IOExt0
-#define _DAC_ I2C_ADDRESS_DS1803
-#define _ADC_ I2C_ADDRESS_ADS1x15
-#define _RTC_ I2C_ADDRESS_DS1307
+// #define _Master_ 0x00
+// #define _ExtIO_ I2C_ADDRESS_MCP23017_IOExt0
+// #define _DAC_ I2C_ADDRESS_DS1803
+// #define _ADC_ I2C_ADDRESS_ADS1x15
+// #define _RTC_ I2C_ADDRESS_DS1307
 
 class I2CBus {
 private:
@@ -46,6 +46,32 @@ public:
   bool isAC() { return !isDC(); }
   bool isDC() { return hasADC() && hasDAC() && hasExtIO(); }
   bool verboseModeI2C = false;
+
+  enum Address {
+    _Master_ = 0x00,
+    _ExtIO_  = I2C_ADDRESS_MCP23017_IOExt0,
+    _DAC_    = I2C_ADDRESS_DS1803,
+    _ADC_    = I2C_ADDRESS_ADS1x15,
+    _RTC_    = I2C_ADDRESS_DS1307
+  };
+};
+
+
+/** 
+ * @brief try to take mux within timeout. 
+ * @brief **Warning: needs this.ok() to check if successful**
+ */
+class RAII_mux {
+private:
+  SemaphoreHandle_t mux;
+  bool _ok;
+public:
+  RAII_mux(SemaphoreHandle_t mux, TickType_t timeout)
+  :mux(mux) {
+    _ok = xSemaphoreTake(mux, timeout);
+  }
+  ~RAII_mux() {xSemaphoreGive(mux);}
+  bool ok() {return _ok;}
 };
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_I2CBUS_H

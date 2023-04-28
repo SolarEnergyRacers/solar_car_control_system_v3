@@ -48,7 +48,7 @@ public:
                     "\tO _ _ _ _ _ _ _ _ _ _ set CarControl verbose mode\n"
                     "\t  [o]                 - verbose\n"
                     "\t  [O]                 - verbose debug\n"
-                    "\tT [yyyy mm dd hh MM]  get/set RTC date and time\n"
+                    "\tT [yyyy mm dd hh MM ss]  get/set RTC date and time\n"
                     "\tK [|kp ki kd] _ _ _ _ show / update PID constants\n"
                     "\t-------- DRIVER INFO COMMANDS --------------------\n"
                     "\t:<text> _ _ _ _ _ _ _ display driver info text\n"

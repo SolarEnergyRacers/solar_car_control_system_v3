@@ -112,6 +112,7 @@ public:
 
     TargetSpeed = 0;
     TargetPower = 0;
+    EngineerInfo = "";
     DriverInfo = "starting...";
     DriverInfoType = INFO_TYPE::STATUS;
     Light = LIGHT::OFF;
@@ -198,6 +199,7 @@ public:
   float TargetSpeed;
   float TargetRecuperation;
   float TargetPower;
+  string EngineerInfo;
   string DriverInfo;
   SPEED_ARROW SpeedArrow;
   INFO_TYPE DriverInfoType;

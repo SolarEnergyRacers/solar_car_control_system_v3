@@ -32,6 +32,8 @@ int counterI_notAvail = 0;
 int counterR_notAvail = 0;
 int counterW_notAvail = 0;
 
+using namespace std;
+
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
 
@@ -84,7 +86,6 @@ string CANBus::init() {
   counterI_notAvail = 0;
   counterR_notAvail = 0;
   counterW_notAvail = 0;
-  console << "[  ] Init CANBus...\n";
   packetsCountMax = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
@@ -116,11 +117,11 @@ void CANBus::push(CANPacket packet) {
 }
 
 // bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
-//                          bool b7) {
+//                          bool b7, bool force) {
 //   uint8_t boolByte = ((uint8_t)b7) << 7 | ((uint8_t)b6) << 6 | ((uint8_t)b5) << 5 | ((uint8_t)b4) << 4 | ((uint8_t)b3) << 3 |
 //                      ((uint8_t)b2) << 2 | ((uint8_t)b1) << 1 | ((uint8_t)b0) << 0;
 //   uint64_t data = ((uint64_t)boolByte) << 48 | ((uint64_t)data0) << 8 | ((int64_t)data1 & 0x00000000000000ff) << 0;
-//   return writePacket(adr, data);
+//   return writePacket(adr, data, force);
 // }
 
 bool CANBus::writePacket(uint16_t adr,
@@ -136,8 +137,8 @@ bool CANBus::writePacket(uint16_t adr,
                          bool b_60,           // empty
                          bool b_61,           // empty
                          bool b_62,           // empty
-                         bool b_63            // empty
-) {
+                         bool b_63,           // empty
+                         bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
@@ -153,52 +154,57 @@ bool CANBus::writePacket(uint16_t adr,
   packet.setData_b(61, b_61);
   packet.setData_b(62, b_62);
   packet.setData_b(63, b_63);
-  return writePacket(adr, packet);
+  return writePacket(adr, packet, force);
 }
 
 bool CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // LifeSign
                          uint16_t data_u16_1, // Potentiometer value
                          uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
-                         uint16_t data_u16_3  // HAL-paddle Deceleration ADC value
-) {
+                         uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
+                         bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
   packet.setData_u16(1, data_u16_1);
   packet.setData_u16(2, data_u16_2);
   packet.setData_u16(3, data_u16_3);
-  return writePacket(adr, packet);
+  return writePacket(adr, packet, force);
 }
 
-bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
-  if (canBus.verboseModeCanOutNative)
-    console << print_raw_packet("S", packet) << NL;
-  try {
-    if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
-      counterW_notAvail = 0;
-      canBusReinitRequestW = false;
-      CAN.beginPacket(adr);
-      CAN.write(packet.getData_i8(0));
-      CAN.write(packet.getData_i8(1));
-      CAN.write(packet.getData_i8(2));
-      CAN.write(packet.getData_i8(3));
-      CAN.write(packet.getData_i8(4));
-      CAN.write(packet.getData_i8(5));
-      CAN.write(packet.getData_i8(6));
-      CAN.write(packet.getData_i8(7));
-      CAN.endPacket();
+std::map<uint16_t, CANPacket> packetsLast;
+bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
+
+  if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
+    if (canBus.verboseModeCanOutNative)
+      console << print_raw_packet("S", packet) << NL;
+    try {
+      packetsLast[adr] = packet;
+      if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+        counterW_notAvail = 0;
+        canBusReinitRequestW = false;
+        CAN.beginPacket(adr);
+        CAN.write(packet.getData_i8(0));
+        CAN.write(packet.getData_i8(1));
+        CAN.write(packet.getData_i8(2));
+        CAN.write(packet.getData_i8(3));
+        CAN.write(packet.getData_i8(4));
+        CAN.write(packet.getData_i8(5));
+        CAN.write(packet.getData_i8(6));
+        CAN.write(packet.getData_i8(7));
+        CAN.endPacket();
+        xSemaphoreGive(mutex);
+      } else {
+        console << fmt::format(" W[{:x}]FAIL ", adr);
+        if (counterW_notAvail++ > 8)
+          canBusReinitRequestW = true;
+        return false;
+      }
+    } catch (exception &ex) {
       xSemaphoreGive(mutex);
-    } else {
-      console << fmt::format(" W[{:x}]FAIL ", adr);
-      if (counterW_notAvail++ > 8)
-        canBusReinitRequestW = true;
+      console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
       return false;
     }
-  } catch (exception &ex) {
-    xSemaphoreGive(mutex);
-    console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
-    return false;
   }
   return true;
 }
@@ -214,7 +220,7 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      //console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
+      // console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
 
       if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
         console << NL

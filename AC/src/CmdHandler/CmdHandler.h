@@ -17,7 +17,7 @@ public:
   void task(void *pvParams);
 
   // Class functions and members
-  string commands = "REDPSVMUBICOTK:!sc?";
+  string commands = "REDPSVJMUFBICOTK:!sc?";
   string helpText = "Available commands (" + commands +
                     "):\n"
                     "\t-------- SYSTEM COMMANDS -------------------------\n"
@@ -27,16 +27,17 @@ public:
                     "\tP _ _ _ _ _ _ _ _ _ _ print directory of sdcard\n"
                     "\tS _ _ _ _ _ _ _ _ _ _ print status\n"
                     "\t  [a]                 - print status and all values\n"
-                    "\tV [|+]  _ _ _ _ _ _ _ write to sdcard | with header (+)\n"
+                    "\tV [|+]  _ _ _ _ _ _ _ write_log to sdcard | with header (+)\n"
                     "\tM _ _ _ _ _ _ _ _ _ _ mount sdcard and eneable logging\n"
                     "\tU _ _ _ _ _ _ _ _ _ _ unmount sdcard and disable logging\n"
                     "\tH _ _ _ _ _ _ _ _ _ _ memory_info\n"
                     "\tB [rate]  _ _ _ _ _ _ show or set baud rate of Serial2\n"
+                    "\tF _ _ _ _ _ _ _ _ _ _ Re-read configuration\n"
                     "\tI _ _ _ _ _ _ _ _ _ _ read and show IOs\n"
                     "\t  [s]                 - scan and show I2C devices\n"
-                    "\t  [i|o]               - show in|out continuously\n"
-                    "\t  [a|d]               - show ADC|DAC continuously\n"
-                    "\t  [c]                 - show controls acc/dec continuously\n"
+                    // "\t  [i|o]               - show in|out continuously\n"
+                    // "\t  [a|d]               - show ADC|DAC continuously\n"
+                    // "\t  [c]                 - show controls acc/dec continuously\n"
                     "\t  [R]                 - reinit\n"
                     "\tC _ _ _ _ _ _ _ _ _ _ set CAN verbose mode\n"
                     "\t  [i]                 - verbose CAN in\n"

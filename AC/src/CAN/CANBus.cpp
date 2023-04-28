@@ -7,6 +7,8 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include <freertos/task.h>
+#include <freertos/timers.h>
 
 #include <Arduino.h>
 #include <CAN.h>
@@ -32,12 +34,14 @@ int counterI_notAvail = 0;
 int counterR_notAvail = 0;
 int counterW_notAvail = 0;
 
+using namespace std;
+
+uint32_t timeout_ms = 1000;
+int timerID = 3;
+int packetSize;
+
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-void onReceive(int packetSize) {
-
-  if (!SystemInited)
-    return;
-
+void onReceive_worker(TimerHandle_t pxTimer) {
   if (xSemaphoreTakeFromISR(canBus.mutex, &xHigherPriorityTaskWoken) == pdTRUE) {
     int packetId = CAN.packetId();
     if (canBus.is_to_ignore_packet(packetId))
@@ -60,6 +64,59 @@ void onReceive(int packetSize) {
       canBusReinitRequestI = true;
   }
 }
+
+void onReceive(int _packetSize) {
+  if (!SystemInited)
+    return;
+
+  packetSize = _packetSize;
+  onReceive_worker(NULL);
+  return;
+  // TimerHandle_t timer = xTimerCreate("onReceive_timer", pdMS_TO_TICKS(timeout_ms), pdFALSE, 0, onReceive_worker);
+
+  // xTimerStart(timer, 0);
+
+  // // Wait for timer to expire or function to complete
+  // TickType_t start_time = xTaskGetTickCount();
+  // while (xTimerIsTimerActive(timer)) {
+  //   // Check if timeout has elapsed
+  //   if (xTaskGetTickCount() - start_time >= pdMS_TO_TICKS(timeout_ms)) {
+  //     console << "onReceive TIMEOUT" << NL;
+  //     break;
+  //   }
+  //   vTaskDelay(pdMS_TO_TICKS(10));
+  // }
+
+  // xTimerStop(timer, 0);
+  // xTimerDelete(timer, 0);
+
+  TimerHandle_t xTimer = xTimerCreate("onReceive_timer",         // Just a text name, not used by the kernel.
+                                      pdMS_TO_TICKS(timeout_ms), // The timer period in ticks.
+                                      pdFALSE,                   // one shoot timer.
+                                      (void *)timerID,           // Assign each timer a unique id equal to its array index.
+                                      onReceive_worker           // Each timer calls the same callback when it expires.
+  );
+  if (xTimer == NULL) { // The timer was not created.
+  } else {
+    // Start the timer.  No block time is specified, and even if one was
+    // it would be ignored because the scheduler has not yet been
+    // started.
+    if (xTimerStart(xTimer, timerID) != pdPASS) { // The timer could not be set into the Active state.
+    }
+  }
+
+  // ...
+  // Create tasks here.
+  // ...
+  // Starting the scheduler will start the timers running as they have already
+  // been set into the active state.
+  vTaskStartScheduler();
+  // Should not reach here.
+  for (;;)
+    ;
+}
+
+//-------------------------------------------------------
 
 bool CANBus::isPacketToRenew(uint16_t packetId) {
   return max_ages[packetId] == 0 || (max_ages[packetId] != -1 && millis() - ages[packetId] > max_ages[packetId]);
@@ -88,6 +145,7 @@ string CANBus::init() {
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
+    CAN.setTimeout(400);
     xSemaphoreGive(mutex);
     hasError = true;
     console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
@@ -114,11 +172,11 @@ void CANBus::push(CANPacket packet) {
 }
 
 // bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
-//                          bool b7) {
+//                          bool b7, bool force) {
 //   uint8_t boolByte = ((uint8_t)b7) << 7 | ((uint8_t)b6) << 6 | ((uint8_t)b5) << 5 | ((uint8_t)b4) << 4 | ((uint8_t)b3) << 3 |
 //                      ((uint8_t)b2) << 2 | ((uint8_t)b1) << 1 | ((uint8_t)b0) << 0;
 //   uint64_t data = ((uint64_t)boolByte) << 48 | ((uint64_t)data0) << 8 | ((int64_t)data1 & 0x00000000000000ff) << 0;
-//   return writePacket(adr, data);
+//   return writePacket(adr, data, force);
 // }
 
 bool CANBus::writePacket(uint16_t adr,
@@ -134,8 +192,8 @@ bool CANBus::writePacket(uint16_t adr,
                          bool b_60,           // empty
                          bool b_61,           // empty
                          bool b_62,           // empty
-                         bool b_63            // empty
-) {
+                         bool b_63,           // empty
+                         bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
@@ -151,55 +209,56 @@ bool CANBus::writePacket(uint16_t adr,
   packet.setData_b(61, b_61);
   packet.setData_b(62, b_62);
   packet.setData_b(63, b_63);
-  return writePacket(adr, packet);
+  return writePacket(adr, packet, force);
 }
 
 bool CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // LifeSign
                          uint16_t data_u16_1, // Potentiometer value
                          uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
-                         uint16_t data_u16_3  // HAL-paddle Deceleration ADC value
-) {
+                         uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
+                         bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
   packet.setData_u16(1, data_u16_1);
   packet.setData_u16(2, data_u16_2);
   packet.setData_u16(3, data_u16_3);
-  return writePacket(adr, packet);
+  return writePacket(adr, packet, force);
 }
 
-bool CANBus::writePacket(uint16_t adr, CANPacket packet) {
-  if (canBus.verboseModeCanOutNative)
-    console << print_raw_packet("S", packet) << NL;
-  try {
-    if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
-      console << fmt::format(" W[{:x}] ", adr);
-      counterW_notAvail = 0;
-      canBusReinitRequestW = false;
-      CAN.beginPacket(adr);
-      CAN.write(packet.getData_i8(0));
-      CAN.write(packet.getData_i8(1));
-      CAN.write(packet.getData_i8(2));
-      CAN.write(packet.getData_i8(3));
-      CAN.write(packet.getData_i8(4));
-      CAN.write(packet.getData_i8(5));
-      CAN.write(packet.getData_i8(6));
-      CAN.write(packet.getData_i8(7));
-      CAN.endPacket();
-      console << "-.";
+std::map<uint16_t, CANPacket> packetsLast;
+bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
+
+  if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
+    if (canBus.verboseModeCanOutNative)
+      console << print_raw_packet("S", packet) << NL;
+    try {
+      packetsLast[adr] = packet;
+      if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+        counterW_notAvail = 0;
+        canBusReinitRequestW = false;
+        CAN.beginPacket(adr);
+        CAN.write(packet.getData_i8(0));
+        CAN.write(packet.getData_i8(1));
+        CAN.write(packet.getData_i8(2));
+        CAN.write(packet.getData_i8(3));
+        CAN.write(packet.getData_i8(4));
+        CAN.write(packet.getData_i8(5));
+        CAN.write(packet.getData_i8(6));
+        CAN.write(packet.getData_i8(7));
+        CAN.endPacket();
+        xSemaphoreGive(mutex);
+      } else {
+        console << fmt::format(" W[{:x}]FAIL ", adr);
+        if (counterW_notAvail++ > 8)
+          canBusReinitRequestW = true;
+        return false;
+      }
+    } catch (exception &ex) {
       xSemaphoreGive(mutex);
-      console << "--";
-    } else {
-      console << fmt::format(" W[{:x}]FAIL ", adr);
-      if (counterW_notAvail++ > 8)
-        canBusReinitRequestW = true;
-      return false;
+      console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
     }
-  } catch (exception &ex) {
-    xSemaphoreGive(mutex);
-    console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
-    return false;
   }
   return true;
 }

@@ -135,19 +135,6 @@ void app_main(void) {
   display.clear_screen(0xffff);
   display.print("Start AC Init Procedure:\n\n");
 
-  // //------------------------------------------------------------
-  // // SC card
-  // // sdCardDetectHandler();
-  // msg = sdCard.init();
-  // console << msg << "\n";
-  // display.print(msg + "\n");
-
-  // //--- SD card available
-  // carState.initalize_config();
-  // sdCard.open_log_file();
-  // //------from now config ini values can be used
-  // vTaskDelay(10);
-
   //------------------------------------------------------------
   // CAN Bus
   msg = canBus.init_t(0, 22, 10000, base_offset_suspend + 90);
@@ -167,7 +154,7 @@ void app_main(void) {
   msg = canBus.report_task_init();
   console << msg << NL;
   display.print(msg + "\n");
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   //------------------------------------------------------------
   // CMD Handler
@@ -184,14 +171,14 @@ void app_main(void) {
   msg = cmdHandler.report_task_init();
   console << msg << NL;
   display.print(msg + "\n");
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   //------------------------------------------------------------
   // Engineer Display
-  engineerDisplay.verboseMode = false;
-  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 300);
+  engineerDisplay.verboseModeEngineer = false;
+  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 100);
   console << msg << NL;
-  console << "     " << engineerDisplay.getName() << " create task ...";
+  console << "[  ] " << engineerDisplay.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(engineerDisplayTask,             /* task function. */
                           engineerDisplay.getInfo(),       /* name of task. */
                           engineerDisplay.getStackSize(),  /* stack size of task */
@@ -202,14 +189,14 @@ void app_main(void) {
   msg = engineerDisplay.report_task_init();
   console << msg << NL;
   display.print(msg + "\n");
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   //------------------------------------------------------------
   // Driver Display
-  driverDisplay.verboseMode = false;
-  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 300);
+  driverDisplay.verboseModeDriver = false;
+  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 100);
   console << msg << NL;
-  console << "     " << driverDisplay.getName() << " create task ..." << NL;
+  console << "[  ] " << driverDisplay.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(driverDisplayTask,             /* task function. */
                           driverDisplay.getInfo(),       /* name of task. */
                           driverDisplay.getStackSize(),  /* stack size of task */
@@ -220,14 +207,14 @@ void app_main(void) {
   msg = driverDisplay.report_task_init();
   console << msg << NL;
   display.print(msg + "\n");
-  vTaskDelay(10);
+  // vTaskDelay(10);
 
   //------------------------------------------------------------
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 100);
+  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 90);
   console << msg << NL;
-  carControl.verboseMode = false;
-  carControl.verboseModeDebug = false;
+  carControl.verboseModeCarControl = false;
+  carControl.verboseModeCarControlDebug = false;
   console << "[  ] " << carControl.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(carControlTask,             /* task function. */
                           carControl.getInfo(),       /* name of task. */
@@ -238,19 +225,18 @@ void app_main(void) {
                           carControl.getCoreId());    /* pin task to core id */
   msg = carControl.report_task_init();
   console << msg << NL;
-  display.print(msg + "\n");
-  vTaskDelay(10);
+  display.print(msg + NL);
+  // vTaskDelay(10);
 
   //------------------------------------------------------------
   // SC card
-  // sdCardDetectHandler();
   msg = sdCard.init();
-  console << msg << "\n";
-  display.print(msg + "\n");
-  vTaskDelay(100);
+  console << msg << NL;
+  display.print(msg + NL);
   //--- SD card available
   carState.initalize_config();
-  sdCard.open_log_file();
+  console << carState.print("State after reading SER4CNFG.INI") << NL;
+  sdCard.check_log_file();
   //------from now config ini values can be used
 
   stringstream ss;
@@ -259,13 +245,15 @@ void app_main(void) {
   ss << "Initialization ready as AuxiliaryController" << NL;
   ss << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
   ss << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
-  ss << fmt::format("- canBus.verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
-  ss << fmt::format("- canBus.verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
-  ss << fmt::format("- canBus.verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
-  ss << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
-  ss << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
+  ss << fmt::format("-        verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
+  ss << fmt::format("-        verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
+  ss << fmt::format("-        verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  ss << fmt::format("- carControl.verboseModeCC      = {}", carControl.verboseModeCarControl) << NL;
+  ss << fmt::format("-            verboseModeCCDebug = {}", carControl.verboseModeCarControlDebug) << NL;
+  ss << fmt::format("- engineerDisplay.verboseModeED = {}", engineerDisplay.verboseModeEngineer) << NL;
+  ss << fmt::format("- driverDisplay.verboseModeDD   = {}", driverDisplay.verboseModeDriver) << NL;
   ss << "----------------------------------------------------" << NL;
-  vTaskDelay(10);
+  // vTaskDelay(10);
   console << ss.str();
   display.print(ss.str());
   //--let the bootscreen visible for a moment ------------------

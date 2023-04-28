@@ -10,8 +10,7 @@
 
 #include <LocalFunctionsAndDevices.h>
 
-#define FILENAME_SER4CONFIG "SER4CONF.INI"
-//#define FILENAME_SER4DATA "/ser4data.csv"
+#define FILENAME_SER4CONFIG "SER4CNFG.INI"
 
 #define NL "\n"
 

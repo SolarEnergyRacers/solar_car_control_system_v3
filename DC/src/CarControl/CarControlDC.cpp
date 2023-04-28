@@ -39,9 +39,8 @@ extern bool SystemInited;
 
 using namespace std;
 
-unsigned long millisNextStampCsv = millis();
-unsigned long millisNextStampSnd = millis();
-
+unsigned long millisNextCanSend = millis();
+unsigned long millisNextLifeSignIncrement = millis();
 // ------------------
 // FreeRTOS functions
 
@@ -175,37 +174,55 @@ void CarControl::set_DAC() {
   }
 }
 
-int cyclecounter = 0;
+// int cyclecounter = 0;
+// unsigned long carStateLifeSignLast = 0;
+// uint16_t carStatePotentiometerLast = 0;
+// uint16_t carStateAccelerationLast = 0;
+// uint16_t carStateDecelerationLast = 0;
+
+// uint16_t carStateTargetSpeedLast = 0;
+// uint16_t carStateTargetPowerLast = 0;
+// int8_t carStateAccelerationDisplayLast = 0;
+// uint8_t carStateSpeedLast = 0;
+// bool driveDirectionLast = false;
+// bool carStateBreakPedalLast = false;
+// bool carStateMotorOnLast = false;
+// bool carStateConstantModeOnLast = false;
 
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      cyclecounter++;
-      if (cyclecounter > 50) {
-        cyclecounter = 0;
+      bool force = false;
+      if (millis() > millisNextCanSend) {
+        millisNextCanSend = millis() + 1000;
+        force = true;
       }
-      
+      if (millis() > millisNextLifeSignIncrement) {
+        // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
+        millisNextLifeSignIncrement = millis() + 1000;
+        carState.LifeSign++;
+      }
       
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
-      // read values from ADC/IO
       read_reference_cell_data();
       vTaskDelay(10);
       read_speed();
-      // vTaskDelay(10, "1-");
+      vTaskDelay(10);
       read_potentiometer();
       vTaskDelay(10);
       if (read_paddles())
         set_DAC();
-      carState.LifeSign++;
       vTaskDelay(10);
+
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          carState.Potentiometer, // Potentiometer value
                          carState.Acceleration,  // HAL-paddle Acceleration ADC value
-                         carState.Deceleration   // HAL-paddle Deceleration ADC value
+                         carState.Deceleration,  // HAL-paddle Deceleration ADC value
+                         force                   // force or not
       );
-      vTaskDelay(10);
+
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
       canBus.writePacket(DC_BASE_ADDR | 0x01,
                          (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
@@ -220,9 +237,12 @@ void CarControl::task(void *pvParams) {
                          false,                                   // empty
                          false,                                   // empty
                          false,                                   // empty
-                         false                                    // empty
+                         false,                                   // empty
+                         force                                    // force or not
       );
+
       vTaskDelay(10);
+
       if (carControl.verboseModeDebug) {
         console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
                                canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,

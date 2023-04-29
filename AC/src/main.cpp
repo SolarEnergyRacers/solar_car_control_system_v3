@@ -41,9 +41,6 @@
 #include <Display.h>
 #include <DriverDisplay.h>
 #include <EngineerDisplay.h>
-// #if RTC_ON
-// #include <ESP32Time.h>
-// #endif
 #include <GPIO.h>
 #include <I2CBus.h>
 #include <OneWire.h>

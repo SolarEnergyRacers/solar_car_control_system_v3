@@ -18,7 +18,6 @@
 
 #include <Arduino.h>
 #if RTC_ON
-// #include <ESP32Time.h>
 #include <RTC_SER.h>
 #include <RtcDateTime.cpp>
 #endif
@@ -51,8 +50,6 @@ extern EngineerDisplay engineerDisplay;
 extern SDCard sdCard;
 extern Console console;
 #if RTC_ON
-// extern RTC rtc;
-// extern ESP32Time esp32time;
 extern GlobalTime globalTime;
 #endif
 
@@ -246,9 +243,6 @@ void CmdHandler::task(void *pvParams) {
           string arr[6];
           int count = splitString(arr, &input[1]);
           if (count == 0) {
-            // time_t theTime = time(NULL);
-            // struct tm t = *localtime(&theTime);
-            // console << "Received: '" << input.c_str() << "' --> DateTime: " << asctime(&t) << NL;
             console << "Received: '" << input.c_str() << "' --> DateTime: " << globalTime.strTime("%X %F (%a)") << NL;
           } else {
             int yy = atof(arr[0].c_str());
@@ -257,17 +251,8 @@ void CmdHandler::task(void *pvParams) {
             int hh = atof(arr[3].c_str());
             int MM = atof(arr[4].c_str());
             int ss = atof(arr[5].c_str());
-            // uint16_t days = DaysSinceFirstOfYear2000<uint16_t>(yy, mm, dd);
-            // uint64_t seconds = SecondsIn<uint64_t>(days, hh, MM, ss);
             RtcDateTime dateTime = RtcDateTime(yy, mm, dd, hh, MM, ss);
-            // console << fmt::format("yy:{} mm:{} dd:{} hh:{} MM:{} ss:{}", yy, mm, dd, hh, MM, ss) << NL;
-            // console << "dateTime date:" << dateTime.Year() << "-"  << dateTime.Month() << "-" << dateTime.Day() << NL;
-            // rtc.write_rtc_datetime(dateTime);
-            // esp32time.setTime(ss, MM, hh, dd, mm, yy);
             globalTime.set_RTC(dateTime);
-            // time_t theTime = time(NULL);
-            // struct tm t = *localtime(&theTime);
-            // console << "Received: '" << input.c_str() << "' --> Set dateTime to: " << asctime(&t) << NL;
             console << "Received: '" << input.c_str() << "' --> Onboard time now: " << globalTime.strTime("%X %F (%a)") << NL;
           }
 #else

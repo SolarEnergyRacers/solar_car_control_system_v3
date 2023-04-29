@@ -15,7 +15,6 @@
 #include <freertos/task.h>
 #include <Wire.h>
 #include <RtcDS1307.h>
-// #include <ESP32Time.h>
 
 // project
 #include <I2CBus.h>
@@ -30,27 +29,24 @@ private:
 	I2CBus* i2cBus;
 
 	RtcDateTime _datetime;
-	// ESP32Time _datetime;
 
 	RtcDS1307<TwoWire> Rtc = RtcDS1307<TwoWire>(Wire);
 
 	void update();
 
-	// tread safety. **MUST BE LOCKED BEFORE I2CBUS MUX**
+	// thread safety. **MUST BE LOCKED BEFORE I2CBUS MUX**
 	SemaphoreHandle_t mutex = NULL;  
 
 public:
 	/**
 	 * @param p_i2cBus: pointer to I2CBus with relevant mux
 	 * @param datetime: datetime to write initialize RTC. 
-	 * Nullptr to not overwrite RTC time.
+	 * Nullptr (default arg.) to not overwrite RTC time.
 	 * datetime cannot be 2000-01-01 00:00:00 (used to mark "don't set RTC")
 	 */
 	GlobalTime(I2CBus* p_i2cBus, const RtcDateTime* datetime = nullptr) 
-	// GlobalTime(I2CBus* p_i2cBus, const ESP32Time* datetime = nullptr) 
 	: i2cBus(p_i2cBus) {
 		this->_datetime = datetime ? *datetime : RtcDateTime(0);
-		// this->_datetime = datetime ? *datetime : ESP32Time(0);
 		mutex = xSemaphoreCreateMutex();
 	}
 

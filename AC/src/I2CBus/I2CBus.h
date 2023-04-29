@@ -20,12 +20,6 @@
 
 using namespace std;
 
-// #define _Master_ 0x00
-// #define _ExtIO_ I2C_ADDRESS_MCP23017_IOExt0
-// #define _DAC_ I2C_ADDRESS_DS1803
-// #define _ADC_ I2C_ADDRESS_ADS1x15
-// #define _RTC_ I2C_ADDRESS_DS1307
-
 class I2CBus {
 private:
   uint8_t i2cDevices = 0;

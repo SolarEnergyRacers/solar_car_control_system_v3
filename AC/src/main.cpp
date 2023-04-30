@@ -114,7 +114,7 @@ void app_main(void) {
   delay(200);
 
   std::array<std::string,7> wd = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};  // todo: rm
-  console << fmt::format("compiletime: {}:{}:{}  {}-{}-{} ({})\n", 
+  console << fmt::format("main.o compiletime: {}:{}:{}  {}-{}-{} ({})\n", 
   compiletime.Hour(), compiletime.Minute(), compiletime.Second(),
   compiletime.Day(), compiletime.Month(), compiletime.Year(), wd[compiletime.DayOfWeek()]);
   int RTC_err = globalTime.init(DS1307SquareWaveOut_Low, 1);

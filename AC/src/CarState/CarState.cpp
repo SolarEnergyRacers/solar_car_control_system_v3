@@ -13,7 +13,7 @@
 #include <Console.h>
 // #include <ESP32Time.h>
 #include <Helper.h>
-// #include <RTC.h>
+#include <RTC_SER.h>
 // #include <SDCard.h>
 #include <definitions.h>
 
@@ -21,6 +21,7 @@ using namespace std;
 
 extern CarState carState;
 extern Console console;
+extern GlobalTime globalTime;
 // extern SDCard sdCard;
 // extern IOExt ioExt;
 // extern RTC rtc;
@@ -105,7 +106,8 @@ const string CarState::print(string msg, bool withColors) {
   stringstream ss(msg);
   ss << "====SER4 Car Status====" << VERSION << "==";
   // ss << t.tm_year << "." << t.tm_mon << "." << t.tm_mday << "_" << t.tm_hour << ":" << t.tm_min << ":" << t.tm_sec;
-  ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
+  // ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
+  ss << "====uptime:" << globalTime.getUptime() << "s====" << globalTime.strTime("%F %R") << "==\n";
   if (msg.length() > 0)
     ss << msg << NL;
   ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << NL;
@@ -177,7 +179,8 @@ const string CarState::print(string msg, bool withColors) {
 }
 
 const string CarState::serialize(string msg) {
-  string timeStamp = getDateTime();
+  // string timeStamp = getDateTime();
+  string timeStamp = globalTime.strTime("%F %R");
   // timeStamp.erase(timeStamp.end() - 1);
 
   cJSON *carData = cJSON_CreateObject();
@@ -187,7 +190,8 @@ const string CarState::serialize(string msg) {
 
   cJSON_AddItemToObject(carData, "dynamicData", dynData);
   cJSON_AddStringToObject(dynData, "timeStamp", timeStamp.c_str());
-  cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
+  // cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
+  cJSON_AddStringToObject(dynData, "uptime", globalTime.getUptime().c_str());
   cJSON_AddStringToObject(dynData, "msg", msg.c_str());
   cJSON_AddNumberToObject(dynData, "potentiometer", Potentiometer);
   cJSON_AddNumberToObject(dynData, "speed", Speed);
@@ -241,7 +245,8 @@ const string CarState::serialize(string msg) {
 }
 
 const string CarState::csv(string msg, bool withHeader) {
-  string timeStamp = getDateTime();
+  // string timeStamp = getDateTime();
+  string timeStamp = globalTime.strTime("%F %R");
   // timeStamp.erase(timeStamp.end() - 1);
 
   stringstream ss;
@@ -301,9 +306,11 @@ const string CarState::csv(string msg, bool withHeader) {
     // ss << NL;
   }
   // data
-  ss << "(hh:mm:ss)"
-     << ", "; // ss << esp32time.getEpoch() << ", " ;
-  ss << millis() / 1000. << ", ";
+  // ss << "(hh:mm:ss)"
+  //    << ", "; // ss << esp32time.getEpoch() << ", " ;
+  // ss << millis() / 1000. << ", ";
+  ss << fmt::format("({})", globalTime.strTime("%X")) << ",";
+  ss << globalTime.getUptime() << ",";
   ss << msg.c_str() << ", ";
   ss << (int)Potentiometer << ", ";
   ss << (int)Speed << ", ";

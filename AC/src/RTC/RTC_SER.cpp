@@ -30,15 +30,15 @@ extern Console console;
 int GlobalTime::init(DS1307SquareWaveOut sq_freq, bool do_run) {
 	int err_code = 0;
 	is_init = true;  // must be true before accessing I2CBus
-	err_code += 0x1 * set_RTC_squarewave(sq_freq);
-	err_code += 0x2 * set_RTC_running(do_run);
+	err_code += 0x1 * !set_RTC_squarewave(sq_freq);
+	err_code += 0x2 * !set_RTC_running(do_run);
 	if ( _datetime.TotalSeconds() == 0 ) {
-		err_code += 0x4 * get_RTC();
+		err_code += 0x4 * !get_RTC();
 	}
 	else {
-		err_code += 0x4 * set_RTC(_datetime);
+		err_code += 0x4 * !set_RTC(_datetime);
 	}
-	err_code += 0x8 * set_RTC_running(1);
+	err_code += 0x8 * !set_RTC_running(1);
 	return err_code;
 }
 
@@ -46,28 +46,38 @@ int GlobalTime::init(DS1307SquareWaveOut sq_freq, bool do_run) {
  * @brief update internal datetime from cpu clock or RTC
  */
 void GlobalTime::update() {
-	constexpr int min_wait = 60 * 1000;  // min. time before next RTC query
+	constexpr int min_wait = 60;  // min. time before next RTC query
 	auto lock = RAII_mux(mutex, portMAX_DELAY);
 	if (!lock.ok()) return;
-	int millisec = millis();
-	if ((millisec - last_update) > min_wait || (millisec - last_update) < 0) {
+	int sec = millis() / 1000;
+	if ((sec - last_update) > min_wait || (sec - last_update) < 0) {
 		if (get_RTC()) return;
 		else console << "ERROR: RTC update failed, using cpu clock instead.\n";
 	}
 	// if get_RTC() not needed or failed:
-	uint32_t sec = _datetime.TotalSeconds();
-	sec += (millisec - millisec0) / 1000;
-	_datetime = RtcDateTime(sec);
-	millisec0 = millisec;
+	uint32_t sec_now = _datetime.TotalSeconds();
+	sec_now += (sec - sec0);
+	_datetime = RtcDateTime(sec_now);
+	sec0 = sec;
 	return;
 }
 
-/**
+/** todo: rm
  * @brief get the time as an std:string object with the specified format
  * @param format
  * time format: 
  * http://www.cplusplus.com/reference/ctime/strftime/
  * TL;DR: '%H:%M:%S %Y-%m-%d (%b)' for '09:10:59 2023-03-28 (Tue)'
+ */
+
+/**
+ * get the time as an std:string object with the specified format:
+ * http://www.cplusplus.com/reference/ctime/strftime/
+ * TL;DR:
+ * "%H:%M:%S %Y-%m-%d (%b)"" -> "09:10:59 2023-03-28 (Tue)"
+ * "%F %R" -> "2023-03-28 09:10"
+ * "%X" -> "09:10:59"
+ * **max. return string length: 127 char**
  */
 std::string GlobalTime::strTime(const std::string& format){
 	update();
@@ -80,6 +90,20 @@ std::string GlobalTime::strTime(const std::string& format){
 	return std::string(s);
 }
 
+/**
+ * get uptime as string in HH:MM:SS.
+ * Does not make any use of RTC and can be used without it.
+ */
+string GlobalTime::getUptime() {
+  unsigned long seconds = millis() / 1000;
+  unsigned long secsRemaining = seconds % 3600;
+  int runHours = seconds / 3600;
+  int runMinutes = secsRemaining / 60;
+  int runSeconds = secsRemaining % 60;
+  return fmt::format("{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
+}
+
+// return 1 on success, 0 otherwise
 bool GlobalTime::set_RTC_running(bool do_run) {
 	if (!is_init) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
@@ -94,6 +118,7 @@ bool GlobalTime::set_RTC_running(bool do_run) {
 	return 1;
 }
 
+// 1 = on, 0 = off or communication error
 bool GlobalTime::get_RTC_running() {
 	if (!is_init) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
@@ -107,6 +132,7 @@ bool GlobalTime::get_RTC_running() {
 	return Rtc.GetIsRunning();
 }
 
+// return 1 on success, 0 otherwise
 bool GlobalTime::set_RTC_squarewave(DS1307SquareWaveOut sq_freq) {
 	if (!is_init) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
@@ -123,6 +149,8 @@ bool GlobalTime::set_RTC_squarewave(DS1307SquareWaveOut sq_freq) {
 
 /**
  * @brief force update internal datetime from RTC
+ * @retval 1 on success, 0 otherwise. 
+ * Does not return time directly in any form.
  */
 bool GlobalTime::get_RTC() {
 	if (!is_init) {
@@ -132,8 +160,8 @@ bool GlobalTime::get_RTC() {
 	auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
 	if (lock.ok()){
 		_datetime = Rtc.GetDateTime();
-		last_update = millis();
-		millisec0 = last_update;
+		last_update = millis() / 1000;
+		sec0 = last_update;
 		return 1;
 	}
 	else return 0;
@@ -142,6 +170,7 @@ bool GlobalTime::get_RTC() {
 /**
  * @brief set RTC time
  * @param secondsFrom2000: seconds since 2000-01-01
+ * @retval 1 on success, 0 otherwise
  */
 bool GlobalTime::set_RTC(uint32_t secondsFrom2000) {
 	if (!is_init) {
@@ -154,7 +183,7 @@ bool GlobalTime::set_RTC(uint32_t secondsFrom2000) {
 	if (lock2.ok()){
 		Rtc.SetDateTime(RtcDateTime(secondsFrom2000));
 		_datetime = RtcDateTime(secondsFrom2000);  // update internal time
-		millisec0 = millis();  // adjust for offline update
+		sec0 = millis() / 1000;  // adjust for offline update
 		return 1;
 	}
 	else return 0;
@@ -163,6 +192,7 @@ bool GlobalTime::set_RTC(uint32_t secondsFrom2000) {
 /**
  * @brief set RTC time
  * @param datetime: RtcDateTime object
+ * @retval 1 on success, 0 otherwise
  */
 bool GlobalTime::set_RTC(const RtcDateTime& datetime) {
 	if (!is_init) {
@@ -175,7 +205,7 @@ bool GlobalTime::set_RTC(const RtcDateTime& datetime) {
 	if (lock2.ok()){
 		Rtc.SetDateTime(datetime);
 		_datetime = datetime;  // update internal time
-		millisec0 = millis();  // adjust for offline update
+		sec0 = millis() / 1000;  // adjust for offline update
 		return 1;
 	}
 	else return 0;

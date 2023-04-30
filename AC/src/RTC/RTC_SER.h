@@ -23,8 +23,8 @@
 class GlobalTime {
 private:
 	bool is_init = false;
-	unsigned int millisec0 = 0;  // dt since last update (ms)
-	int last_update = std::numeric_limits<int>::max();  // actual RTC sync (ms)
+	unsigned int sec0 = 0;  // dt since last update (sec)
+	int last_update = std::numeric_limits<int>::max();  // actual RTC sync (sec)
 
 	I2CBus* i2cBus;
 
@@ -66,6 +66,7 @@ public:
 
 	RtcDateTime datetime() {update(); return _datetime;}
 	std::string strTime(const std::string& format);
+	std::string getUptime();
 
 	bool get_RTC();
 	bool set_RTC(uint32_t secondsFrom2000);

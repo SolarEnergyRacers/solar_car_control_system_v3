@@ -31,7 +31,7 @@ public:
                     "\tM _ _ _ _ _ _ _ _ _ _ mount sdcard and eneable logging\n"
                     "\tU _ _ _ _ _ _ _ _ _ _ unmount sdcard and disable logging\n"
                     "\tH _ _ _ _ _ _ _ _ _ _ memory_info\n"
-                    "\tB [rate]  _ _ _ _ _ _ show or set baud rate of Serial2\n"
+                    "\tB [v]|[rate]  _ _ _ _ show or set baud rate of Serial2, v-verbose mode\n"
                     "\tF _ _ _ _ _ _ _ _ _ _ Re-read configuration\n"
                     "\tI _ _ _ _ _ _ _ _ _ _ read and show IOs\n"
                     "\t  [s]                 - scan and show I2C devices\n"

@@ -16,20 +16,20 @@
 #include <CarControl.h>
 #include <CarState.h>
 #include <Console.h>
-#include <DriverDisplay.h>
-#include <EngineerDisplay.h>
+// #include <DriverDisplay.h>
+// #include <EngineerDisplay.h>
 #include <Helper.h>
 #include <I2CBus.h>
 #include <SDCard.h>
+#include <Serial.h>
 
 extern CANBus canBus;
 extern CarControl carControl;
 extern CarState carState;
 extern Console console;
-// extern DriverDisplay driverDisplay;
-// extern EngineerDisplay engineerDisplay;
 extern I2CBus i2cBus;
 extern SDCard sdCard;
+extern Uart uart;
 
 extern bool SystemInited;
 
@@ -67,7 +67,7 @@ bool CarControl::read_nextScreenButton() {
   switch (carState.displayStatus) {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::DRIVER_SETUP;
-    console << "Switch Next Screen toggle: switch from eng --> driver" << NL;
+    console << "Switch Next Screen toggle: switch from engineer --> driver" << NL;
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::ENGINEER_SETUP;
@@ -146,11 +146,11 @@ void CarControl::task(void *pvParams) {
         carStateLifeSignLast = carState.LifeSign;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
       read_sd_card_detect();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
       read_const_mode_and_mountrequest();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
@@ -160,7 +160,7 @@ void CarControl::task(void *pvParams) {
                          (uint16_t)0,            // Ki
                          force                   // force or not
       );
-      //vTaskDelay(10);
+      // vTaskDelay(10);
 #endif
       if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
@@ -180,16 +180,22 @@ void CarControl::task(void *pvParams) {
         if (sdCard.isMounted() && millis() > millisNextStampCsv) {
           millisNextStampCsv = millis() + carState.LogInterval;
           if (sdCard.verboseModeSdCard)
-            console << "d: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
+            console << "SDCARD:: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
           sdCard.write_log_line(record);
         }
         // vTaskDelay(10);
-        // if (verboseModeRadioSend) {
-        //   if (millis() > millisNextStampSnd) {
-        //     // send serail2 --> radio
-        //     millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-        //   }
-        // }
+        if (millis() > millisNextStampSnd) {
+          // send serail2 --> radio
+          stringstream ss;
+          ss << "d: Interval=" << carState.CarDataSendPeriod << ", Rec: " << record << NL;
+          console << ss.str();
+          if (uart.verboseModeRadioSend) {
+            stringstream sss; // prevent from hiding
+            sss << "RADIO:: " << ss.str();
+            console << sss.str();
+          }
+          millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+        }
       }
     }
     taskSuspend();

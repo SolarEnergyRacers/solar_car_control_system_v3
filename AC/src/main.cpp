@@ -94,7 +94,7 @@ void app_main(void) {
 
   // init console IO and radio console
   msg = uart.init();
-
+  uart.verboseModeRadioSend = false;
   console << "------------------------------------------------------------" << NL;
   console << "-- gpio pin settings ---------------------------------------" << NL;
   msg = gpio.init();
@@ -192,7 +192,7 @@ void app_main(void) {
 
   //------------------------------------------------------------
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 90);
+  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 40);
   console << msg << NL;
   carControl.verboseModeCarControl = false;
   carControl.verboseModeCarControlDebug = false;
@@ -233,6 +233,8 @@ void app_main(void) {
   ss << fmt::format("-            verboseModeCCDebug = {}", carControl.verboseModeCarControlDebug) << NL;
   ss << fmt::format("- engineerDisplay.verboseModeED = {}", engineerDisplay.verboseModeEngineer) << NL;
   ss << fmt::format("- driverDisplay.verboseModeDD   = {}", driverDisplay.verboseModeDriver) << NL;
+  ss << fmt::format("- uart.verboseModeRadioSend     = {}", uart.verboseModeRadioSend) << NL;
+  ss << fmt::format("- sdCard.verboseModeSdCard      = {}", sdCard.verboseModeSdCard) << NL;
   ss << "----------------------------------------------------" << NL;
   // vTaskDelay(10);
   console << ss.str();

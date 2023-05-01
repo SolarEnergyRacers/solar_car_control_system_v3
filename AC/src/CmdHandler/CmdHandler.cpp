@@ -37,6 +37,7 @@
 #include <I2CBus.h>
 // #include <RTC.h>
 #include <SDCard.h>
+#include <Serial.h>
 #include <System.h>
 
 extern CANBus can;
@@ -49,6 +50,7 @@ extern DriverDisplay driverDisplay;
 extern EngineerDisplay engineerDisplay;
 extern SDCard sdCard;
 extern Console console;
+extern Uart uart;
 #if RTC_ON
 extern RTC rtc;
 extern ESP32Time esp32time;
@@ -156,6 +158,9 @@ void CmdHandler::task(void *pvParams) {
         case 'B':
           if (input[1] == '\0') {
             console << "Serial2 baudrate=" << carState.Serial2Baudrate << NL;
+          } else if (input[1] == 'v') {
+            uart.verboseModeRadioSend = !uart.verboseModeRadioSend;
+            console << "set verboseModeRadioSend: " << uart.verboseModeRadioSend << NL;
           } else {
             carState.Serial2Baudrate = atof(&input[1]);
             Serial2.end();

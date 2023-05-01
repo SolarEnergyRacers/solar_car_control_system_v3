@@ -46,6 +46,7 @@ string ConstSpeed::init() {
   console << "[  ] Init 'ConstSpeed'...\n";
   target_speed = 0;
   pid = PID(&input_value, &output_setpoint, &target_speed, carState.Kp, carState.Ki, carState.Kd, DIRECT);
+  output_setpoint = 0;
   pid.SetMode(AUTOMATIC);
   pid.SetOutputLimits(-DAC_MAX, DAC_MAX);
   return fmt::format("[{}] ConstSpeed initialized.", hasError ? "--" : "ok");

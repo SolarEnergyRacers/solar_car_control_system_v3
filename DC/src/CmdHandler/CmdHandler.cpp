@@ -55,6 +55,8 @@ extern RTC rtc;
 extern ESP32Time esp32time;
 #endif
 
+extern bool SystemInited;
+
 using namespace std;
 
 // ------------------
@@ -77,7 +79,7 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
-      while (Serial.available()) {
+      while (SystemInited && Serial.available()) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {

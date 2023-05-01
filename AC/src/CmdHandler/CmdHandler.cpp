@@ -76,25 +76,24 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
-      //       if (Serial.available() || Serial2.available()) {
-      //         // read the incoming chars:
-      //         String input = "";
-      //         if (Serial.available()) {
-      //           input = Serial.readString();
-      //           Serial.flush();
-      //         } else if (Serial2.available()) {
-      //           input = Serial2.readString();
-      //           Serial2.flush();
-      //         }
-      // #if SERIAL_RADIO_ON
-      // #endif
-      while (SystemInited && Serial.available()) {
+      while (SystemInited && (Serial.available()
+#if SERIAL_RADIO_ON
+                              || Serial2.available()
+#endif
+                                  )) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
+#if SERIAL_RADIO_ON
+        } else if (Serial2.available()) {
+          input = Serial2.readString();
+          Serial2.flush();
+#endif
         }
+        if (input.length() == 0)
+          break;
         if (input.endsWith("\n")) {
           input = input.substring(0, input.length() - 1);
         }
@@ -268,27 +267,27 @@ void CmdHandler::task(void *pvParams) {
 #endif
         } break;
         case 'K':
-// #if CARSPEED_ON
-//           console << "Received: '" << input.c_str() << "' --> ";
-//           if (input[1] == 'v') {
-//             carSpeed.verboseModePID = !carSpeed.verboseModePID;
-//           } else {
-//             string arr[4];
-//             int count = splitString(arr, &input[1]);
-//             if (count == 0) {
-//               console << "PID parameters: ";
-//             } else {
-//               float Kp = atof(arr[0].c_str());
-//               float Ki = atof(arr[1].c_str());
-//               float Kd = atof(arr[2].c_str());
-//               carSpeed.update_pid(Kp, Ki, Kd);
-//               console << "PID set parameters: ";
-//             }
-//             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
-//           }
-// #else
+          // #if CARSPEED_ON
+          //           console << "Received: '" << input.c_str() << "' --> ";
+          //           if (input[1] == 'v') {
+          //             carSpeed.verboseModePID = !carSpeed.verboseModePID;
+          //           } else {
+          //             string arr[4];
+          //             int count = splitString(arr, &input[1]);
+          //             if (count == 0) {
+          //               console << "PID parameters: ";
+          //             } else {
+          //               float Kp = atof(arr[0].c_str());
+          //               float Ki = atof(arr[1].c_str());
+          //               float Kd = atof(arr[2].c_str());
+          //               carSpeed.update_pid(Kp, Ki, Kd);
+          //               console << "PID set parameters: ";
+          //             }
+          //             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
+          //           }
+          // #else
           console << "Car speed control settings only on DC possible\n";
-// #endif
+          // #endif
           break;
         //-------- DRIVER INFO COMMANDS --------------------
         case 's':

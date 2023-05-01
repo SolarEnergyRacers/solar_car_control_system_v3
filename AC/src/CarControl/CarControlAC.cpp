@@ -142,26 +142,25 @@ void CarControl::task(void *pvParams) {
       bool force = false;
       if (millis() > millisNextCanSend || carStateLifeSignLast != carState.LifeSign) {
         millisNextCanSend = millis() + 1000;
-        // console << "." << NL;
         force = true;
         carStateLifeSignLast = carState.LifeSign;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
-      vTaskDelay(10);
+      //vTaskDelay(10);
       read_sd_card_detect();
-      vTaskDelay(10);
+      //vTaskDelay(10);
       read_const_mode_and_mountrequest();
-      vTaskDelay(10);
+      //vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
       canBus.writePacket(AC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          (uint16_t)constantMode, // switch constant mode Speed / Power
-                         (uint16_t)0,            // empty
-                         (uint16_t)0,            // empty
+                         (uint16_t)0,            // Kp
+                         (uint16_t)0,            // Ki
                          force                   // force or not
       );
-      vTaskDelay(10);
+      //vTaskDelay(10);
 #endif
       if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),

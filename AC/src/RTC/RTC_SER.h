@@ -40,8 +40,8 @@ private:
 public:
 	/**
 	 * @param p_i2cBus: pointer to I2CBus with relevant mux
-	 * @param datetime: datetime to write initialize RTC. 
-	 * Nullptr (default arg.) to not overwrite RTC time.
+	 * @param datetime: datetime to write to RTC. 
+	 * nullptr (default arg.) to not overwrite RTC time.
 	 * datetime cannot be 2000-01-01 00:00:00 (used to mark "don't set RTC")
 	 */
 	GlobalTime(I2CBus* p_i2cBus, const RtcDateTime* datetime = nullptr) 
@@ -55,6 +55,7 @@ public:
 		return init(sq_freq, do_run);
 	}
 
+	int msec() {return millis()%1000;}
 	int sec()  {update(); return _datetime.Second();}
 	int min()  {update(); return _datetime.Minute();}
 	int hour() {update(); return _datetime.Hour();}
@@ -66,7 +67,7 @@ public:
 
 	RtcDateTime datetime() {update(); return _datetime;}
 	std::string strTime(const std::string& format);
-	std::string getUptime();
+	std::string strUptime(bool with_ms = false);
 
 	bool get_RTC();
 	bool set_RTC(uint32_t secondsFrom2000);

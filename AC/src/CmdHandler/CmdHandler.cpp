@@ -243,7 +243,9 @@ void CmdHandler::task(void *pvParams) {
           string arr[6];
           int count = splitString(arr, &input[1]);
           if (count == 0) {
-            console << "Received: '" << input.c_str() << "' --> DateTime: " << globalTime.strTime("%X %F (%a)") << NL;
+            console << "Received: '" << input.c_str() 
+              << "' --> DateTime: " << globalTime.strTime("%X %F (%a)") 
+              << ", Uptime: " << globalTime.strUptime(true) << NL;
           } else {
             int yy = atof(arr[0].c_str());
             int mm = atof(arr[1].c_str());

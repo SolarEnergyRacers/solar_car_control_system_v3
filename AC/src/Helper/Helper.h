@@ -12,6 +12,9 @@
 #include <sstream>
 #include <string>
 #include <limits>
+#include <Console.h>
+
+extern Console console;
 
 // #include <../.pio/libdeps/esp32dev/ESP32Time/ESP32Time.h>
 // #include <../.pio/libdeps/esp32dev/RTCDS1307/RTCDS1307.h>
@@ -45,5 +48,32 @@ any_out normalize_0(any_in minOriginValue, any_in maxOriginValue, any_in value) 
   value = value > maxOriginValue ? maxOriginValue : value;// - 0.500001;
   return static_cast<any_out>( round((value - minOriginValue) * k) );
 }
+
+
+/** 
+ * @brief try to take mux within timeout. 
+ * @brief **Warning: needs this.ok() to check if successful**
+ */
+
+/**
+ * @brief try to take mux within timeout. 
+ * @throw runtime_error("mux") if fails to acquire within timeout
+ */
+class RAII_mux {
+private:
+  SemaphoreHandle_t mux;
+  // bool _ok;
+public:
+  RAII_mux(SemaphoreHandle_t mux, TickType_t timeout)
+  :mux(mux) {
+    // _ok = xSemaphoreTake(mux, timeout);
+    if (!xSemaphoreTake(mux, timeout)) {
+      console << "mux '" << mux << "' not acquired within timeout\n";
+      throw std::runtime_error("mux");
+    }
+  }
+  ~RAII_mux() {xSemaphoreGive(mux);}
+  // bool ok() {return _ok;}
+};
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_HELPER_H

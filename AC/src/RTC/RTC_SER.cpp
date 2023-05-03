@@ -14,6 +14,7 @@
 #include <I2CBus.h>
 #include <iostream>
 #include <Console.h>
+#include <Helper.h>
 
 
 extern Console console;
@@ -46,20 +47,27 @@ int GlobalTime::init(DS1307SquareWaveOut sq_freq, bool do_run) {
  * @brief update internal datetime from cpu clock or RTC
  */
 void GlobalTime::update() {
-	constexpr int min_wait = 60;  // min. time before next RTC query
-	auto lock = RAII_mux(mutex, portMAX_DELAY);
-	if (!lock.ok()) return;
-	int sec = millis() / 1000;
-	if ((sec - last_update) > min_wait || (sec - last_update) < 0) {
-		if (get_RTC()) return;
-		else console << "ERROR: RTC update failed, using cpu clock instead.\n";
+	constexpr int min_wait = 60;  // min. time before next RTC query (seconds)
+	// auto lock = RAII_mux(mutex, portMAX_DELAY);
+	// if (!lock.ok()) return;
+	try {
+		auto lock = RAII_mux(mutex, portMAX_DELAY);
+		int sec = millis() / 1000;
+		if ((sec - last_update) > min_wait || (sec - last_update) < 0) {
+			console << "INFO: Time update from RTC.\n";
+			if (get_RTC()) return;
+			else console << "ERROR: RTC update failed, using cpu clock instead.\n";
+		}
+		// if get_RTC() not needed or failed:
+		uint32_t sec_now = _datetime.TotalSeconds();
+		sec_now += (sec - sec0);
+		_datetime = RtcDateTime(sec_now);
+		sec0 = sec;
+		return;
 	}
-	// if get_RTC() not needed or failed:
-	uint32_t sec_now = _datetime.TotalSeconds();
-	sec_now += (sec - sec0);
-	_datetime = RtcDateTime(sec_now);
-	sec0 = sec;
-	return;
+	catch(const std::runtime_error& e) {
+		return;
+	}
 }
 
 /** todo: rm
@@ -91,16 +99,23 @@ std::string GlobalTime::strTime(const std::string& format){
 }
 
 /**
- * get uptime as string in HH:MM:SS.
+ * get uptime as string in HH:MM:SS, or HH:MM:SS.ms if with_ms.
  * Does not make any use of RTC and can be used without it.
  */
-string GlobalTime::getUptime() {
-  unsigned long seconds = millis() / 1000;
-  unsigned long secsRemaining = seconds % 3600;
-  int runHours = seconds / 3600;
-  int runMinutes = secsRemaining / 60;
-  int runSeconds = secsRemaining % 60;
-  return fmt::format("{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
+string GlobalTime::strUptime(bool with_ms) {
+	unsigned long seconds = millis() / 1000;
+	unsigned long secsRemaining = seconds % 3600;
+	int runHours = seconds / 3600;
+	int runMinutes = secsRemaining / 60;
+	int runSeconds = secsRemaining % 60;
+	if (with_ms) {
+		return fmt::format("{:02d}:{:02d}:{:02d}.{:03d}", 
+		runHours, runMinutes, runSeconds, millis()%1000);
+	}
+	else {
+		return fmt::format("{:02d}:{:02d}:{:02d}", 
+		runHours, runMinutes, runSeconds);
+  }
 }
 
 // return 1 on success, 0 otherwise
@@ -109,13 +124,17 @@ bool GlobalTime::set_RTC_running(bool do_run) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
 		return 0;
 	}
-	auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
-	if (!lock.ok()) {
+	// auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+	// if (!lock.ok()) {
+	try {
+		auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+		Rtc.SetIsRunning(do_run);
+		return 1;
+	}
+	catch (const std::runtime_error& e) {
 		cout << "ERROR: set_RTC_running() didn't get mux lock.\n";
 		return 0;
 	}
-	Rtc.SetIsRunning(do_run);
-	return 1;
 }
 
 // 1 = on, 0 = off or communication error
@@ -124,12 +143,16 @@ bool GlobalTime::get_RTC_running() {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
 		return 0;
 	}
-	auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
-	if (!lock.ok()) {
+	// auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+	// if (!lock.ok()) {
+	try {
+		auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+		return Rtc.GetIsRunning();
+	}
+	catch (const std::runtime_error& e) {
 		cout << "ERROR: get_RTC_running() didn't get mux lock.\n";
 		return 0;
-	}
-	return Rtc.GetIsRunning();
+	}	
 }
 
 // return 1 on success, 0 otherwise
@@ -138,13 +161,17 @@ bool GlobalTime::set_RTC_squarewave(DS1307SquareWaveOut sq_freq) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
 		return 0;
 	}
-	auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
-	if (!lock.ok()) {
+	// auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+	// if (!lock.ok()) {
+	try {
+		auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+		Rtc.SetSquareWavePin(sq_freq);
+		return 1;
+	}
+	catch (const std::runtime_error& e) {
 		cout << "ERROR: set_RTC_squarewave() didn't get mux lock.\n";
 		return 0;
 	}
-	Rtc.SetSquareWavePin(sq_freq);
-	return 1;
 }
 
 /**
@@ -157,14 +184,16 @@ bool GlobalTime::get_RTC() {
 		console << "tried to read RTC before GlobalTime was init()ed.\n";
 		return 0;
 	}
-	auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
-	if (lock.ok()){
+	// auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+	// if (lock.ok()){
+	try {
+		auto lock = RAII_mux(i2cBus->mutex, portMAX_DELAY);
 		_datetime = Rtc.GetDateTime();
 		last_update = millis() / 1000;
 		sec0 = last_update;
 		return 1;
 	}
-	else return 0;
+	catch (const std::runtime_error& e) {return 0;}
 }
 
 /**
@@ -177,16 +206,19 @@ bool GlobalTime::set_RTC(uint32_t secondsFrom2000) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
 		return 0;
 	}
-	auto lock1 = RAII_mux(mutex, portMAX_DELAY);  // writing this->...
-	if (!lock1.ok()) return 0;
-	auto lock2 = RAII_mux(i2cBus->mutex, portMAX_DELAY);
-	if (lock2.ok()){
+	// auto lock1 = RAII_mux(mutex, portMAX_DELAY);  // writing this->...
+	// if (!lock1.ok()) return 0;
+	// auto lock2 = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+	// if (lock2.ok()){
+	try {
+		auto lock1 = RAII_mux(mutex, portMAX_DELAY);  // writing this->...
+		auto lock2 = RAII_mux(i2cBus->mutex, portMAX_DELAY);
 		Rtc.SetDateTime(RtcDateTime(secondsFrom2000));
 		_datetime = RtcDateTime(secondsFrom2000);  // update internal time
 		sec0 = millis() / 1000;  // adjust for offline update
 		return 1;
 	}
-	else return 0;
+	catch (const std::runtime_error& e) {return 0;}
 }
 
 /**
@@ -199,14 +231,17 @@ bool GlobalTime::set_RTC(const RtcDateTime& datetime) {
 		console << "tried to set RTC before GlobalTime was init()ed.\n";
 		return 0;
 	}
-	auto lock1 = RAII_mux(mutex, portMAX_DELAY);  // writing this->...
-	if (!lock1.ok()) return 0;
-	auto lock2 = RAII_mux(i2cBus->mutex, portMAX_DELAY);
-	if (lock2.ok()){
+	// auto lock1 = RAII_mux(mutex, portMAX_DELAY);  // writing this->...
+	// if (!lock1.ok()) return 0;
+	// auto lock2 = RAII_mux(i2cBus->mutex, portMAX_DELAY);
+	// if (lock2.ok()){
+	try {
+		auto lock1 = RAII_mux(mutex, portMAX_DELAY);  // writing this->...
+		auto lock2 = RAII_mux(i2cBus->mutex, portMAX_DELAY);
 		Rtc.SetDateTime(datetime);
 		_datetime = datetime;  // update internal time
 		sec0 = millis() / 1000;  // adjust for offline update
 		return 1;
 	}
-	else return 0;
+	catch (const std::runtime_error& e) {return 0;}
 }

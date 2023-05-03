@@ -50,22 +50,4 @@ public:
   };
 };
 
-
-/** 
- * @brief try to take mux within timeout. 
- * @brief **Warning: needs this.ok() to check if successful**
- */
-class RAII_mux {
-private:
-  SemaphoreHandle_t mux;
-  bool _ok;
-public:
-  RAII_mux(SemaphoreHandle_t mux, TickType_t timeout)
-  :mux(mux) {
-    _ok = xSemaphoreTake(mux, timeout);
-  }
-  ~RAII_mux() {xSemaphoreGive(mux);}
-  bool ok() {return _ok;}
-};
-
 #endif // SOLAR_CAR_CONTROL_SYSTEM_I2CBUS_H

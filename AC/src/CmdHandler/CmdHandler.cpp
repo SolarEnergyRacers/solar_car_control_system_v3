@@ -19,7 +19,7 @@
 #include <Arduino.h>
 #if RTC_ON
 #include <RTC_SER.h>
-#include <RtcDateTime.cpp>
+#include <RtcDateTime.h>
 #endif
 
 #include <Wire.h> // I2C

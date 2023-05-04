@@ -41,17 +41,19 @@
 #include <Display.h>
 #include <DriverDisplay.h>
 #include <EngineerDisplay.h>
-#if RTC_ON
-#include <ESP32Time.h>
-#endif
 #include <GPIO.h>
 #include <I2CBus.h>
 #include <OneWire.h>
 #include <OneWireBus.h>
+#include <RTC_SER.h>
 #include <SDCard.h>
 #include <SPIBus.h>
 #include <Serial.h>
 #include <System.h>
+
+// #include <Wire.h>
+#include <array>
+// #include <vector>
 
 // add C linkage definition
 extern "C" {
@@ -77,12 +79,14 @@ I2CBus i2cBus;
 SDCard sdCard;
 SPIBus spiBus;
 Uart uart;
+GlobalTime globalTime = GlobalTime(&i2cBus);
 
 static void canBusTask(void *pvParams) { canBus.task(pvParams); }
 static void carControlTask(void *pvParams) { carControl.task(pvParams); }
 static void cmdHandlerTask(void *pvParams) { cmdHandler.task(pvParams); }
 static void engineerDisplayTask(void *pvParams) { engineerDisplay.task(pvParams); }
 static void driverDisplayTask(void *pvParams) { driverDisplay.task(pvParams); }
+auto compiletime = RtcDateTime(__DATE__, __TIME__);
 
 // Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(SPI_CS_TFT, SPI_DC, SPI_MOSI, SPI_CLK, SPI_RST, SPI_MISO);
 Adafruit_ILI9341 ili9341 = Adafruit_ILI9341(&(spiBus.spi), SPI_DC, SPI_CS_TFT, SPI_RST);
@@ -108,6 +112,18 @@ void app_main(void) {
   console << msg << NL;
   i2cBus.verboseModeI2C = false;
   delay(200);
+
+  std::array<std::string,7> wd = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};  // todo: rm
+  console << fmt::format("main.o compiletime: {}:{}:{}  {}-{}-{} ({})\n", 
+  compiletime.Hour(), compiletime.Minute(), compiletime.Second(),
+  compiletime.Day(), compiletime.Month(), compiletime.Year(), wd[compiletime.DayOfWeek()]);
+  int RTC_err = globalTime.init(DS1307SquareWaveOut_Low, 1);
+  console << "RTC init errorcode: "<< RTC_err << "\n";
+  console << "RTC time: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";
+  // sleep(5);
+  // console << "time 5s: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";
+  // sleep(60);
+  // console << "time 5s: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";
 
   //------------------------------------------------------------
   // Global Display

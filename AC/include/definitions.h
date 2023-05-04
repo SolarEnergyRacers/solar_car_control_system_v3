@@ -47,8 +47,8 @@
  */
 #define I2C_SDA 23
 #define I2C_SCL 22
-#define I2C_FREQ 200000 // 200kHz
-//#define I2C_FREQ 100000 // 100kHz
+// #define I2C_FREQ 200000 // 200kHz
+#define I2C_FREQ 100000 // 100kHz  (DS1307 limit)
 //#define I2C_FREQ 50000 // 50kHz
 
 // analog digital coder

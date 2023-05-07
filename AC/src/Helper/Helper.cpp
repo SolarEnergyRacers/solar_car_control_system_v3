@@ -50,8 +50,8 @@ void xSemaphoreTakeT(xQueueHandle mutex) {
 }
 
 // https://github.com/fbiego/ESP32Time
-string getDateTime() { return "xx.xx.xxxx xx:xx"; } // esp32time.getTime("%Y-%m-%d,%H:%M:%S").c_str(); }
-string getTime() { return "xx:xx"; }                // esp32time.getTime("%H:%M:%S").c_str(); }
+// string getDateTime() { return "xx.xx.xxxx xx:xx"; } // esp32time.getTime("%Y-%m-%d,%H:%M:%S").c_str(); }
+// string getTime() { return "xx:xx"; }                // esp32time.getTime("%H:%M:%S").c_str(); }
 
 // string formatDateTime(RtcDateTime now) {
 //   string static dateTimeString =
@@ -60,14 +60,14 @@ string getTime() { return "xx:xx"; }                // esp32time.getTime("%H:%M:
 //   return dateTimeString;
 // }
 
-string getTimeStamp() {
-  unsigned long seconds = millis() / 1000;
-  unsigned long secsRemaining = seconds % 3600;
-  int runHours = seconds / 3600;
-  int runMinutes = secsRemaining / 60;
-  int runSeconds = secsRemaining % 60;
-  return fmt::format("T{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
-}
+// string getTimeStamp() {
+//   unsigned long seconds = millis() / 1000;
+//   unsigned long secsRemaining = seconds % 3600;
+//   int runHours = seconds / 3600;
+//   int runMinutes = secsRemaining / 60;
+//   int runSeconds = secsRemaining % 60;
+//   return fmt::format("T{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
+// }
 
 uint16_t normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value) {
   float k = (float)UINT16_MAX / (maxOriginValue - minOriginValue);

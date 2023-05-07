@@ -13,7 +13,7 @@
 #include <Console.h>
 // #include <ESP32Time.h>
 #include <Helper.h>
-// #include <RTC.h>
+#include <RTC_SER.h>
 // #include <SDCard.h>
 #include <definitions.h>
 
@@ -21,6 +21,7 @@ using namespace std;
 
 extern CarState carState;
 extern Console console;
+extern GlobalTime globalTime;
 // extern SDCard sdCard;
 // extern IOExt ioExt;
 // extern RTC rtc;
@@ -105,7 +106,8 @@ const string CarState::print(string msg, bool withColors) {
   stringstream ss(msg);
   ss << "====SER4 Car Status====" << VERSION << "==";
   // ss << t.tm_year << "." << t.tm_mon << "." << t.tm_mday << "_" << t.tm_hour << ":" << t.tm_min << ":" << t.tm_sec;
-  ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
+  // ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
+  ss << "====uptime:" << globalTime.strUptime() << "s====" << globalTime.strTime("%F %R") << "==\n";
   if (msg.length() > 0)
     ss << msg << NL;
   ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << NL;
@@ -177,7 +179,8 @@ const string CarState::print(string msg, bool withColors) {
 }
 
 const string CarState::serialize(string msg) {
-  string timeStamp = getDateTime();
+  // string timeStamp = getDateTime();
+  string timeStamp = globalTime.strTime("%F %R");
   // timeStamp.erase(timeStamp.end() - 1);
 
   cJSON *carData = cJSON_CreateObject();
@@ -187,7 +190,8 @@ const string CarState::serialize(string msg) {
 
   cJSON_AddItemToObject(carData, "dynamicData", dynData);
   cJSON_AddStringToObject(dynData, "timeStamp", timeStamp.c_str());
-  cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
+  // cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
+  cJSON_AddStringToObject(dynData, "uptime", globalTime.strUptime().c_str());
   cJSON_AddStringToObject(dynData, "msg", msg.c_str());
   cJSON_AddNumberToObject(dynData, "potentiometer", Potentiometer);
   cJSON_AddNumberToObject(dynData, "speed", Speed);
@@ -241,69 +245,73 @@ const string CarState::serialize(string msg) {
 }
 
 const string CarState::csv(string msg, bool withHeader) {
-  string timeStamp = getDateTime();
+  // string timeStamp = getDateTime();
+  // string timeStamp = globalTime.strTime("%F %R");
   // timeStamp.erase(timeStamp.end() - 1);
 
   stringstream ss;
   if (withHeader) {
     // header
-    ss << "Epoch, ";
-    ss << "uptime, ";
-    ss << "msg, ";
-    ss << "potentiomenter, ";
-    ss << "speed, ";
-    ss << "acceleration, ";
-    ss << "deceleration, ";
-    ss << "accelerationDisplay, ";
+    ss << "Epoch,";
+    ss << "uptime,";
+    ss << "msg,";
+    ss << "potentiomenter,";
+    ss << "speed,";
+    ss << "acceleration,";
+    ss << "deceleration,";
+    ss << "accelerationDisplay,";
 
-    // ss << "batteryOn, ";
-    ss << "batteryVoltage, ";
-    ss << "batteryCurrent, ";
-    ss << "batteryErrors, ";
-    ss << "batteryPrechargeState, ";
-    ss << "pvOn, ";
-    ss << "pvCurrent, ";
-    ss << "motorOn, ";
-    ss << "motorCurrent, ";
+    // ss << "batteryOn,";
+    ss << "batteryVoltage,";
+    ss << "batteryCurrent,";
+    ss << "batteryErrors,";
+    ss << "batteryPrechargeState,";
+    ss << "pvOn,";
+    ss << "pvCurrent,";
+    ss << "motorOn,";
+    ss << "motorCurrent,";
 
-    ss << "mppt1Current, ";
-    ss << "mppt2Current, ";
-    ss << "mppt3Current, ";
-    ss << "voltageMin, ";
-    ss << "voltageAvg, ";
-    ss << "voltageMax, ";
-    ss << "T1, ";
-    ss << "T2, ";
-    ss << "T3, ";
-    ss << "Tmin, ";
-    ss << "Tmax, ";
+    ss << "mppt1Current,";
+    ss << "mppt2Current,";
+    ss << "mppt3Current,";
+    ss << "voltageMin,";
+    ss << "voltageAvg,";
+    ss << "voltageMax,";
+    ss << "T1,";
+    ss << "T2,";
+    ss << "T3,";
+    ss << "Tmin,";
+    ss << "Tmax,";
 
-    ss << "driveDirection, ";
-    ss << "constantMode, ";
-    ss << "sdCardDetected, ";
+    ss << "driveDirection,";
+    ss << "constantMode,";
+    ss << "sdCardDetected,";
 
-    ss << "displayStatus, ";
+    ss << "displayStatus,";
 
-    ss << "targetSpeed, ";
-    ss << "Kp, ";
-    ss << "Ki, ";
-    ss << "Kd, ";
-    ss << "targetPower, ";
-    ss << "engineerInfo, ";
-    ss << "driverInfo, ";
-    ss << "speedArrow, ";
-    ss << "light, ";
-    ss << "greenLight, ";
-    ss << "fan, ";
-    ss << "io, ";
-    ss << "timeStampDate, ";
-    ss << "timeStampTime ";
-    // ss << NL;
+    ss << "targetSpeed,";
+    ss << "Kp,";
+    ss << "Ki,";
+    ss << "Kd,";
+    ss << "targetPower,";
+    ss << "engineerInfo,";
+    ss << "driverInfo,";
+    ss << "speedArrow,";
+    ss << "light,";
+    ss << "greenLight,";
+    ss << "fan,";
+    // ss << "io, ";
+    ss << "io";
+    // ss << "timeStampDate, ";
+    // ss << "timeStampTime ";
+    ss << NL;
   }
   // data
-  ss << "(hh:mm:ss)"
-     << ", "; // ss << esp32time.getEpoch() << ", " ;
-  ss << millis() / 1000. << ", ";
+  // ss << "(hh:mm:ss)"
+  //    << ", "; // ss << esp32time.getEpoch() << ", " ;
+  // ss << millis() / 1000. << ", ";
+  ss << globalTime.strTime("%FT%X") << ",";
+  ss << globalTime.strUptime() << ",";
   ss << msg.c_str() << ", ";
   ss << (int)Potentiometer << ", ";
   ss << (int)Speed << ", ";
@@ -351,7 +359,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << GreenLight << ", ";
   ss << Fan << ", ";
   ss << printIOs("", false).c_str() << ", ";
-  ss << timeStamp.c_str();
+  // ss << timeStamp.c_str();
   // ss << NL;
   return ss.str();
 }

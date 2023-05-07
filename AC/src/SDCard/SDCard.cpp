@@ -50,7 +50,6 @@ string SDCard::init() {
 
 bool SDCard::update_sd_card_detect() {
   carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
-  // console << ":" << carState.SdCardDetect << "_";
   return carState.SdCardDetect;
 }
 
@@ -58,26 +57,31 @@ bool SDCard::mount() {
   if (isMounted()) {
     return true;
   }
+  update_sd_card_detect();
   if (!carState.SdCardDetect) {
     carState.EngineerInfo = "No SD card detected!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
-    // xSemaphoreTakeT(spiBus.mutex);
-    // SD.end();
-    // xSemaphoreGive(spiBus.mutex);
     return false;
   }
   try {
     carState.EngineerInfo = "Mounting SD card...";
     console << "     " << carState.EngineerInfo << NL;
+    int attempts = 0;
+    mounted = false;
     xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
-    mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
+    while (!mounted && attempts++ < 3) {
+      mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
+      vTaskDelay(100);
+    }
     xSemaphoreGive(spiBus.mutex);
     if (mounted) {
       carState.EngineerInfo = "SD card mounted";
-      console << "     " << carState.EngineerInfo << NL;
+      console << "     " << carState.EngineerInfo << ", " << attempts << " attempts" << NL;
+      xSemaphoreTakeT(spiBus.mutex);
       uint8_t cardType = SD.cardType();
+      xSemaphoreGive(spiBus.mutex);
       console << "     SD Card Type: ";
       switch (cardType) {
       case CARD_NONE:
@@ -114,7 +118,6 @@ void SDCard::close_log_file() {
   dataFile.flush();
   dataFile.close();
   xSemaphoreGive(spiBus.mutex);
-  // dataFile = 0;
 }
 
 bool SDCard::open_log_file() {
@@ -225,7 +228,6 @@ void SDCard::write_log(string msg) {
       open_log_file();
       xSemaphoreTakeT(spiBus.mutex);
       dataFile.print(msg.c_str());
-      dataFile.flush();
       xSemaphoreGive(spiBus.mutex);
       close_log_file();
     } catch (exception &ex) {

@@ -14,34 +14,50 @@ TODO: DESCRIBE IT!
 
 ### Switch Board
 
-| Switch Name | Function (what is switched)        | Driver Screen | Engineer Screen |
+![image-20230506130251806](assets.ser4-drivers-manual/image-20230506130251806.png)
+
+| Switch Name | Function (what is switched)        | Driver Screen / Steering Wheel | Engineer Screen |
 | ------------- | ------------------------------------ | --------------- | ----------------- |
-| 12V on/off  | Main switch for controller.        | no            | no              |
-| MC on/off   | Montor controller                  | yes           | yes             |
-| Batt on/off | Battery                            | yes           | yes             |
-| PV on/off   | Photo Voltaic                      | yes           | yes             |
-| Fwd/Bwd     | Drive direction forward / backward | yes           | no              |
-| Eco/Pwr     | Drive mode econimically / power    | yes           | no              |
-| Spare2      | %                                  | %             | %               |
-| Spare1      | Rear view power on off             | no            | no              |
+| Spare | - | - | - |
+| Aux | AC (auxiliary controller) power on (up) / off (down) | %            | %              |
+| PreChg |  | no | no |
+| MC   | MC (motor controller)  power on/off | yes<br />(right from Motor current) | yes           |
+| Drive       | DC (drive controller) power on (up) / off (down)       | %                                             | %               |
+| FrontLight  |                                                        | Right blue LED                                |                 |
+| DriveLight  |                                                        | Left yellow LED                               |                 |
+| Rearview    | Rear view camera power on (up) / off (down)            | no                                            | no              |
+| PR1         | Aggressiveness / sensitivity of the PLUS/MINUS buttons | yes<br />(below target speed)                 | no              |
+| Dir | Drive direction forward / backward | yes if backward<br />(red below target speed) | no |
 
 ### Steering Wheel
 
-![steeringwheel](./assets.ser4-drivers-manual/SteeringWheel.drawio.png)
+![](assets.ser4-drivers-manual/image-20230506132037797.png)
+
+| Button | Name                   | Function                                                     |
+| ------ | ---------------------- | ------------------------------------------------------------ |
+| L1     | left indicator on/off  |                                                              |
+| R1     | right indicator on/off |                                                              |
+| L1+R1  | Hazard warning lights  |                                                              |
+| L2     | MINUS                  | decreases acceleration, switch on constant mode, current speed/power is overtaken as target speed |
+| R2     | PLUS                   | increases acceleration, switch on constant mode, current speed/power is overtaken as target speed |
+| L3     | const. off             | switches off the constant mode, resets the PID (constant controller) |
+| R3     | const. on              | switches on the constant mode, overtake last used target speed/power |
+| L4     | SPEAK                  | driver speak button for radio communication                  |
+| R4     | Const/Mount            | Driver screen: switches between speed and power constant mode<br />Engineer screen: mounts or unmounts the sd-card |
+| L5     | Horn                   | blows the cattle off the road                                |
+| R5     | Next Screen            | switches between Driver and Engineer screen                  |
 
 ## Car Start
 
 ### Boot Screen
 
-The bootscreen with blue font on yellow background shows the initialization of all devices controlled by the car control system.
+The bootscreen with black font on white background shows the initialization of all devices controlled by the AC car control system.
 
-The first part shows the device init, the second part shows the control task creation.
-
-At least the display holds for a 4 seconds countdown to allow an additional view to the values.
+At least the display holds for a few seconds countdown to allow an additional check of the values.
 
 ### Main Driver Screen
 
-TODO
+![image-20230506134445977](assets.ser4-drivers-manual/image-20230506134445977.png)
 
 ### Engineering Screen
 

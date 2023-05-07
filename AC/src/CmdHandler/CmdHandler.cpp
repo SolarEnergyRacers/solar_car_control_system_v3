@@ -212,6 +212,9 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'O') {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
+          } else if (input[1] == 'L') {
+            canBus.verboseModeCanBusLoad = !canBus.verboseModeCanBusLoad;
+            console << "set verboseModeCanBusLoad: " << canBus.verboseModeCanBusLoad << NL;
           } else if (input[1] == 'S') {
             sdCard.verboseModeSdCard = !sdCard.verboseModeSdCard;
             console << "set verboseModeSdCard: " << sdCard.verboseModeSdCard << NL;
@@ -291,7 +294,7 @@ void CmdHandler::task(void *pvParams) {
           //             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
           //           }
           // #else
-          console << "Car speed control settings only on DC possible\n";
+          console << "Car speed control settings only on DC possible yet\n";
           // #endif
           break;
         //-------- DRIVER INFO COMMANDS --------------------

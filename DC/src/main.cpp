@@ -60,7 +60,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 0;
+int base_offset_suspend = 100;
 bool SystemInited = false;
 bool SystemJustInited = true;
 bool adcInited = false;

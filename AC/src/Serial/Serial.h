@@ -10,7 +10,7 @@
 
 class Uart : public AbstractTask {
 public:
-bool verboseModeRadioSend = false;
+  bool verboseModeRadioSend = false;
 // RTOS task
 #if SERIAL_RADIO_ON
   string getName() { return "SerialWire-SerialRadio"; };

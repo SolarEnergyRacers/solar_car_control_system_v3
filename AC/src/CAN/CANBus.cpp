@@ -7,8 +7,6 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
-#include <freertos/task.h>
-#include <freertos/timers.h>
 
 #include <Arduino.h>
 #include <CAN.h>
@@ -25,26 +23,26 @@ extern I2CBus i2cBus;
 extern CANBus canBus;
 extern bool SystemInited;
 
-bool canBusReinitRequestR = false;
-bool canBusReinitRequestI = false;
-bool canBusReinitRequestW = false;
-int counterI = 0;
-int counterR = 0;
-int counterI_notAvail = 0;
-int counterR_notAvail = 0;
-int counterW_notAvail = 0;
+bool canBusReinitRequestR;
+bool canBusReinitRequestI;
+bool canBusReinitRequestW;
+int counterI;
+int counterR;
+int counterI_notAvail;
+int counterR_notAvail;
+int counterW_notAvail;
 
 using namespace std;
 
-uint32_t timeout_ms = 1000;
-int timerID = 3;
-int packetSize;
-
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-void onReceive_worker(TimerHandle_t pxTimer) {
+void onReceive(int packetSize) {
+
+  if (!SystemInited)
+    return;
+
   if (xSemaphoreTakeFromISR(canBus.mutex, &xHigherPriorityTaskWoken) == pdTRUE) {
     int packetId = CAN.packetId();
-    if (canBus.is_to_ignore_packet(packetId)){
+    if (canBus.is_to_ignore_packet(packetId)) {
       xSemaphoreGiveFromISR(canBus.mutex, &xHigherPriorityTaskWoken);
       return;
     }
@@ -67,59 +65,6 @@ void onReceive_worker(TimerHandle_t pxTimer) {
   }
 }
 
-void onReceive(int _packetSize) {
-  if (!SystemInited)
-    return;
-
-  packetSize = _packetSize;
-  onReceive_worker(NULL);
-  return;
-  // TimerHandle_t timer = xTimerCreate("onReceive_timer", pdMS_TO_TICKS(timeout_ms), pdFALSE, 0, onReceive_worker);
-
-  // xTimerStart(timer, 0);
-
-  // // Wait for timer to expire or function to complete
-  // TickType_t start_time = xTaskGetTickCount();
-  // while (xTimerIsTimerActive(timer)) {
-  //   // Check if timeout has elapsed
-  //   if (xTaskGetTickCount() - start_time >= pdMS_TO_TICKS(timeout_ms)) {
-  //     console << "onReceive TIMEOUT" << NL;
-  //     break;
-  //   }
-  //   vTaskDelay(pdMS_TO_TICKS(10));
-  // }
-
-  // xTimerStop(timer, 0);
-  // xTimerDelete(timer, 0);
-
-  TimerHandle_t xTimer = xTimerCreate("onReceive_timer",         // Just a text name, not used by the kernel.
-                                      pdMS_TO_TICKS(timeout_ms), // The timer period in ticks.
-                                      pdFALSE,                   // one shoot timer.
-                                      (void *)timerID,           // Assign each timer a unique id equal to its array index.
-                                      onReceive_worker           // Each timer calls the same callback when it expires.
-  );
-  if (xTimer == NULL) { // The timer was not created.
-  } else {
-    // Start the timer.  No block time is specified, and even if one was
-    // it would be ignored because the scheduler has not yet been
-    // started.
-    if (xTimerStart(xTimer, timerID) != pdPASS) { // The timer could not be set into the Active state.
-    }
-  }
-
-  // ...
-  // Create tasks here.
-  // ...
-  // Starting the scheduler will start the timers running as they have already
-  // been set into the active state.
-  vTaskStartScheduler();
-  // Should not reach here.
-  for (;;)
-    ;
-}
-
-//-------------------------------------------------------
-
 bool CANBus::isPacketToRenew(uint16_t packetId) {
   return max_ages[packetId] == 0 || (max_ages[packetId] != -1 && millis() - ages[packetId] > max_ages[packetId]);
 }
@@ -127,7 +72,7 @@ bool CANBus::isPacketToRenew(uint16_t packetId) {
 void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
 
 CANBus::CANBus() {
-  packetsCountMax = 0;
+  counterMaxPackets = 0;
   init_ages();
 }
 
@@ -143,7 +88,8 @@ string CANBus::init() {
   counterI_notAvail = 0;
   counterR_notAvail = 0;
   counterW_notAvail = 0;
-  packetsCountMax = 0;
+
+  counterMaxPackets = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
@@ -169,8 +115,8 @@ void CANBus::exit() {
 void CANBus::push(CANPacket packet) {
   rxBuffer.push(packet);
   // register level of rxBuffer filling:
-  if (packetsCountMax < availiblePackets())
-    packetsCountMax = availiblePackets();
+  if (counterMaxPackets < availiblePackets())
+    counterMaxPackets = availiblePackets();
 }
 
 // bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
@@ -237,7 +183,7 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
       console << print_raw_packet("S", packet) << NL;
     try {
       packetsLast[adr] = packet;
-      if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+      if (xSemaphoreTake(mutex, (TickType_t)32) == pdTRUE) {
         counterW_notAvail = 0;
         canBusReinitRequestW = false;
         CAN.beginPacket(adr);
@@ -252,14 +198,15 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
         CAN.endPacket();
         xSemaphoreGive(mutex);
       } else {
-        console << fmt::format(" W[{:x}]FAIL ", adr);
+        console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);
         if (counterW_notAvail++ > 8)
           canBusReinitRequestW = true;
         return false;
       }
     } catch (exception &ex) {
       xSemaphoreGive(mutex);
-      console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
+      console << "ERROR: Couldn not send uint64_t data to address " << adr << ", ex: " << ex.what() << NL;
+      return false;
     }
   }
   return true;
@@ -276,7 +223,8 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      // console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
+      if (verboseModeCanBusLoad)
+        console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail) << NL;
 
       if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
         console << NL
@@ -284,11 +232,11 @@ void CANBus::task(void *pvParams) {
                                canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
                                counterW_notAvail)
                 << NL;
-        vTaskDelay(10, "i-");
+        // vTaskDelay(10, "i-");
         canBus.re_init();
-        vTaskDelay(10, "j-");
+        // vTaskDelay(10, "j-");
       }
-      if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
+      if (xSemaphoreTake(mutex, (TickType_t)13) == pdTRUE) {
         counterR++;
         counterR_notAvail = 0;
         while (rxBuffer.isAvailable()) {

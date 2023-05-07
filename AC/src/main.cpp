@@ -60,7 +60,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 0;
+int base_offset_suspend = 100;
 bool SystemInited = false;
 bool SystemJustInited = true;
 uint64_t life_sign = 0;
@@ -124,6 +124,7 @@ void app_main(void) {
   canBus.verboseModeCanInNative = false;
   canBus.verboseModeCanOut = false;
   canBus.verboseModeCanOutNative = false;
+  canBus.verboseModeCanBusLoad = false;
   console << "[  ] " << canBus.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(canBusTask,             /* task function. */
                           canBus.getInfo(),       /* name of task. */
@@ -229,8 +230,9 @@ void app_main(void) {
   ss << fmt::format("-        verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
   ss << fmt::format("-        verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
   ss << fmt::format("-        verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
+  ss << fmt::format("-        verboseModeCanBusLoad  = {}", canBus.verboseModeCanBusLoad) << NL;
   ss << fmt::format("- carControl.verboseModeCC      = {}", carControl.verboseModeCarControl) << NL;
-  ss << fmt::format("-            verboseModeCCDebug = {}", carControl.verboseModeCarControlDebug) << NL;
+  ss << fmt::format("-        verboseModeCCDebug     = {}", carControl.verboseModeCarControlDebug) << NL;
   ss << fmt::format("- engineerDisplay.verboseModeED = {}", engineerDisplay.verboseModeEngineer) << NL;
   ss << fmt::format("- driverDisplay.verboseModeDD   = {}", driverDisplay.verboseModeDriver) << NL;
   ss << fmt::format("- uart.verboseModeRadioSend     = {}", uart.verboseModeRadioSend) << NL;
@@ -238,7 +240,7 @@ void app_main(void) {
   ss << "----------------------------------------------------" << NL;
   // vTaskDelay(10);
   console << ss.str();
-  display.print(ss.str());
+  // display.print(ss.str());
   //--let the bootscreen visible for a moment ------------------
   display.print("\nWaiting for start of life system: ");
   int waitAtConsoleView = 3;

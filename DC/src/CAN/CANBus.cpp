@@ -23,14 +23,14 @@ extern I2CBus i2cBus;
 extern CANBus canBus;
 extern bool SystemInited;
 
-bool canBusReinitRequestR = false;
-bool canBusReinitRequestI = false;
-bool canBusReinitRequestW = false;
-int counterI = 0;
-int counterR = 0;
-int counterI_notAvail = 0;
-int counterR_notAvail = 0;
-int counterW_notAvail = 0;
+bool canBusReinitRequestR;
+bool canBusReinitRequestI;
+bool canBusReinitRequestW;
+int counterI;
+int counterR;
+int counterI_notAvail;
+int counterR_notAvail;
+int counterW_notAvail;
 
 using namespace std;
 
@@ -72,7 +72,7 @@ bool CANBus::isPacketToRenew(uint16_t packetId) {
 void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
 
 CANBus::CANBus() {
-  packetsCountMax = 0;
+  counterMaxPackets = 0;
   init_ages();
 }
 
@@ -88,7 +88,8 @@ string CANBus::init() {
   counterI_notAvail = 0;
   counterR_notAvail = 0;
   counterW_notAvail = 0;
-  packetsCountMax = 0;
+
+  counterMaxPackets = 0;
   mutex = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
@@ -114,8 +115,8 @@ void CANBus::exit() {
 void CANBus::push(CANPacket packet) {
   rxBuffer.push(packet);
   // register level of rxBuffer filling:
-  if (packetsCountMax < availiblePackets())
-    packetsCountMax = availiblePackets();
+  if (counterMaxPackets < availiblePackets())
+    counterMaxPackets = availiblePackets();
 }
 
 // bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
@@ -182,7 +183,7 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
       console << print_raw_packet("S", packet) << NL;
     try {
       packetsLast[adr] = packet;
-      if (xSemaphoreTake(mutex, (TickType_t)11) == pdTRUE) {
+      if (xSemaphoreTake(mutex, (TickType_t)32) == pdTRUE) {
         counterW_notAvail = 0;
         canBusReinitRequestW = false;
         CAN.beginPacket(adr);
@@ -197,14 +198,14 @@ bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
         CAN.endPacket();
         xSemaphoreGive(mutex);
       } else {
-        console << fmt::format(" W[{:x}]FAIL ", adr);
+        console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);
         if (counterW_notAvail++ > 8)
           canBusReinitRequestW = true;
         return false;
       }
     } catch (exception &ex) {
       xSemaphoreGive(mutex);
-      console << "ERROR: Couldn not send uint64_t data to address " << adr << NL;
+      console << "ERROR: Couldn not send uint64_t data to address " << adr << ", ex: " << ex.what() << NL;
       return false;
     }
   }
@@ -222,7 +223,8 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      // console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail);
+      if (verboseModeCanBusLoad)
+        console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail) << NL;
 
       if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
         console << NL
@@ -230,11 +232,11 @@ void CANBus::task(void *pvParams) {
                                canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
                                counterW_notAvail)
                 << NL;
-        vTaskDelay(10, "i-");
+        // vTaskDelay(10, "i-");
         canBus.re_init();
-        vTaskDelay(10, "j-");
+        // vTaskDelay(10, "j-");
       }
-      if (xSemaphoreTake(mutex, (TickType_t)1300) == pdTRUE) {
+      if (xSemaphoreTake(mutex, (TickType_t)13) == pdTRUE) {
         counterR++;
         counterR_notAvail = 0;
         while (rxBuffer.isAvailable()) {

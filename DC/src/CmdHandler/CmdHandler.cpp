@@ -163,6 +163,9 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'O') {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
+          } else if (input[1] == 'L') {
+            canBus.verboseModeCanBusLoad = !canBus.verboseModeCanBusLoad;
+            console << "set verboseModeCanBusLoad: " << canBus.verboseModeCanBusLoad << NL;
           } else {
             string arr[4];
             splitString(arr, &input[1]);

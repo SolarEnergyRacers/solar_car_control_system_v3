@@ -26,7 +26,7 @@ public:
 
   // Class functions and members
 private:
-  int packetsCountMax;
+  int counterMaxPackets;
   CANRxBuffer rxBuffer;
   std::map<uint16_t, int32_t> max_ages;
   std::map<uint16_t, int32_t> ages;
@@ -44,7 +44,7 @@ public:
   void setPacketTimeStamp(uint16_t packetId, int32_t millis);
 
   int availiblePackets() { return rxBuffer.getSize(); }
-  int getMaxPacketsBufferUsage() { return packetsCountMax; };
+  int getMaxPacketsBufferUsage() { return counterMaxPackets; };
 
   // optimize with: https://learn.microsoft.com/en-us/cpp/cpp/functions-with-variable-argument-lists-cpp?view=msvc-170
   bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
@@ -57,5 +57,6 @@ public:
   bool verboseModeCanInNative = false;
   bool verboseModeCanOut = false;
   bool verboseModeCanOutNative = false;
+  bool verboseModeCanBusLoad = false;
 };
 #endif // SOLAR_CAR_CONTROL_SYSTEM_CANBUS_H

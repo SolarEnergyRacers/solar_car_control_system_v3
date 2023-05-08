@@ -90,12 +90,13 @@ bool CarControl::read_sd_card_detect() {
   if (carState.SdCardDetect && !sdCardDetectOld) {
     carState.EngineerInfo = "SD card detected, try to start logging...";
     console << "     " << carState.EngineerInfo << NL;
-    string msg = sdCard.init();
-    console << msg << NL;
-    if (sdCard.check_log_file()) {
-      string state = carState.csv("Recent State", true); // with header
-      sdCard.write_log_line(state);
-    }
+    // Do not mount automatically
+    // string msg = sdCard.init();
+    // console << msg << NL;
+    // if (sdCard.check_log_file()) {
+    //   string state = carState.csv("Recent State", true); // with header
+    //   sdCard.write_log_line(state);
+    // }
   } else if (!carState.SdCardDetect && sdCardDetectOld) {
     carState.EngineerInfo = "SD card removed.";
     console << "     " << carState.EngineerInfo << NL;
@@ -176,18 +177,18 @@ void CarControl::task(void *pvParams) {
       }
       //  log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-        string record = carState.csv();
+        string record = carState.csv("log");
         if (sdCard.isMounted() && millis() > millisNextStampCsv) {
           millisNextStampCsv = millis() + carState.LogInterval;
           if (sdCard.verboseModeSdCard)
-            console << "SDCARD:: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
-          sdCard.write_log_line(record);
+            console << "SDCARD:: Interval=" << carState.LogInterval << ", Rec: " << record;
+          sdCard.write_log(record);
         }
         // vTaskDelay(10);
         if (millis() > millisNextStampSnd) {
           // send serail2 --> radio
           stringstream ss;
-          ss << "d: Interval=" << carState.CarDataSendPeriod << ", Rec: " << record << NL;
+          ss << "d: Interval=" << carState.CarDataSendPeriod << ", Rec: " << record;
           console << ss.str();
           if (uart.verboseModeRadioSend) {
             stringstream sss; // prevent from hiding

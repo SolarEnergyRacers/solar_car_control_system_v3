@@ -125,15 +125,15 @@ void CmdHandler::task(void *pvParams) {
           if (input[1] == 'a') {
             console << printSystemValues();
           } else {
-            console << carState.print("Recent State") << NL;
+            console << carState.print("Recent State (CMD-S)") << NL;
           }
           break;
         case 'J':
-          state = carState.serialize("Recent State");
+          state = carState.serialize("Recent State (CMD-J)");
           console << state;
           break;
         case 'V':
-          state = carState.csv("Recent State", input[1] == '+' ? true : false); // +: with header
+          state = carState.csv("Recent State (CMD-V)", input[1] == '+' ? true : false); // +: with header
           sdCard.write_log(state);
           console << state;
           break;
@@ -346,7 +346,7 @@ void CmdHandler::task(void *pvParams) {
 }
 
 string CmdHandler::printSystemValues() {
-  stringstream ss("");
+  stringstream ss("nothing to show");
 #if ADC_ON
   int16_t valueDec = adc.STW_DEC;
   int16_t valueAcc = adc.STW_ACC;

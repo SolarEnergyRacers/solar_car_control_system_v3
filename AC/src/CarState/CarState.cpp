@@ -252,8 +252,9 @@ const string CarState::csv(string msg, bool withHeader) {
   stringstream ss;
   if (withHeader) {
     // header
-    ss << "Epoch,";
+    ss << "DateTimeStamp,";
     ss << "uptime,";
+    ss << "LifeSign";
     ss << "msg,";
     ss << "potentiomenter,";
     ss << "speed,";
@@ -300,18 +301,13 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "light,";
     ss << "greenLight,";
     ss << "fan,";
-    // ss << "io, ";
     ss << "io";
-    // ss << "timeStampDate, ";
-    // ss << "timeStampTime ";
     ss << NL;
   }
   // data
-  // ss << "(hh:mm:ss)"
-  //    << ", "; // ss << esp32time.getEpoch() << ", " ;
-  // ss << millis() / 1000. << ", ";
-  ss << globalTime.strTime("%FT%X") << ",";
-  ss << globalTime.strUptime() << ",";
+  ss << globalTime.strTime("%FT%X") << ", ";
+  ss << globalTime.strUptime() << ", ";
+  ss << LifeSign << ", ";
   ss << msg.c_str() << ", ";
   ss << (int)Potentiometer << ", ";
   ss << (int)Speed << ", ";
@@ -359,8 +355,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << GreenLight << ", ";
   ss << Fan << ", ";
   ss << printIOs("", false).c_str() << ", ";
-  // ss << timeStamp.c_str();
-  // ss << NL;
+  ss << NL;
   return ss.str();
 }
 

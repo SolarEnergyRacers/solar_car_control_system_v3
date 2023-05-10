@@ -52,7 +52,8 @@ public:
   bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3, bool force = false);
   bool writePacket(uint16_t adr, CANPacket packet, bool force = false);
 
-  SemaphoreHandle_t mutex;
+  SemaphoreHandle_t mutex_in;
+  SemaphoreHandle_t mutex_out;
   bool verboseModeCanIn = false;
   bool verboseModeCanInNative = false;
   bool verboseModeCanOut = false;

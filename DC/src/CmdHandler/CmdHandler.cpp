@@ -55,6 +55,8 @@ extern RTC rtc;
 extern ESP32Time esp32time;
 #endif
 
+extern bool SystemInited;
+
 using namespace std;
 
 // ------------------
@@ -77,7 +79,7 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
-      while (Serial.available()) {
+      while (SystemInited && Serial.available()) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
@@ -161,18 +163,23 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'O') {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
+          } else if (input[1] == 'L') {
+            canBus.verboseModeCanBusLoad = !canBus.verboseModeCanBusLoad;
+            console << "set verboseModeCanBusLoad: " << canBus.verboseModeCanBusLoad << NL;
           } else {
             string arr[4];
             splitString(arr, &input[1]);
-            float batCurrent = atof(arr[0].c_str());
+            float motCurrent = atof(arr[0].c_str());
             float batVoltage = atof(arr[1].c_str());
-            int address = BMS_BASE_ADDR | 0xFA;
-            uint64_t data = 0;
-            CANPacket packet = CANPacket(address, data);
-            packet.setData_i32(0, batVoltage);
-            packet.setData_i32(1, batCurrent);
-            canBus.handle_rx_packet(packet);
-            console << "CAN inject for AdrId[" << address << "]: batCurrent=" << batCurrent << ", batVoltage=" << batVoltage << NL;
+            float batCurrent = atof(arr[2].c_str());
+            carState.MotorCurrent = motCurrent;
+            // Injection into BMS-CAN!!
+            int packetId = BMS_BASE_ADDR | 0xFA;
+            CANPacket packet = CANPacket(packetId, (uint64_t)0);
+            packet.setData_i32(0, batVoltage * 1000);
+            packet.setData_i32(1, batCurrent * 1000);
+            canBus.pushOut(packet);
+            console << fmt::format("CAN inject for AdrId[{:3x}]: batCurrent={}, batVoltage={}\n", packetId, batCurrent, batVoltage);
           }
           break;
         case 'O':

@@ -174,46 +174,32 @@ void CarControl::set_DAC() {
   }
 }
 
-// int cyclecounter = 0;
-// unsigned long carStateLifeSignLast = 0;
-// uint16_t carStatePotentiometerLast = 0;
-// uint16_t carStateAccelerationLast = 0;
-// uint16_t carStateDecelerationLast = 0;
-
-// uint16_t carStateTargetSpeedLast = 0;
-// uint16_t carStateTargetPowerLast = 0;
-// int8_t carStateAccelerationDisplayLast = 0;
-// uint8_t carStateSpeedLast = 0;
-// bool driveDirectionLast = false;
-// bool carStateBreakPedalLast = false;
-// bool carStateMotorOnLast = false;
-// bool carStateConstantModeOnLast = false;
-
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
       bool force = false;
-      if (millis() > millisNextCanSend) {
-        millisNextCanSend = millis() + 1000;
+      unsigned long cur_millis = millis();
+      if (cur_millis > millisNextCanSend) {
+        millisNextCanSend = cur_millis + 1000;
         force = true;
       }
-      if (millis() > millisNextLifeSignIncrement) {
-        // console << "CLEAR ENGINFO: '" << carState.EngineerInfo << "'" << NL;
-        millisNextLifeSignIncrement = millis() + 1000;
+      if (cur_millis > millisNextLifeSignIncrement) {
+        millisNextLifeSignIncrement = cur_millis + 1000;
         carState.LifeSign++;
+        force = true;
       }
-      
+
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       read_reference_cell_data();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       read_speed();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       read_potentiometer();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       if (read_paddles())
         set_DAC();
-      vTaskDelay(10);
+      // vTaskDelay(10);
 
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
@@ -241,12 +227,13 @@ void CarControl::task(void *pvParams) {
                          force                                    // force or not
       );
 
-      vTaskDelay(10);
+      // vTaskDelay(10);
 
       if (carControl.verboseModeDebug) {
-        console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
-                               canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
-                               carState.Potentiometer, carState.Acceleration, carState.Deceleration)
+        console << fmt::format("[I:{:02d}|{:02d},O:{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
+                               canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
+                               canBus.getMaxPacketsBufferOutUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer,
+                               carState.Acceleration, carState.Deceleration)
                 << NL;
         console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, cMod={:1d}, speed={:3d}, "
                                "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}",

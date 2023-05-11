@@ -54,7 +54,7 @@ void GlobalTime::update() {
 		auto lock = RAII_mux(mutex, portMAX_DELAY);
 		int sec = millis() / 1000;
 		if ((sec - last_update) > min_wait || (sec - last_update) < 0) {
-			console << "INFO: Time update from RTC.\n";
+			//console << "INFO: Time update from RTC.\n";
 			if (get_RTC()) return;
 			else console << "ERROR: RTC update failed, using cpu clock instead.\n";
 		}

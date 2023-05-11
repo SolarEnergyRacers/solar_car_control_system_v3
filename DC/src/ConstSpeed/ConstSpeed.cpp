@@ -32,14 +32,11 @@ extern CarControl carControl;
 extern bool SystemInited;
 extern DAC dac;
 
-// ------------------
-// FreeRTOS functions
-
 string ConstSpeed::re_init() {
-  //pid = NULL;
-  // pid.SetMode(MANUAL);
-  // pid.SetMode(AUTOMATIC);
-  return init();
+  pid = PID(&input_value, &output_setpoint, &target_speed, carState.Kp, carState.Ki, carState.Kd, DIRECT);
+  output_setpoint = 0;
+  pid.SetMode(AUTOMATIC);
+  return "PID reinited";
 }
 
 string ConstSpeed::init() {
@@ -47,13 +44,13 @@ string ConstSpeed::init() {
   console << "[  ] Init 'ConstSpeed'...\n";
   target_speed = 0;
   pid = PID(&input_value, &output_setpoint, &target_speed, carState.Kp, carState.Ki, carState.Kd, DIRECT);
+  output_setpoint = 0;
   pid.SetMode(AUTOMATIC);
   pid.SetOutputLimits(-DAC_MAX, DAC_MAX);
   return fmt::format("[{}] ConstSpeed initialized.", hasError ? "--" : "ok");
 }
 
 void ConstSpeed::exit(void) { set_target_speed(0); }
-// ------------------
 
 void ConstSpeed::set_target_speed(double speed) { target_speed = speed; }
 

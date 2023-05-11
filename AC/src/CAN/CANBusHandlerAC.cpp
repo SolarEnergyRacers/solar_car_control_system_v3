@@ -118,9 +118,11 @@ void CANBus::init_ages() {
   ages[MPPT3_BASE_ADDR | 0x6] = INT32_MAX;
 }
 
-int CANBus::handle_rx_packet(CANPacket packet) {
-  int retValue = 0;
+void CANBus::handle_rx_packet(CANPacket packet) {
   int packetId = packet.getId();
+  if (packetId == 0)
+    return;
+  counterR++;
   if (canBus.verboseModeCanInNative)
     console << print_raw_packet("R", packet) << NL;
   // Do something with packet
@@ -131,10 +133,10 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     carState.Potentiometer = packet.getData_u16(1);
     carState.Acceleration = packet.getData_u16(2);
     carState.Deceleration = packet.getData_u16(3);
-    if (canBus.verboseModeCanIn)
+    if (verboseModeCanIn)
       console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:lifeSign={:4x}, speed={:4x}, decl={:4x}, accl={:4x}, poti={:4x}",
-                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x00, carState.LifeSign,
-                             carState.Speed, carState.Deceleration, carState.Acceleration, carState.Potentiometer)
+                             availiblePacketsIn(), getMaxPacketsBufferInUsage(), packetId | 0x00, carState.LifeSign, carState.Speed,
+                             carState.Deceleration, carState.Acceleration, carState.Potentiometer)
               << NL;
     break;
 
@@ -149,14 +151,13 @@ int CANBus::handle_rx_packet(CANPacket packet) {
     carState.MotorOn = packet.getData_b(58);
     carState.ConstantModeOn = packet.getData_b(59);
   }
-    if (canBus.verboseModeCanIn)
-      console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:targetSpeed={:3}, targetPower={:3}, speed={:3d}, "
-                             "accelDispl={:3d}, constMode={:5s}({}), direction={}, breakPedal={}, MotorOn={}",
-                             canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), packetId | 0x01, carState.TargetSpeed,
-                             carState.TargetPower, carState.Speed, carState.AccelerationDisplay,
-                             CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn,
-                             DRIVE_DIRECTION_str[(int)(carState.DriveDirection)], carState.BreakPedal, carState.MotorOn,
-                             carState.ConstantModeOn)
+    if (verboseModeCanIn)
+      console << fmt::format(
+                     "[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:targetSpeed={:3}, targetPower={:3}, speed={:3d}, "
+                     "accelDispl={:3d}, constMode={:5s}({}), direction={}, breakPedal={}, MotorOn={}",
+                     availiblePacketsIn(), getMaxPacketsBufferInUsage(), packetId | 0x01, carState.TargetSpeed, carState.TargetPower,
+                     carState.Speed, carState.AccelerationDisplay, CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn,
+                     DRIVE_DIRECTION_str[(int)(carState.DriveDirection)], carState.BreakPedal, carState.MotorOn, carState.ConstantModeOn)
               << NL;
     break;
   case DC_BASE_ADDR | 0x02:
@@ -321,5 +322,4 @@ int CANBus::handle_rx_packet(CANPacket packet) {
       console << "T3=" << carState.T3 << NL;
     }
   }
-  return retValue;
 }

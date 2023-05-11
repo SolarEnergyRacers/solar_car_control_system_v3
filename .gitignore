@@ -45,5 +45,6 @@ AC/.pio/**
 
 # console log files
 tio-USB*.log
+error_report-*.*
 
 logs_archive/**

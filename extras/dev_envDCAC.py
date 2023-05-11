@@ -44,10 +44,10 @@ width, height = pyautogui.size()
 height = 2160
 
 start('code', '/home/ksc/work/ser4/solar_car_control_system_v3/AC/SER4_v3_AC.code-workspace',
-      10, 10, width//2-16, int(height*.9))
+      10, 10, width//2-16, int(height*.99))
 time.sleep(1)
 start('code', '/home/ksc/work/ser4/solar_car_control_system_v3/DC/SER4_v3_DC.code-workspace',
-      width//2, 10, width//2-20, int(height*.9))
+      width//2, 10, width//2-20, int(height*.99))
 
 # print('fiin.')
 # time.sleep(5)

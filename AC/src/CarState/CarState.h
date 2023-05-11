@@ -252,6 +252,7 @@ public:
   const string serialize(string msg = "");
   const string csv(string msg = "", bool withHeader = false);
   const string batteryErrorsAsString(bool verbose = false);
+  const string drive_data();
 };
 
 #endif // CARSTATE_H

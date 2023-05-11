@@ -188,18 +188,18 @@ void CarControl::task(void *pvParams) {
         carState.LifeSign++;
         force = true;
       }
-            
+
       // update OUTPUT pins
       // ioExt.writeAllPins(PinHandleMode::FORCED);
       read_reference_cell_data();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
       read_speed();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
       read_potentiometer();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
       if (read_paddles())
         set_DAC();
-      //vTaskDelay(10);
+      // vTaskDelay(10);
 
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
@@ -227,12 +227,13 @@ void CarControl::task(void *pvParams) {
                          force                                    // force or not
       );
 
-      //vTaskDelay(10);
+      // vTaskDelay(10);
 
       if (carControl.verboseModeDebug) {
-        console << fmt::format("[{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
-                               canBus.availiblePackets(), canBus.getMaxPacketsBufferUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign,
-                               carState.Potentiometer, carState.Acceleration, carState.Deceleration)
+        console << fmt::format("[I:{:02d}|{:02d},O:{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
+                               canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
+                               canBus.getMaxPacketsBufferOutUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer,
+                               carState.Acceleration, carState.Deceleration)
                 << NL;
         console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, cMod={:1d}, speed={:3d}, "
                                "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}",

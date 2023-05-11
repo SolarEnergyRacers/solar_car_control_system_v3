@@ -118,9 +118,11 @@ void CANBus::init_ages() {
   ages[MPPT3_BASE_ADDR | 0x6] = INT32_MAX;
 }
 
-int CANBus::handle_rx_packet(CANPacket packet) {
-  int retValue = 0;
+void CANBus::handle_rx_packet(CANPacket packet) {
   int packetId = packet.getId();
+  if (packetId == 0)
+    return;
+  counterR++;
   if (canBus.verboseModeCanInNative)
     console << print_raw_packet("R", packet) << NL;
   // Do something with packet
@@ -295,5 +297,4 @@ int CANBus::handle_rx_packet(CANPacket packet) {
       console << "T3=" << carState.T3 << NL;
     }
   }
-  return retValue;
 }

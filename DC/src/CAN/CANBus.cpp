@@ -23,15 +23,6 @@ extern I2CBus i2cBus;
 extern CANBus canBus;
 extern bool SystemInited;
 
-bool canBusReinitRequestR;
-bool canBusReinitRequestI;
-bool canBusReinitRequestW;
-int counterI;
-int counterR;
-int counterI_notAvail;
-int counterR_notAvail;
-int counterW_notAvail;
-
 using namespace std;
 
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -40,29 +31,32 @@ void onReceive(int packetSize) {
   if (!SystemInited)
     return;
 
-  if (xSemaphoreTakeFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken) == pdTRUE) {
-    int packetId = CAN.packetId();
-    if (canBus.is_to_ignore_packet(packetId)) {
-      xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
-      return;
-    }
-
-    counterI++;
-    counterI_notAvail = 0;
-    canBus.setPacketTimeStamp(packetId, millis());
-
-    if (CAN.available()) {
-      uint64_t rxData = 0l;
-      for (int i = 0; i < packetSize && i < 8; i++) {
-        rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
-      }
-      canBus.push(CANPacket(packetId, rxData));
-    }
-    xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
-  } else {
-    if (counterI_notAvail++ > 8)
-      canBusReinitRequestI = true;
+  uint64_t rxData = 0l;
+  if (xSemaphoreTakeFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken) != pdTRUE) {
+    canBus.counterI_notAvail++;
+    return;
   }
+
+  int packetId = CAN.packetId();
+  if (canBus.is_to_ignore_packet(packetId)) {
+    xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
+    return;
+  }
+
+  if (!CAN.available()) {
+    xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
+    canBus.counterI_notAvail++;
+    return;
+  }
+  for (int i = 0; i < packetSize && i < 8; i++) {
+    rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
+  }
+  xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
+
+  canBus.pushIn(CANPacket(packetId, rxData));
+  canBus.counterI++;
+  canBus.counterI_notAvail = 0;
+  canBus.setPacketTimeStamp(packetId, millis());
 }
 
 bool CANBus::isPacketToRenew(uint16_t packetId) {
@@ -72,7 +66,6 @@ bool CANBus::isPacketToRenew(uint16_t packetId) {
 void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
 
 CANBus::CANBus() {
-  counterMaxPackets = 0;
   init_ages();
 }
 
@@ -80,17 +73,17 @@ string CANBus::re_init() { return CANBus::init(); }
 
 string CANBus::init() {
   bool hasError = false;
-  canBusReinitRequestR = false;
-  canBusReinitRequestI = false;
-  canBusReinitRequestW = false;
   counterI = 0;
   counterR = 0;
+  counterW = 0;
   counterI_notAvail = 0;
   counterR_notAvail = 0;
   counterW_notAvail = 0;
 
-  counterMaxPackets = 0;
-  mutex_out = xSemaphoreCreateBinary(); 
+  counterMaxPacketsIn = 0;
+  counterMaxPacketsOut = 0;
+
+  mutex_out = xSemaphoreCreateBinary();
   xSemaphoreGive(mutex_out);
   mutex_in = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
@@ -113,21 +106,6 @@ void CANBus::exit() {
   CAN.end();
   xSemaphoreGive(mutex_in);
 }
-
-void CANBus::push(CANPacket packet) {
-  rxBuffer.push(packet);
-  // register level of rxBuffer filling:
-  if (counterMaxPackets < availiblePackets())
-    counterMaxPackets = availiblePackets();
-}
-
-// bool CANBus::writePacket(uint16_t adr, uint8_t data0, int8_t data1, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6,
-//                          bool b7, bool force) {
-//   uint8_t boolByte = ((uint8_t)b7) << 7 | ((uint8_t)b6) << 6 | ((uint8_t)b5) << 5 | ((uint8_t)b4) << 4 | ((uint8_t)b3) << 3 |
-//                      ((uint8_t)b2) << 2 | ((uint8_t)b1) << 1 | ((uint8_t)b0) << 0;
-//   uint64_t data = ((uint64_t)boolByte) << 48 | ((uint64_t)data0) << 8 | ((int64_t)data1 & 0x00000000000000ff) << 0;
-//   return writePacket(adr, data, force);
-// }
 
 bool CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // Target Speed [float as value\*1000]
@@ -179,75 +157,75 @@ bool CANBus::writePacket(uint16_t adr,
 
 std::map<uint16_t, CANPacket> packetsLast;
 bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
-
   if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
-    if (canBus.verboseModeCanOutNative)
-      console << print_raw_packet("S", packet) << NL;
-    try {
-      packetsLast[adr] = packet;
-      if (xSemaphoreTake(mutex_out, (TickType_t)32) == pdTRUE) {
-        counterW_notAvail = 0;
-        canBusReinitRequestW = false;
-        CAN.beginPacket(adr);
-        CAN.write(packet.getData_i8(0));
-        CAN.write(packet.getData_i8(1));
-        CAN.write(packet.getData_i8(2));
-        CAN.write(packet.getData_i8(3));
-        CAN.write(packet.getData_i8(4));
-        CAN.write(packet.getData_i8(5));
-        CAN.write(packet.getData_i8(6));
-        CAN.write(packet.getData_i8(7));
-        CAN.endPacket();
-        xSemaphoreGive(mutex_out);
-      } else {
-        console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);
-        if (counterW_notAvail++ > 8)
-          canBusReinitRequestW = true;
-        return false;
-      }
-    } catch (exception &ex) {
-      xSemaphoreGive(mutex_out);
-      console << "ERROR: Couldn not send uint64_t data to address " << adr << ", ex: " << ex.what() << NL;
-      return false;
-    }
+    pushOut(packet);
   }
   return true;
 }
 
+void CANBus::write_rx_packet(CANPacket packet) {
+  int adr = 0;
+  try {
+    // if (xSemaphoreTake(mutex_out, (TickType_t)32) != pdTRUE) {
+    //   console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);
+    //   counterW_notAvail++;
+    //   return;
+    // }
+    adr = packet.getId();
+    if (adr == 0) {
+      // xSemaphoreGive(mutex_out);
+      return;
+    }
+
+    packetsLast[adr] = packet;
+    counterW++;
+    if (verboseModeCanOutNative)
+      console << print_raw_packet("W", packet) << NL;
+    counterW_notAvail = 0;
+    CAN.beginPacket(packet.getId());
+    CAN.write(packet.getData_i8(0));
+    CAN.write(packet.getData_i8(1));
+    CAN.write(packet.getData_i8(2));
+    CAN.write(packet.getData_i8(3));
+    CAN.write(packet.getData_i8(4));
+    CAN.write(packet.getData_i8(5));
+    CAN.write(packet.getData_i8(6));
+    CAN.write(packet.getData_i8(7));
+    CAN.endPacket();
+    // xSemaphoreGive(mutex_out);
+  } catch (exception &ex) {
+    // xSemaphoreGive(mutex_out);
+    console << "ERROR: Couldn not send uint64_t data to address " << adr << ", ex: " << ex.what() << NL;
+  }
+}
+
 string CANBus::print_raw_packet(string msg, CANPacket packet) {
-  return fmt::format("C{}-{}-[{:02d}|{:02d}]={}=CAN.PacketId=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
-                     "{:02x} - {:02x} - {:02x}",
-                     xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePackets(), getMaxPacketsBufferUsage(), msg, packet.getId(),
-                     packet.getData_u64(), packet.getData_u8(7), packet.getData_u8(6), packet.getData_u8(5), packet.getData_u8(4),
-                     packet.getData_u8(3), packet.getData_u8(2), packet.getData_u8(1), packet.getData_u8(0));
+  return fmt::format(
+      "C{}-{}-[I:{:02d}|{:02d},O:{:02d}|{:02d}]={}=Id=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
+      "{:02x} - {:02x} - {:02x}",
+      xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePacketsIn(), getMaxPacketsBufferInUsage(), availiblePacketsOut(),
+      getMaxPacketsBufferOutUsage(), msg, packet.getId(), packet.getData_u64(), packet.getData_u8(7), packet.getData_u8(6),
+      packet.getData_u8(5), packet.getData_u8(4), packet.getData_u8(3), packet.getData_u8(2), packet.getData_u8(1), packet.getData_u8(0));
 }
 
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      if (verboseModeCanBusLoad)
-        console << fmt::format("({}_{}_{})", counterI_notAvail, counterR_notAvail, counterW_notAvail) << NL;
-
-      if (canBusReinitRequestR || canBusReinitRequestI || canBusReinitRequestW) {
+     
+      if (counterR_notAvail > 8 || counterI_notAvail > 8 || counterW_notAvail > 8) {
         console << NL
-                << fmt::format("CANBus REINIT, trigger: I{} | R{} | W{}: {:4d} | {:4d} ERR: {}_{}_{}", canBusReinitRequestI,
-                               canBusReinitRequestR, canBusReinitRequestW, counterI, counterR, counterI_notAvail, counterR_notAvail,
-                               counterW_notAvail)
+                << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}", counterI_notAvail, counterI, counterR_notAvail, counterR,
+                               counterW_notAvail, counterW)
                 << NL;
-        // vTaskDelay(10, "i-");
         canBus.re_init();
-        // vTaskDelay(10, "j-");
       }
-      if (xSemaphoreTake(mutex_in, (TickType_t)13) == pdTRUE) {
-        counterR++;
-        counterR_notAvail = 0;
-        while (rxBuffer.isAvailable()) {
-          handle_rx_packet(rxBuffer.pop());
-        }
-        xSemaphoreGive(mutex_in);
-      } else {
-        if (counterR_notAvail++ > 8)
-          canBusReinitRequestR = true;
+
+      while (rxBufferIn.isAvailable()) {
+        handle_rx_packet(rxBufferIn.pop());
+      }
+
+      while (rxBufferOut.isAvailable()) {
+        write_rx_packet(rxBufferOut.pop());
       }
     }
     taskSuspend();

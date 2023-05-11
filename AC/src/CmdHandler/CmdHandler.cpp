@@ -224,14 +224,13 @@ void CmdHandler::task(void *pvParams) {
             float batVoltage = atof(arr[1].c_str());
             float batCurrent = atof(arr[2].c_str());
             carState.MotorCurrent = motCurrent;
-            uint64_t data = 0;
             // Injection into BMS-CAN!!
-            int address = BMS_BASE_ADDR | 0xFA;
-            CANPacket packet = CANPacket(address, data);
+            int packetId = BMS_BASE_ADDR | 0xFA;
+            CANPacket packet = CANPacket(packetId, (uint64_t)0);
             packet.setData_i32(0, batVoltage * 1000);
             packet.setData_i32(1, batCurrent * 1000);
-            canBus.handle_rx_packet(packet);
-            console << fmt::format("CAN inject for AdrId[{:04x}]: batCurrent={}, batVoltage={}\n", address, batCurrent, batVoltage);
+            canBus.pushOut(packet);
+            console << fmt::format("CAN inject for AdrId[{:3x}]: batCurrent={}, batVoltage={}\n", packetId, batCurrent, batVoltage);
           }
           break;
         case 'O':

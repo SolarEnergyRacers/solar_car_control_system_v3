@@ -88,7 +88,7 @@ bool CarControl::read_sd_card_detect() {
   // console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
 
   if (carState.SdCardDetect && !sdCardDetectOld) {
-    //carState.EngineerInfo = "SD card detected, try to start logging...";
+    // carState.EngineerInfo = "SD card detected, try to start logging...";
     carState.EngineerInfo = "SD card detected. Not mounted yet.";
     console << "     " << carState.EngineerInfo << NL;
     // Do not mount automatically
@@ -165,8 +165,9 @@ void CarControl::task(void *pvParams) {
       // vTaskDelay(10);
 #endif
       if (carControl.verboseModeCarControlDebug)
-        console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
-                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
+        console << fmt::format("[I:{:02d}|{:02d},O::{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ",
+                               canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
+                               canBus.getMaxPacketsBufferOutUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
       // self destroying engineer info
       if (carState.EngineerInfo.compare(carStateEngineerInfoLast) != 0) {

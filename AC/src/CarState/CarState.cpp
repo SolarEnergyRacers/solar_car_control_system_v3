@@ -245,16 +245,12 @@ const string CarState::serialize(string msg) {
 }
 
 const string CarState::csv(string msg, bool withHeader) {
-  // string timeStamp = getDateTime();
-  // string timeStamp = globalTime.strTime("%F %R");
-  // timeStamp.erase(timeStamp.end() - 1);
-
   stringstream ss;
   if (withHeader) {
     // header
     ss << "DateTimeStamp,";
     ss << "uptime,";
-    ss << "LifeSign";
+    ss << "LifeSign,";
     ss << "msg,";
     ss << "potentiomenter,";
     ss << "speed,";
@@ -298,10 +294,10 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "engineerInfo,";
     ss << "driverInfo,";
     ss << "speedArrow,";
-    ss << "light,";
-    ss << "greenLight,";
-    ss << "fan,";
-    ss << "io";
+    // ss << "light,";
+    // ss << "greenLight,";
+    // ss << "fan,";
+    // ss << "io";
     ss << NL;
   }
   // data
@@ -350,12 +346,11 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << TargetPower << ", ";
   ss << fmt::format("\"EngInf {}: {}\"", "", getCleanString(EngineerInfo)) << ", ";
   ss << fmt::format("\"DrvInf {}: {}\"", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo)) << ", ";
-  ss << SPEED_ARROW_str[(int)SpeedArrow] << ", ";
-  ss << LIGHT_str[(int)(Light)] << ", ";
-  ss << GreenLight << ", ";
-  ss << Fan << ", ";
-  ss << printIOs("", false).c_str() << ", ";
-  ss << NL;
+  ss << SPEED_ARROW_str[(int)SpeedArrow] << NL;
+  // ss << LIGHT_str[(int)(Light)] << ", ";
+  // ss << GreenLight << ", ";
+  // ss << Fan << NL;
+  // ss << ", " << printIOs("", false).c_str() << NL;
   return ss.str();
 }
 

@@ -49,8 +49,8 @@ Version 2023.01.01
 
 ### Communication AC-Chase Car
 
-#### Envelope, Encodeing
-Forward some CAN Frames, encoded as ASCII chars
+#### Envelope, Encoding
+Forward some CAN Frames, ~~encoded as ASCII chars~~
 The id (11 bits) and data (64 bits) parts of the CAN frame get transmitted
 
 The id is encoded into two chars, aligned by least significant bit.

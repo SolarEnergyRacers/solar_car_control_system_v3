@@ -17,7 +17,7 @@ public:
   void task(void *pvParams);
 
   // Class functions and members
-  string commands = "REDPSVJMUFBICOTK:!sc?";
+  string commands = "REDPSVJMUFBICOTKi:!sc?";
   string helpText = "Available commands (" + commands +
                     "):\n"
                     "\t-------- SYSTEM COMMANDS -------------------------\n"
@@ -52,6 +52,7 @@ public:
                     "\tT _ _ _ _ _ _ _ _ _ _ get system time\n"
                     "\t  [yyyy mm dd hh MM ss] - set RTC date and time\n"
                     "\tK [|kp ki kd] _ _ _ _ show / update PID constants\n"
+                    "\ti _ _ _ _ _ _ _ _ _ _ minimal drive to console\n"
                     "\t-------- DRIVER INFO COMMANDS --------------------\n"
                     "\t:<text> _ _ _ _ _ _ _ display driver info text\n"
                     "\t!<text> _ _ _ _ _ _ _ display driver warn text\n"

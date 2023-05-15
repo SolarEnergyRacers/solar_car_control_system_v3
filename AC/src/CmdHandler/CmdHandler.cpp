@@ -172,9 +172,6 @@ void CmdHandler::task(void *pvParams) {
           if (input[1] == 's') {
             console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
             i2cBus.scan_i2c_devices();
-          } else if (input[1] == 'c') {
-            carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
-            console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
           }
           // } else if (input[1] == 'i') {
           //   ioExt.verboseModeDigitalIn = !ioExt.verboseModeDigitalIn;
@@ -290,6 +287,9 @@ void CmdHandler::task(void *pvParams) {
           console << "Car speed control settings only on DC possible yet\n";
           // #endif
           break;
+        case 'i':
+          carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
+          console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
         //-------- DRIVER INFO COMMANDS --------------------
         case 's':
           if (input[1] == '+')

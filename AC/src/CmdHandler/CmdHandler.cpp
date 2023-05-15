@@ -172,6 +172,9 @@ void CmdHandler::task(void *pvParams) {
           if (input[1] == 's') {
             console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
             i2cBus.scan_i2c_devices();
+          } else if (input[1] == 'c') {
+            carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
+            console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
           }
           // } else if (input[1] == 'i') {
           //   ioExt.verboseModeDigitalIn = !ioExt.verboseModeDigitalIn;
@@ -185,9 +188,6 @@ void CmdHandler::task(void *pvParams) {
           // } else if (input[1] == 'd') {
           //   dac.verboseModeDAC = !dac.verboseModeDAC;
           //   console << "set verboseModeDAC: " << dac.verboseModeDAC << NL;
-          // } else if (input[1] == 'c') {
-          //   carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
-          //   console << "set verboseModeCarControl for acc-/dec-controls: " << carControl.verboseModeCarControl << NL;
           // } else if (input[1] == 'R') {
           //   console << ioExt.re_init() << NL;
           //   msg = ioExt.re_init();
@@ -229,8 +229,9 @@ void CmdHandler::task(void *pvParams) {
             CANPacket packet = CANPacket(packetId, (uint64_t)0);
             packet.setData_i32(0, batVoltage * 1000);
             packet.setData_i32(1, batCurrent * 1000);
-            canBus.pushOut(packet);
-            console << fmt::format("CAN inject for AdrId[{:3x}]: batCurrent={}, batVoltage={}\n", packetId, batCurrent, batVoltage);
+            canBus.pushIn(packet);
+            console << fmt::format("CarState direct set motCurrent={}; CAN inject for AdrId[{:3x}]: batCurrent={}, batVoltage={}\n",
+                                   motCurrent, packetId, batCurrent, batVoltage);
           }
           break;
         case 'O':
@@ -249,9 +250,8 @@ void CmdHandler::task(void *pvParams) {
           string arr[6];
           int count = splitString(arr, &input[1]);
           if (count == 0) {
-            console << "Received: '" << input.c_str() 
-              << "' --> DateTime: " << globalTime.strTime("%X %F (%a)") 
-              << ", Uptime: " << globalTime.strUptime(true) << NL;
+            console << "Received: '" << input.c_str() << "' --> DateTime: " << globalTime.strTime("%X %F (%a)")
+                    << ", Uptime: " << globalTime.strUptime(true) << NL;
           } else {
             int yy = atof(arr[0].c_str());
             int mm = atof(arr[1].c_str());
@@ -315,9 +315,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {

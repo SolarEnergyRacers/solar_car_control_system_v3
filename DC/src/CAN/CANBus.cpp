@@ -158,6 +158,7 @@ bool CANBus::writePacket(uint16_t adr,
 std::map<uint16_t, CANPacket> packetsLast;
 bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
   if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
+    packetsLast[adr] = packet;
     pushOut(packet);
   }
   return true;
@@ -177,7 +178,6 @@ void CANBus::write_rx_packet(CANPacket packet) {
       return;
     }
 
-    packetsLast[adr] = packet;
     counterW++;
     if (verboseModeCanOutNative)
       console << print_raw_packet("W", packet) << NL;

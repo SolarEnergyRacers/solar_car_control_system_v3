@@ -179,6 +179,8 @@ void CarControl::task(void *pvParams) {
       }
       //  log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
+        if (verboseModeCarControl)
+          console << carState.drive_data();
         string record = carState.csv("log");
         if (sdCard.isMounted() && millis() > millisNextStampCsv) {
           millisNextStampCsv = millis() + carState.LogInterval;

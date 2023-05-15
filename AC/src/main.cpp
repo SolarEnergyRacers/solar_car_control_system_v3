@@ -62,7 +62,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 100;
+int base_offset_suspend = 10;
 bool SystemInited = false;
 bool SystemJustInited = true;
 uint64_t life_sign = 0;
@@ -134,7 +134,7 @@ void app_main(void) {
 
   //------------------------------------------------------------
   // CAN Bus
-  msg = canBus.init_t(0, 22, 10000, base_offset_suspend + 90);
+  msg = canBus.init_t(0, 22, 10000, base_offset_suspend + 10);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -174,7 +174,7 @@ void app_main(void) {
   //------------------------------------------------------------
   // Engineer Display
   engineerDisplay.verboseModeEngineer = false;
-  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 100);
+  msg = engineerDisplay.init_t(1, 1, 10000, base_offset_suspend + 20);
   console << msg << NL;
   console << "[  ] " << engineerDisplay.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(engineerDisplayTask,             /* task function. */
@@ -192,7 +192,7 @@ void app_main(void) {
   //------------------------------------------------------------
   // Driver Display
   driverDisplay.verboseModeDriver = false;
-  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 100);
+  msg = driverDisplay.init_t(1, 1, 10000, base_offset_suspend + 20);
   console << msg << NL;
   console << "[  ] " << driverDisplay.getName() << " create task ..." << NL;
   xTaskCreatePinnedToCore(driverDisplayTask,             /* task function. */
@@ -209,7 +209,7 @@ void app_main(void) {
 
   //------------------------------------------------------------
   // Car Control AC
-  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 40);
+  msg = carControl.init_t(1, 10, 10000, base_offset_suspend + 10);
   console << msg << NL;
   carControl.verboseModeCarControl = false;
   carControl.verboseModeCarControlDebug = false;
@@ -248,7 +248,7 @@ void app_main(void) {
   ss << fmt::format("-        verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
   ss << fmt::format("-        verboseModeCanBusLoad  = {}", canBus.verboseModeCanBusLoad) << NL;
   ss << fmt::format("- carControl.verboseModeCC      = {}", carControl.verboseModeCarControl) << NL;
-  ss << fmt::format("-        verboseModeCCDebug     = {}", carControl.verboseModeCarControlDebug) << NL;
+  ss << fmt::format("-            verboseModeCCDebug = {}", carControl.verboseModeCarControlDebug) << NL;
   ss << fmt::format("- engineerDisplay.verboseModeED = {}", engineerDisplay.verboseModeEngineer) << NL;
   ss << fmt::format("- driverDisplay.verboseModeDD   = {}", driverDisplay.verboseModeDriver) << NL;
   ss << fmt::format("- uart.verboseModeRadioSend     = {}", uart.verboseModeRadioSend) << NL;

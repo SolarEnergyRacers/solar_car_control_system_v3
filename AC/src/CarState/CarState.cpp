@@ -14,7 +14,7 @@
 // #include <ESP32Time.h>
 #include <Helper.h>
 #include <RTC_SER.h>
-// #include <SDCard.h>
+#include <SDCard.h>
 #include <definitions.h>
 
 using namespace std;
@@ -22,7 +22,7 @@ using namespace std;
 extern CarState carState;
 extern Console console;
 extern GlobalTime globalTime;
-// extern SDCard sdCard;
+extern SDCard sdCard;
 // extern IOExt ioExt;
 // extern RTC rtc;
 // extern ESP32Time esp32time;
@@ -71,9 +71,9 @@ bool CarState::initalize_config() {
     LogFilePeriod = cf.get("Main", "LogFilePeriod", 24);
     LogInterval = cf.get("Main", "LogInterval", 1000);
     // [PID]
-    Kp = cf.get("PID", "Kp", 15);
-    Ki = cf.get("PID", "Ki", 5);
-    Kd = cf.get("PID", "Kd", 0.05);
+    Kp = cf.get("PID", "Kp", 20);
+    Ki = cf.get("PID", "Ki", 15);
+    Kd = cf.get("PID", "Kd", 1);
     // [Dynamic]
     PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
     PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
@@ -426,5 +426,26 @@ const string CarState::batteryErrorsAsString(bool verbose /*= false*/) {
 
   ss << "]";
 
+  return ss.str();
+}
+
+const string CarState::drive_data() {
+  const char *spaces = "                              ";
+  stringstream ss;
+  ss << globalTime.strTime("%FT%X") << ", ";
+  ss << globalTime.strUptime() << ", ";
+  ss << LifeSign << " ";
+  ss << fmt::format("Spd:{:3d}, Accel:{:3d}\n{}", Speed, AccelerationDisplay, spaces);
+  ss << fmt::format("[MotC={:4.1f}A ({}) | BatV={:5.1f}V {} Umin={:5.3f} | Uavg={:5.3f} | Umax={:5.3f} | Tmin={:4.1f} "
+                    "Tmax={:4.1f}]\n{}",
+                    MotorCurrent, MotorOn ? "ON!" : "off", BatteryVoltage, batteryErrorsAsString(), Umin, Uavg, Umax, Tmin, Tmax, spaces);
+  ss << fmt::format("[PvC ={:4.1f}A (___) | MT1={:5.2f}A | MT2={:5.2f}A | MT3={:5.2f}A] ", PhotoVoltaicCurrent, Mppt1Current, Mppt2Current,
+                    Mppt3Current);
+  ss << DRIVE_DIRECTION_str[(int)(DriveDirection)] << ", ";
+  ss << fmt::format("sdCard detect:{}, mounted:{}\n{}", SdCardDetect, sdCard.isMounted(), spaces);
+  ss << fmt::format("\"DrvInf {}: {}\", ", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo));
+  ss << fmt::format("Target: {:2d}/{:4.1f} {} [p={:5.2f} i={:5.2f} d={:5.2f}]", (int)TargetSpeed, TargetPower,
+                    ConstantModeOn ? CONSTANT_MODE_str[(int)(ConstantMode)] : "off", (float)Kp, (float)Ki, (float)Kd);
+  ss << NL;
   return ss.str();
 }

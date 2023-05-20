@@ -206,7 +206,8 @@ public:
   bool Fan;
 
   // All IO pins
-  static CarStatePin pins[IOExtPINCOUNT];
+  // static CarStatePin pins[IOExtPINCOUNT];
+  static std::array<CarStatePin, IOExtPINCOUNT> pins;
   int getIdx(string pinName);
   CarStatePin *getPin(int devNr, int pinNr);
   CarStatePin *getPin(int port);
@@ -253,6 +254,27 @@ public:
   const string serialize(string msg = "");
   const string csv(string msg = "", bool withHeader = false);
   const string batteryErrorsAsString(bool verbose = false);
+
+  enum IOExt_PinIds {
+    BTN_PLUS = 0,
+    BTN_RESET,
+    BTN_MINUS,
+    BTN_SET,
+    PEDAL_BRAKE,
+    LIGHT_BRAKE,
+    SW_FWD_BWD,
+    SW_MC_ON,
+    PIN_GPB0,
+    PIN_GPB1,
+    PIN_GPB2,
+    PIN_GPB3,
+    PIN_GPB4,
+    PIN_GPB5,
+    PIN_GPB6,
+    PIN_GPB7
+  };
+private:
+  static std::array<CarStatePin, IOExtPINCOUNT> set_pins_defs();
 };
 
 #endif // CARSTATE_H

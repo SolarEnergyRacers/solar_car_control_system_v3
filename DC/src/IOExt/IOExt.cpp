@@ -194,6 +194,14 @@ bool IOExt::readAndHandlePins(PinHandleMode mode) {
   }
   pinHandlerList.clear();
   isInInputHandler = false;
+
+  if (carState.AccelerationDisplay < -10) {  // switch at approx. 4km/h / s ?
+    carState.pins[CarState::IOExt_PinIds::LIGHT_BRAKE].value = 1;  }
+  else {
+    carState.pins[CarState::IOExt_PinIds::LIGHT_BRAKE].value = 0;
+  }
+  writeAllPins(PinHandleMode::FORCED);
+
   return hasChanges;
 }
 

@@ -29,10 +29,11 @@ void CANPacket::setData(uint8_t data[]) {
   }
 }
 
-void CANPacket::to_serial(std::array<uint8_t, 10> &buffer) {
-  buffer[0] = id;
-  buffer[1] = 1;
-  for (auto idx = 0; idx < 8; idx++) {
-    buffer[idx + 2] = getData_b(idx);
+void CANPacket::to_serial(std::array<uint8_t, BUFFER_SIZE> &buffer) {
+  auto idx = 0;
+  buffer[idx++] = (uint8_t)(id >> 8);
+  buffer[idx++] = (uint8_t)(id & 0x00ff);
+  for (auto idxPacket = 0; idxPacket < 8; idxPacket++) {
+    buffer[idx++] = getData_b(idxPacket);
   }
 }

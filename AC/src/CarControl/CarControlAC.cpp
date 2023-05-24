@@ -190,12 +190,10 @@ void CarControl::task(void *pvParams) {
         }
         // vTaskDelay(10);
         if (millis() > millisNextStampSnd) {
-          // // send serail2 --> radio
-          if (uart.verboseModeRadioSend) {
-            cout << ".";
-          }
+          // send serail2 --> radio
+
           // TEST ONLY! TODO: Fill up with rela data.
-          //uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
+          // uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
           bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
           CANPacket packet = canBus.createPacket(DC_BASE_ADDR | 0x01,
                                                  (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
@@ -213,15 +211,17 @@ void CarControl::task(void *pvParams) {
                                                  false,                                   // empty
                                                  force                                    // force or not
           );
-          std::array<uint8_t, 10> buffer;
+          std::array<uint8_t, CANPacket::BUFFER_SIZE> buffer;
           packet.to_serial(buffer);
-          Serial2.printf("#%d", buffer.size());
-          Serial.printf("#%d", buffer.size());
-          // Serial2.write(buffer.data(), buffer.size());
+          Serial2.write(buffer.data(), buffer.size());
           if (uart.verboseModeRadioSend) {
-            cout << packet.getId() << "_" << NL;
+            cout << fmt::printf("%04x: __", packet.getId());
+            for (auto idx = 0; idx < buffer.size(); idx++) {
+              cout << fmt::printf("%02x ", (uint8_t)(buffer[idx]));
+            }
+            //cout << "--(" << carState.AccelerationDisplay << ")" << NL;
+            cout << fmt::printf("--(%d)\n", carState.AccelerationDisplay);
           }
-
           millisNextStampSnd = millis() + carState.CarDataSendPeriod;
         }
       }

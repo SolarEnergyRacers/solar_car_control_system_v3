@@ -190,15 +190,38 @@ void CarControl::task(void *pvParams) {
         }
         // vTaskDelay(10);
         if (millis() > millisNextStampSnd) {
-          // send serail2 --> radio
-          stringstream ss;
-          ss << "d: Interval=" << carState.CarDataSendPeriod << ", Rec: " << record;
-          console << ss.str();
+          // // send serail2 --> radio
           if (uart.verboseModeRadioSend) {
-            stringstream sss; // prevent from hiding
-            sss << "RADIO:: " << ss.str();
-            console << sss.str();
+            cout << ".";
           }
+          // TEST ONLY! TODO: Fill up with rela data.
+          //uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
+          bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
+          CANPacket packet = canBus.createPacket(DC_BASE_ADDR | 0x01,
+                                                 (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
+                                                 (uint16_t)(carState.TargetPower * 1000), // Target Power [float as value\*1000]
+                                                 carState.AccelerationDisplay,            // Display Acceleration
+                                                 0,                                       // empty
+                                                 carState.Speed,                          // Display Speed
+                                                 driveDirection,                          // Fwd [1] / Bwd [0]
+                                                 carState.BreakPedal,                     // Button Lvl Brake Pedal
+                                                 carState.MotorOn,                        // MC Off [0] / On [1]
+                                                 carState.ConstantModeOn,                 // Constant Mode Off [false], On [true]
+                                                 false,                                   // empty
+                                                 false,                                   // empty
+                                                 false,                                   // empty
+                                                 false,                                   // empty
+                                                 force                                    // force or not
+          );
+          std::array<uint8_t, 10> buffer;
+          packet.to_serial(buffer);
+          Serial2.printf("#%d", buffer.size());
+          Serial.printf("#%d", buffer.size());
+          // Serial2.write(buffer.data(), buffer.size());
+          if (uart.verboseModeRadioSend) {
+            cout << packet.getId() << "_" << NL;
+          }
+
           millisNextStampSnd = millis() + carState.CarDataSendPeriod;
         }
       }

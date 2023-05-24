@@ -73,6 +73,8 @@ public:
     }
   }
   bool getData_b(uint8_t index) { return this->data.b64 & BIT64(index); }
+
+  void to_serial(std::array<uint8_t, 10>& buffer);
 };
 
 // if (status & BIT(1)) {

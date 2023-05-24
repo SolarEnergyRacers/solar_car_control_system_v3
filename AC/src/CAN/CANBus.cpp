@@ -65,9 +65,7 @@ bool CANBus::isPacketToRenew(uint16_t packetId) {
 
 void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
 
-CANBus::CANBus() {
-  init_ages();
-}
+CANBus::CANBus() { init_ages(); }
 
 string CANBus::re_init() { return CANBus::init(); }
 
@@ -105,6 +103,39 @@ void CANBus::exit() {
   xSemaphoreTakeT(mutex_in);
   CAN.end();
   xSemaphoreGive(mutex_in);
+}
+
+CANPacket CANBus::createPacket(uint16_t adr,
+                               uint16_t data_u16_0, // Target Speed [float as value\*1000]
+                               uint16_t data_u16_1, // Target Power [float as value\*1000]
+                               int8_t data_i8_4,    // Display Acceleration
+                               uint8_t data_u8_5,   // empty
+                               uint8_t data_u8_6,   // Display Speed
+                               bool b_56,           // Fwd [1] / Bwd [0]
+                               bool b_57,           // Button Lvl Brake Pedal
+                               bool b_58,           // MC Off [0] / On [1]
+                               bool b_59,           // Constant Mode Off [false], On [true]
+                               bool b_60,           // empty
+                               bool b_61,           // empty
+                               bool b_62,           // empty
+                               bool b_63,           // empty
+                               bool force) {
+  uint64_t data = 0;
+  CANPacket packet = CANPacket(adr, data);
+  packet.setData_u16(0, data_u16_0);
+  packet.setData_u16(1, data_u16_1);
+  packet.setData_i8(4, data_i8_4);
+  packet.setData_u8(5, data_u8_5);
+  packet.setData_u8(6, data_u8_6);
+  packet.setData_b(56, b_56);
+  packet.setData_b(57, b_57);
+  packet.setData_b(58, b_58);
+  packet.setData_b(59, b_59);
+  packet.setData_b(60, b_60);
+  packet.setData_b(61, b_61);
+  packet.setData_b(62, b_62);
+  packet.setData_b(63, b_63);
+  return packet;
 }
 
 bool CANBus::writePacket(uint16_t adr,
@@ -211,7 +242,7 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-     
+
       if (counterR_notAvail > 8 || counterI_notAvail > 8 || counterW_notAvail > 8) {
         console << NL
                 << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}", counterI_notAvail, counterI, counterR_notAvail, counterR,

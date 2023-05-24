@@ -30,6 +30,7 @@ public:
   bool read_reference_cell_data();
   bool read_potentiometer();
   bool read_speed(); // in km/h
+  void switch_break_light();
 
   int calculate_acceleration_display(int valueDec, int valueAcc);
   void set_DAC();

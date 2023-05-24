@@ -290,6 +290,7 @@ void CmdHandler::task(void *pvParams) {
         case 'i':
           carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
           console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
+          break;
         //-------- DRIVER INFO COMMANDS --------------------
         case 's':
           if (input[1] == '+')

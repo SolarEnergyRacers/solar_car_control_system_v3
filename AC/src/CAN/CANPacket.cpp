@@ -28,3 +28,11 @@ void CANPacket::setData(uint8_t data[]) {
     this->data.data_u8[i] = data[i];
   }
 }
+
+void CANPacket::to_serial(std::array<uint8_t, 10> &buffer) {
+  buffer[0] = id;
+  buffer[1] = 1;
+  for (auto idx = 0; idx < 8; idx++) {
+    buffer[idx + 2] = getData_b(idx);
+  }
+}

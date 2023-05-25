@@ -215,12 +215,15 @@ void CarControl::task(void *pvParams) {
           packet.to_serial(buffer);
           Serial2.write(buffer.data(), buffer.size());
           if (uart.verboseModeRadioSend) {
-            cout << fmt::printf("%04x: __", packet.getId());
-            for (auto idx = 0; idx < buffer.size(); idx++) {
-              cout << fmt::printf("%02x ", (uint8_t)(buffer[idx]));
+            cout << fmt::format("{:02x}:", packet.getId());
+
+            for (uint8_t element : buffer) {
+              cout << fmt::format("{:02x} ", element);
             }
-            //cout << "--(" << carState.AccelerationDisplay << ")" << NL;
-            cout << fmt::printf("--(%d)\n", carState.AccelerationDisplay);
+            // for (auto idx = 0; idx < buffer.size(); idx++) {
+            //   cout << fmt::printf("%02x ", (uint8_t)(buffer[idx]));
+            // }
+            cout << fmt::format("--(accDispl={})\n", carState.AccelerationDisplay);
           }
           millisNextStampSnd = millis() + carState.CarDataSendPeriod;
         }

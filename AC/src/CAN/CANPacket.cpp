@@ -30,10 +30,9 @@ void CANPacket::setData(uint8_t data[]) {
 }
 
 void CANPacket::to_serial(std::array<uint8_t, BUFFER_SIZE> &buffer) {
-  auto idx = 0;
-  buffer[idx++] = (uint8_t)(id >> 8);
-  buffer[idx++] = (uint8_t)(id & 0x00ff);
-  for (auto idxPacket = 0; idxPacket < 8; idxPacket++) {
-    buffer[idx++] = getData_b(idxPacket);
-  }
+  int pos = 0;
+  memcpy(buffer.data(), &id, sizeof(id));
+  pos += sizeof(id);
+  memcpy(buffer.data() + pos, &data, sizeof(data));
+  pos += sizeof(data);
 }

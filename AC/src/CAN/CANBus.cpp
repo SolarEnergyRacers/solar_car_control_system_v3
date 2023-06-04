@@ -106,20 +106,20 @@ void CANBus::exit() {
 }
 
 CANPacket CANBus::writePacket(uint16_t adr,
-                         uint16_t data_u16_0, // Target Speed [float as value\*1000]
-                         uint16_t data_u16_1, // Target Power [float as value\*1000]
-                         int8_t data_i8_4,    // Display Acceleration
-                         uint8_t data_u8_5,   // empty
-                         uint8_t data_u8_6,   // Display Speed
-                         bool b_56,           // Fwd [1] / Bwd [0]
-                         bool b_57,           // Button Lvl Brake Pedal
-                         bool b_58,           // MC Off [0] / On [1]
-                         bool b_59,           // Constant Mode Off [false], On [true]
-                         bool b_60,           // empty
-                         bool b_61,           // empty
-                         bool b_62,           // empty
-                         bool b_63,           // empty
-                         bool force) {
+                              uint16_t data_u16_0, // Target Speed [float as value\*1000]
+                              uint16_t data_u16_1, // Target Power [float as value\*1000]
+                              int8_t data_i8_4,    // Display Acceleration
+                              uint8_t data_u8_5,   // empty
+                              uint8_t data_u8_6,   // Display Speed
+                              bool b_56,           // Fwd [1] / Bwd [0]
+                              bool b_57,           // Button Lvl Brake Pedal
+                              bool b_58,           // MC Off [0] / On [1]
+                              bool b_59,           // Constant Mode Off [false], On [true]
+                              bool b_60,           // empty
+                              bool b_61,           // empty
+                              bool b_62,           // empty
+                              bool b_63,           // empty
+                              bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
@@ -139,11 +139,11 @@ CANPacket CANBus::writePacket(uint16_t adr,
 }
 
 CANPacket CANBus::writePacket(uint16_t adr,
-                         uint16_t data_u16_0, // LifeSign
-                         uint16_t data_u16_1, // Potentiometer value
-                         uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
-                         uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
-                         bool force) {
+                              uint16_t data_u16_0, // LifeSign
+                              uint16_t data_u16_1, // Potentiometer value
+                              uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
+                              uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
+                              bool force) {
   uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);

@@ -116,12 +116,11 @@ void app_main(void) {
   i2cBus.verboseModeI2C = false;
   delay(200);
 
-  std::array<std::string,7> wd = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};  // todo: rm
-  console << fmt::format("main.o compiletime: {}:{}:{}  {}-{}-{} ({})\n", 
-  compiletime.Hour(), compiletime.Minute(), compiletime.Second(),
-  compiletime.Day(), compiletime.Month(), compiletime.Year(), wd[compiletime.DayOfWeek()]);
+  std::array<std::string, 7> wd = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; // todo: rm
+  console << fmt::format("main.o compiletime: {}:{}:{}  {}-{}-{} ({})\n", compiletime.Hour(), compiletime.Minute(), compiletime.Second(),
+                         compiletime.Day(), compiletime.Month(), compiletime.Year(), wd[compiletime.DayOfWeek()]);
   int RTC_err = globalTime.init(DS1307SquareWaveOut_Low, 1);
-  console << "RTC init errorcode: "<< RTC_err << "\n";
+  console << "RTC init errorcode: " << RTC_err << "\n";
   console << "RTC time: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";
   // sleep(5);
   // console << "time 5s: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";

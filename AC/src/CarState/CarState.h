@@ -158,30 +158,30 @@ public:
   // #SAFETY-END#
 
   // bool BatteryOn;      // IO-In
-  bool PhotoVoltaicOn;               // IO-in
-  bool MotorOn;                      // IO-In
-  bool EcoOn;                        // IO-In
+  bool PhotoVoltaicOn; // IO-in
+  bool MotorOn;        // IO-In
+  bool EcoOn;          // IO-In
 
   PRECHARGE_STATE PrechargeState;    // CAN
   list<BATTERY_ERROR> BatteryErrors; // CAN
 
-  float BatteryVoltage;              // CAN
-  float BatteryCurrent;              // CAN
-  float PhotoVoltaicCurrent;         // ADC
-  float MotorVoltage;                // ADC
-  float MotorCurrent;                // ADC
+  float BatteryVoltage;      // CAN
+  float BatteryCurrent;      // CAN
+  float PhotoVoltaicCurrent; // ADC
+  float MotorVoltage;        // ADC
+  float MotorCurrent;        // ADC
 
-  float Mppt1Current;                // CAN
-  float Mppt2Current;                // CAN
-  float Mppt3Current;                // CAN
+  float Mppt1Current; // CAN
+  float Mppt2Current; // CAN
+  float Mppt3Current; // CAN
 
-  float Umin;                        // CAN
-  float Uavg;                        // CAN
-  float Umax;                        // CAN
+  float Umin; // CAN
+  float Uavg; // CAN
+  float Umax; // CAN
 
-  float T1;                          // MPPT1
-  float T2;                          // MPPT2
-  float T3;                          // MPPT3
+  float T1; // MPPT1
+  float T2; // MPPT2
+  float T3; // MPPT3
   // float T4; // Motorcontroller
   float Tmin; // max. cell temperatur from BMS
   float Tmax; // max. cell temperatur from BMS

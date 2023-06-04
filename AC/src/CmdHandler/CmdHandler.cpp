@@ -78,20 +78,20 @@ void CmdHandler::task(void *pvParams) {
   while (1) {
     try {
       while (SystemInited && (Serial.available()
-// #if SERIAL_RADIO_ON
-//                               || Serial2.available()
-// #endif
-                                  )) {
+                              // #if SERIAL_RADIO_ON
+                              //                               || Serial2.available()
+                              // #endif
+                              )) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
-// #if SERIAL_RADIO_ON
-//         } else if (Serial2.available()) {
-//           input = Serial2.readString();
-//           Serial2.flush();
-// #endif
+          // #if SERIAL_RADIO_ON
+          //         } else if (Serial2.available()) {
+          //           input = Serial2.readString();
+          //           Serial2.flush();
+          // #endif
         }
         if (input.length() == 0)
           break;
@@ -316,9 +316,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {

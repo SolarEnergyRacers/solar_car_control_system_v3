@@ -12,8 +12,7 @@
 #include <CANRxBuffer.h>
 #include <CarState.h>
 
-
-
+// all handled CAN addresses:
 #define AC_BASE0x00 AC_BASE_ADDR | 0x00 // AC: 
 
 #define BmsBase0x00 BMS_BASE_ADDR | 0x00 // BMU_HEARTBEAT
@@ -65,7 +64,6 @@
 #define Mppt3Base0x06 MPPT3_BASE_ADDR | 0x06 // MPPT_POWER_CONN
 
 
-
 // init
 class CANBus : public AbstractTask {
 
@@ -76,7 +74,7 @@ public:
   string re_init(void);
   void exit(void);
   void task(void *pvParams);
-  bool is_to_ignore_packet(int packetId);
+  bool is_to_ignore_packet(uint16_t packetId);
 
   // Class functions and members
 private:
@@ -107,12 +105,10 @@ public:
   int counterI;
   int counterI_notAvail;
 
-  CANPacket createPacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
-                         bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
-  bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
                    bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
-  bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3, bool force = false);
-  bool writePacket(uint16_t adr, CANPacket packet, bool force = false);
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3, bool force = false);
+  CANPacket writePacket(uint16_t adr, CANPacket packet, bool force = false);
 
   void pushIn(CANPacket packet) {
     rxBufferIn.push(packet);

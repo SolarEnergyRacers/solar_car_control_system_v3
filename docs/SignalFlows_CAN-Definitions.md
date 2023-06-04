@@ -128,7 +128,7 @@ The CAN frames to be transmitted can be defined in property `radio_packages` of 
 
 ### DC - Drive Controller
 
-DC_BASE_ADDR: **0x660**
+DC_BASE_ADDR: **0x460**
 
 #### CAN id: 0x00 - Speed Control
 
@@ -192,7 +192,7 @@ f_16   | [3]    | 4,5    | Kd [float as value\*1000]
 
 ### AC - Auxiliary Controller
 
-AC_BASE_ADDR: **0x630**
+AC_BASE_ADDR: **0x430**
 
 #### CAN id: 0x00 - Display Data
 
@@ -217,3 +217,11 @@ Format | IdxFmt | Index8 | Meaning
 f_16   | [0]    | 0,1    | Kp [float as value*1000]
 f_16   | [1]    | 2,3    | Ki [float as value*1000]
 f_16   | [2]    | 4,5    | Kd [float as value*1000]
+
+### MC
+
+MC CAN Definition: [github.com/vedderb/bldc/blob/master/documentation/comm_can.md](https://github.com/vedderb/bldc/blob/master/documentation/comm_can.md#status-commands)
+
+MC_BASE_ADDR = 0x700
+
+CAN_PACKET_STATUS_0 - CAN_PACKET_STATUS_5** 

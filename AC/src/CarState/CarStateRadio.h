@@ -13,7 +13,7 @@
 #include <definitions.h>
 
 #include <CANBus.h>
-#include <CANPacket.h>
+// #include <CANPacket.h>
 
 using namespace std;
 
@@ -22,32 +22,34 @@ private:
   unsigned long lastSendMillis;
 
 public:
-  list<int> radio_packages = {
+  list<uint16_t> radio_packages = {
       // mandatory
-      Mppt1Base0x01, //
-      Mppt2Base0x01, //
-      Mppt3Base0x01, //
-      BmsBase0x00,   //
-      BmsBase0xF7,   //
-      BmsBase0xF8,   //
-      BmsBase0xF9,   //
-      BmsBase0xFA,   //
-      BmsBase0xFD,   //
-      DC_BASE0x00,   //
-      DC_BASE0x01,   //
-      AC_BASE0x00,   //
+      (uint16_t)DC_BASE0x00,   //
+      (uint16_t)DC_BASE0x01,   //
+      (uint16_t)AC_BASE0x00,   //
+      (uint16_t)Mppt1Base0x01, //
+      (uint16_t)Mppt2Base0x01, //
+      (uint16_t)Mppt3Base0x01, //
+      (uint16_t)BmsBase0x00,   //
+      (uint16_t)BmsBase0xF7,   //
+      (uint16_t)BmsBase0xF8,   //
+      (uint16_t)BmsBase0xF9,   //
+      (uint16_t)BmsBase0xFA,   //
+      (uint16_t)BmsBase0xFD,   //
       // nice to have
-      Mppt1Base0x00, //
-      Mppt1Base0x02, //
-      Mppt2Base0x00, //
-      Mppt2Base0x02, //
-      Mppt3Base0x00, //
-      Mppt3Base0x02, //
-      BmsBase0x01,   //
-      BmsBase0x02    //
+      (uint16_t)Mppt1Base0x00, //
+      (uint16_t)Mppt1Base0x02, //
+      (uint16_t)Mppt2Base0x00, //
+      (uint16_t)Mppt2Base0x02, //
+      (uint16_t)Mppt3Base0x00, //
+      (uint16_t)Mppt3Base0x02, //
+      (uint16_t)BmsBase0x01,   //
+      (uint16_t)BmsBase0x02    //
   };
 
   void init_values();
+  void send_serial();
+  void cache_filtered(uint16_t adr, CANPacket packet);
 };
 
 #endif // CARSTATERADIO_H

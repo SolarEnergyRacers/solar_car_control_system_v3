@@ -26,7 +26,7 @@ extern CarStateRadio carStateRadio;
 extern Console console;
 extern CANBus canBus;
 
-bool CANBus::is_to_ignore_packet(int packetId) {
+bool CANBus::is_to_ignore_packet(uint16_t packetId) {
   return packetId != (DC_BASE0x00) && packetId != (DC_BASE0x01) && !canBus.isPacketToRenew(packetId);
 }
 
@@ -125,16 +125,15 @@ void CANBus::init_ages() {
 }
 
 void CANBus::handle_rx_packet(CANPacket packet) {
-  int packetId = packet.getId();
+  uint16_t packetId = packet.getId();
   if (packetId == 0)
     return;
   counterR++;
   if (canBus.verboseModeCanInNative)
     console << print_raw_packet("R", packet) << NL;
 
-  if (contains(carStateRadio.radio_packages, packetId))
-    carState.packet_cache[packetId] = packet;
-  
+  carStateRadio.cache_filtered(packetId, packet);
+
   switch (packetId) {
   case DC_BASE0x00:
     carState.LifeSign = packet.getData_u16(0);
@@ -168,7 +167,7 @@ void CANBus::handle_rx_packet(CANPacket packet) {
                      DRIVE_DIRECTION_str[(int)(carState.DriveDirection)], carState.BreakPedal, carState.MotorOn, carState.ConstantModeOn)
               << NL;
     break;
-  // case DC_BASE_ADDR | 0x02:
+  // case DC_BASE0x02:
   //   break;
   case BmsBase0x00:
     // heartbeat packet.getData_ui32(0)

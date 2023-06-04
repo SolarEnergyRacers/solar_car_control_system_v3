@@ -37,7 +37,7 @@ void onReceive(int packetSize) {
     return;
   }
 
-  int packetId = CAN.packetId();
+  uint16_t packetId = CAN.packetId();
   if (canBus.is_to_ignore_packet(packetId)) {
     xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
     return;
@@ -105,40 +105,7 @@ void CANBus::exit() {
   xSemaphoreGive(mutex_in);
 }
 
-CANPacket CANBus::createPacket(uint16_t adr,
-                               uint16_t data_u16_0, // Target Speed [float as value\*1000]
-                               uint16_t data_u16_1, // Target Power [float as value\*1000]
-                               int8_t data_i8_4,    // Display Acceleration
-                               uint8_t data_u8_5,   // empty
-                               uint8_t data_u8_6,   // Display Speed
-                               bool b_56,           // Fwd [1] / Bwd [0]
-                               bool b_57,           // Button Lvl Brake Pedal
-                               bool b_58,           // MC Off [0] / On [1]
-                               bool b_59,           // Constant Mode Off [false], On [true]
-                               bool b_60,           // empty
-                               bool b_61,           // empty
-                               bool b_62,           // empty
-                               bool b_63,           // empty
-                               bool force) {
-  uint64_t data = 0;
-  CANPacket packet = CANPacket(adr, data);
-  packet.setData_u16(0, data_u16_0);
-  packet.setData_u16(1, data_u16_1);
-  packet.setData_i8(4, data_i8_4);
-  packet.setData_u8(5, data_u8_5);
-  packet.setData_u8(6, data_u8_6);
-  packet.setData_b(56, b_56);
-  packet.setData_b(57, b_57);
-  packet.setData_b(58, b_58);
-  packet.setData_b(59, b_59);
-  packet.setData_b(60, b_60);
-  packet.setData_b(61, b_61);
-  packet.setData_b(62, b_62);
-  packet.setData_b(63, b_63);
-  return packet;
-}
-
-bool CANBus::writePacket(uint16_t adr,
+CANPacket CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // Target Speed [float as value\*1000]
                          uint16_t data_u16_1, // Target Power [float as value\*1000]
                          int8_t data_i8_4,    // Display Acceleration
@@ -171,13 +138,13 @@ bool CANBus::writePacket(uint16_t adr,
   return writePacket(adr, packet, force);
 }
 
-bool CANBus::writePacket(uint16_t adr,
+CANPacket CANBus::writePacket(uint16_t adr,
                          uint16_t data_u16_0, // LifeSign
                          uint16_t data_u16_1, // Potentiometer value
                          uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
                          uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
                          bool force) {
-  uint64_t data = 0;
+  uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
   packet.setData_u16(1, data_u16_1);
@@ -187,16 +154,16 @@ bool CANBus::writePacket(uint16_t adr,
 }
 
 std::map<uint16_t, CANPacket> packetsLast;
-bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
+CANPacket CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
   if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
     packetsLast[adr] = packet;
     pushOut(packet);
   }
-  return true;
+  return packet;
 }
 
 void CANBus::write_rx_packet(CANPacket packet) {
-  int adr = 0;
+  uint16_t adr = 0;
   try {
     // if (xSemaphoreTake(mutex_out, (TickType_t)32) != pdTRUE) {
     //   console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);

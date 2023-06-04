@@ -28,3 +28,12 @@ void CANPacket::setData(uint8_t data[]) {
     this->data.data_u8[i] = data[i];
   }
 }
+
+void CANPacket::to_serial(std::array<uint8_t, BUFFER_SIZE> &buffer) {
+  int pos = 0;
+  uint16_t maskedId = id & 0b1111100000000000;
+  memcpy(buffer.data(), &maskedId, sizeof(maskedId));
+  pos += sizeof(id);
+  memcpy(buffer.data() + pos, &data, sizeof(data));
+  pos += sizeof(data);
+}

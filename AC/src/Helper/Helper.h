@@ -5,14 +5,16 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_HELPER_H
 #define SOLAR_CAR_CONTROL_SYSTEM_HELPER_H
 
+#include <list>
+
+#include <Console.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h> // semaphore
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <sstream>
 #include <string>
-#include <limits>
-#include <Console.h>
 
 extern Console console;
 
@@ -41,22 +43,20 @@ template <size_t N> int splitString(string (&arr)[N], string str) {
   return n;
 }
 
-template<typename any_in, typename any_out>
-any_out normalize_0(any_in minOriginValue, any_in maxOriginValue, any_in value) {
+template <typename any_in, typename any_out> any_out normalize_0(any_in minOriginValue, any_in maxOriginValue, any_in value) {
   float k = static_cast<float>(std::numeric_limits<any_out>::max()) / (maxOriginValue - minOriginValue);
   value = value < minOriginValue ? minOriginValue : value;
-  value = value > maxOriginValue ? maxOriginValue : value;// - 0.500001;
-  return static_cast<any_out>( round((value - minOriginValue) * k) );
+  value = value > maxOriginValue ? maxOriginValue : value; // - 0.500001;
+  return static_cast<any_out>(round((value - minOriginValue) * k));
 }
 
-
-/** 
- * @brief try to take mux within timeout. 
+/**
+ * @brief try to take mux within timeout.
  * @brief **Warning: needs this.ok() to check if successful**
  */
 
 /**
- * @brief try to take mux within timeout. 
+ * @brief try to take mux within timeout.
  * @throw runtime_error("mux") if fails to acquire within timeout
  */
 class RAII_mux {
@@ -64,16 +64,26 @@ private:
   SemaphoreHandle_t mux;
   // bool _ok;
 public:
-  RAII_mux(SemaphoreHandle_t mux, TickType_t timeout)
-  :mux(mux) {
+  RAII_mux(SemaphoreHandle_t mux, TickType_t timeout) : mux(mux) {
     // _ok = xSemaphoreTake(mux, timeout);
     if (!xSemaphoreTake(mux, timeout)) {
       console << "mux '" << mux << "' not acquired within timeout\n";
       throw std::runtime_error("mux");
     }
   }
-  ~RAII_mux() {xSemaphoreGive(mux);}
+  ~RAII_mux() { xSemaphoreGive(mux); }
   // bool ok() {return _ok;}
 };
+
+/*
+ * Generic function to find if an element of any type exists in list
+ */
+template <typename T> bool contains(std::list<T> &listOfElements, const T &element) {
+  // Find the iterator if element in list
+  auto it = std::find(listOfElements.begin(), listOfElements.end(), element);
+  // return if iterator points to end or not. It points to end then it means element
+  //  does not exists in list
+  return it != listOfElements.end();
+}
 
 #endif // SOLAR_CAR_CONTROL_SYSTEM_HELPER_H

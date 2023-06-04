@@ -47,7 +47,7 @@ Version 2023.01.01
 |------------------------------------|-----|------|-----------------------|
 | (see docs)                         | >   | CAN  |                       |
 
-### Communication AC-Chase Car
+### Communication AC - ChaseCar
 
 #### Envelope, Encoding
 Forward some CAN Frames, ~~encoded as ASCII chars~~
@@ -65,6 +65,8 @@ a = MSB
 k = LSB
 
 #### Data Frames
+
+The CAN frames to be transmitted can be defined in property `radio_packages` of class `CarStateRadio`.
 
 | AC | Dir | Type | ChaseCar |
 |------------------------------------|-----|-------|-----------------------|
@@ -85,7 +87,7 @@ k = LSB
 | MPPT Status (MPPT Base+3)          | >   | CAN*  |                       |
 | BMS cell Voltages (BMS Base+[1..]) | >   | CAN*  |                       |
 
-\* CAN frames ecoded to ASCII chars, transmitted over serial
+\* CAN frames encoded to ASCII chars, transmitted over serial
 
 ## DC Data
 

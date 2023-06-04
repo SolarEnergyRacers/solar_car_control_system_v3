@@ -65,9 +65,7 @@ bool CANBus::isPacketToRenew(uint16_t packetId) {
 
 void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
 
-CANBus::CANBus() {
-  init_ages();
-}
+CANBus::CANBus() { init_ages(); }
 
 string CANBus::re_init() { return CANBus::init(); }
 

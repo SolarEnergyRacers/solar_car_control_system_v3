@@ -12,6 +12,26 @@
 #include <CANRxBuffer.h>
 #include <CarState.h>
 
+#define Mppt1Base0x01 MPPT1_BASE_ADDR | 0x01
+#define Mppt2Base0x01 MPPT2_BASE_ADDR | 0x01
+#define Mppt3Base0x01 MPPT3_BASE_ADDR | 0x01
+#define BmsBase0x00 BMS_BASE_ADDR | 0x00
+#define BmsBase0xF7 BMS_BASE_ADDR | 0xF7
+#define BmsBase0xF8 BMS_BASE_ADDR | 0xF8
+#define BmsBase0xF9 BMS_BASE_ADDR | 0xF9
+#define BmsBase0xFA BMS_BASE_ADDR | 0xFA
+#define BmsBase0xFD BMS_BASE_ADDR | 0xFD
+#define DC_BASE0x00 DC_BASE_ADDR | 0x00
+#define DC_BASE0x01 DC_BASE_ADDR | 0x01
+#define AC_BASE0x00 8
+#define Mppt1Base0x00 MPPT1_BASE_ADDR | 0x00
+#define Mppt1Base0x02 MPPT1_BASE_ADDR | 0x02
+#define Mppt2Base0x00 MPPT2_BASE_ADDR | 0x00
+#define Mppt2Base0x02 MPPT2_BASE_ADDR | 0x02
+#define Mppt3Base0x00 MPPT3_BASE_ADDR | 0x00
+#define Mppt3Base0x02 MPPT3_BASE_ADDR | 0x02
+#define BmsBase0x01 15
+
 class CANBus : public AbstractTask {
 
 public:
@@ -48,7 +68,7 @@ private:
 
 public:
   CANBus();
-  
+
   int counterI;
   int counterI_notAvail;
 

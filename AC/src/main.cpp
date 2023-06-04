@@ -36,6 +36,8 @@
 // local components
 #include <CANBus.h>
 #include <CarControl.h>
+#include <CarState.h>
+#include <CarStateRadio.h>
 #include <CmdHandler.h>
 #include <Console.h>
 #include <Display.h>
@@ -70,6 +72,7 @@ uint64_t life_sign = 0;
 CANBus canBus;
 CarControl carControl;
 CarState carState;
+CarStateRadio carStateRadio;
 CmdHandler cmdHandler;
 Console console;
 DriverDisplay driverDisplay;

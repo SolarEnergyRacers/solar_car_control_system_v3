@@ -209,7 +209,6 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-
       if (counterR_notAvail > 8 || counterI_notAvail > 8 || counterW_notAvail > 8) {
         console << NL
                 << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}", counterI_notAvail, counterI, counterR_notAvail, counterR,

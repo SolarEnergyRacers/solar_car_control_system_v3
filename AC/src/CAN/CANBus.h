@@ -10,7 +10,7 @@
 
 #include <AbstractTask.h>
 #include <CANRxBuffer.h>
-#include <CarState.h>
+// #include <CarState.h>
 
 // all handled CAN addresses:
 #define AC_BASE0x00 AC_BASE_ADDR | 0x00 // AC: LifeSign, switch constant mode Speed / Power, Kp,  Ki

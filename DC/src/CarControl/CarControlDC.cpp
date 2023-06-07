@@ -176,7 +176,7 @@ void CarControl::set_DAC() {
 
 void CarControl::switch_break_light() {
   // -10 means to switch on brak light at approx. 4km/h / s (1.1m/s^2)
-  carState.getPin(PinDO_BreakLight)->value = carState.AccelerationDisplay < -10 ? 1 : 0;  
+  carState.getPin(PinDO_BreakLight)->value = carState.AccelerationDisplay < -10 ? 1 : 0;
 }
 
 void CarControl::task(void *pvParams) {

@@ -165,7 +165,7 @@ bool IOExt::readAndHandlePins(PinHandleMode mode) {
       unsigned long timestamp = millis();
       // button: debounced time and value == 0 --> activate Handler
       // toggles: debounced time == 0, value 0|1 --> activate handler
-      if ( (pin.value == 0 || (pin.debounceTime_ms == 0 && pin.oldValue != pin.value)) &&
+      if ((pin.value == 0 || (pin.debounceTime_ms == 0 && pin.oldValue != pin.value)) &&
           (timestamp > pin.timestamp + pin.debounceTime_ms) &&
           (pin.continouseMode || pin.oldValue != pin.value || !pin.inited || mode == PinHandleMode::FORCED)) {
         if (ioExt.verboseModeDIn)

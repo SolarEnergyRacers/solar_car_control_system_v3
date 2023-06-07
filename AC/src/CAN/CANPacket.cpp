@@ -9,11 +9,12 @@
 
 CANPacket::CANPacket() {
   id = 0;
-  data.data_u64 = 0;
+  data.data_u64 = 0ull;
 }
 
 CANPacket::CANPacket(uint16_t id, uint8_t data[]) {
   this->id = id;
+  this->data.data_u64 = 0ull;
   for (int i = 0; i < 8; i++) {
     this->data.data_u8[i] = data[i];
   }

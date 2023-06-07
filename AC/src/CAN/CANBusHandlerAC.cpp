@@ -132,7 +132,7 @@ void CANBus::handle_rx_packet(CANPacket packet) {
   if (canBus.verboseModeCanInNative)
     console << print_raw_packet("R", packet) << NL;
 
-  carStateRadio.cache_filtered(packetId, packet);
+  carStateRadio.push_if_radio_packet(packetId, packet);
 
   switch (packetId) {
   case DC_BASE0x00:

@@ -12,9 +12,8 @@
 #include <CANRxBuffer.h>
 #include <CarState.h>
 
-
-
-#define AC_BASE0x00 AC_BASE_ADDR | 0x00 // AC: 
+// all handled CAN addresses:
+#define AC_BASE0x00 AC_BASE_ADDR | 0x00 // AC: LifeSign, switch constant mode Speed / Power, Kp,  Ki
 
 #define BmsBase0x00 BMS_BASE_ADDR | 0x00 // BMU_HEARTBEAT
 #define BmsBase0x01 BMS_BASE_ADDR | 0x01 // CMU_TEMP_CMU1
@@ -37,8 +36,11 @@
 #define BmsBase0xFC BMS_BASE_ADDR | 0xFC // PACK_FAN_STATUS
 #define BmsBase0xFD BMS_BASE_ADDR | 0xFD // EXT_PACK_STATUS
 
-#define DC_BASE0x00 DC_BASE_ADDR | 0x00 // DC: 
-#define DC_BASE0x01 DC_BASE_ADDR | 0x01 // DC:
+#define DC_BASE0x00 DC_BASE_ADDR | 0x00 // DC: LifeSign, Potentiometer, Acceleration, Deceleration
+#define DC_BASE0x01                                                                                                                        \
+  DC_BASE_ADDR | 0x01 // DC: TargetSpeed, TargetPower, AccelerationDisplay,
+                      //     Speed, Direction, DriveDirection, BreakPedal,
+                      //     MotorOn, ConstantModeOn
 
 #define Mppt1Base0x00 MPPT1_BASE_ADDR | 0x00 // MPPT_INPUT
 #define Mppt1Base0x01 MPPT1_BASE_ADDR | 0x01 // MPPT_OUTPUT
@@ -64,8 +66,6 @@
 #define Mppt3Base0x05 MPPT3_BASE_ADDR | 0x05 // MPPT_STATUS
 #define Mppt3Base0x06 MPPT3_BASE_ADDR | 0x06 // MPPT_POWER_CONN
 
-
-
 // init
 class CANBus : public AbstractTask {
 
@@ -76,7 +76,7 @@ public:
   string re_init(void);
   void exit(void);
   void task(void *pvParams);
-  bool is_to_ignore_packet(int packetId);
+  bool is_to_ignore_packet(uint16_t packetId);
 
   // Class functions and members
 private:
@@ -107,10 +107,11 @@ public:
   int counterI;
   int counterI_notAvail;
 
-  bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
-                   bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
-  bool writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3, bool force = false);
-  bool writePacket(uint16_t adr, CANPacket packet, bool force = false);
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, int8_t data_i8_4, uint8_t data_u8_5, uint8_t data_u8_6,
+                        bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3,
+                        bool force = false);
+  CANPacket writePacket(uint16_t adr, CANPacket packet, bool force = false);
 
   void pushIn(CANPacket packet) {
     rxBufferIn.push(packet);

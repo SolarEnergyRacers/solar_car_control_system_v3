@@ -28,6 +28,7 @@
 #include <CarControl.h>
 #include <CarState.h>
 #include <CarStatePin.h>
+#include <CarStateRadio.h>
 #include <CmdHandler.h>
 #include <Console.h>
 #include <Display.h>
@@ -43,6 +44,7 @@
 extern CANBus can;
 extern I2CBus i2cBus;
 extern CarState carState;
+extern CarStateRadio carStateRadio;
 extern CANBus canBus;
 extern CarControl carControl;
 extern Display display;
@@ -158,14 +160,21 @@ void CmdHandler::task(void *pvParams) {
           if (input[1] == '\0') {
             console << "Serial2 baudrate=" << carState.Serial2Baudrate << NL;
           } else if (input[1] == 'v') {
-            uart.verboseModeRadioSend = !uart.verboseModeRadioSend;
-            console << "set verboseModeRadioSend: " << uart.verboseModeRadioSend << NL;
-          } else {
-            carState.Serial2Baudrate = atof(&input[1]);
+            carStateRadio.verboseModeRadioSend = !carStateRadio.verboseModeRadioSend;
+            console << "set verboseModeRadioSend: " << carStateRadio.verboseModeRadioSend << NL;
+          } else if (input[1] == 'm') {
+            if (carStateRadio.mode == SEND_MODE::ASCII)
+              carStateRadio.mode = SEND_MODE::BINARY;
+            else
+              carStateRadio.mode = SEND_MODE::ASCII;
+            console << "set radio send: " << SEND_MODE_str[(int)carStateRadio.mode] << NL;
+          } else if (input[1] == 'r') {
+            carState.Serial2Baudrate = atof(&input[2]);
             Serial2.end();
             Serial2.begin(carState.Serial2Baudrate, SERIAL_8N1, SERIAL2_RX, SERIAL2_TX);
-            console << "Restart Serial2 with baudrate=" << carState.Serial2Baudrate << NL;
           }
+          console << "Serial2(radio) baudrate=" << carState.Serial2Baudrate << ", send mode: " << SEND_MODE_str[(int)carStateRadio.mode]
+                  << NL;
           break;
         case 'I':
           // console << "Received: '" << input << "' --> ";
@@ -316,9 +325,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {

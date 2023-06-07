@@ -37,7 +37,7 @@ void onReceive(int packetSize) {
     return;
   }
 
-  int packetId = CAN.packetId();
+  uint16_t packetId = CAN.packetId();
   if (canBus.is_to_ignore_packet(packetId)) {
     xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
     return;
@@ -105,21 +105,21 @@ void CANBus::exit() {
   xSemaphoreGive(mutex_in);
 }
 
-bool CANBus::writePacket(uint16_t adr,
-                         uint16_t data_u16_0, // Target Speed [float as value\*1000]
-                         uint16_t data_u16_1, // Target Power [float as value\*1000]
-                         int8_t data_i8_4,    // Display Acceleration
-                         uint8_t data_u8_5,   // empty
-                         uint8_t data_u8_6,   // Display Speed
-                         bool b_56,           // Fwd [1] / Bwd [0]
-                         bool b_57,           // Button Lvl Brake Pedal
-                         bool b_58,           // MC Off [0] / On [1]
-                         bool b_59,           // Constant Mode Off [false], On [true]
-                         bool b_60,           // empty
-                         bool b_61,           // empty
-                         bool b_62,           // empty
-                         bool b_63,           // empty
-                         bool force) {
+CANPacket CANBus::writePacket(uint16_t adr,
+                              uint16_t data_u16_0, // Target Speed [float as value\*1000]
+                              uint16_t data_u16_1, // Target Power [float as value\*1000]
+                              int8_t data_i8_4,    // Display Acceleration
+                              uint8_t data_u8_5,   // empty
+                              uint8_t data_u8_6,   // Display Speed
+                              bool b_56,           // Fwd [1] / Bwd [0]
+                              bool b_57,           // Button Lvl Brake Pedal
+                              bool b_58,           // MC Off [0] / On [1]
+                              bool b_59,           // Constant Mode Off [false], On [true]
+                              bool b_60,           // empty
+                              bool b_61,           // empty
+                              bool b_62,           // empty
+                              bool b_63,           // empty
+                              bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
@@ -138,13 +138,13 @@ bool CANBus::writePacket(uint16_t adr,
   return writePacket(adr, packet, force);
 }
 
-bool CANBus::writePacket(uint16_t adr,
-                         uint16_t data_u16_0, // LifeSign
-                         uint16_t data_u16_1, // Potentiometer value
-                         uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
-                         uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
-                         bool force) {
-  uint64_t data = 0;
+CANPacket CANBus::writePacket(uint16_t adr,
+                              uint16_t data_u16_0, // LifeSign
+                              uint16_t data_u16_1, // Potentiometer value
+                              uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
+                              uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
+                              bool force) {
+  uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
   packet.setData_u16(1, data_u16_1);
@@ -154,16 +154,16 @@ bool CANBus::writePacket(uint16_t adr,
 }
 
 std::map<uint16_t, CANPacket> packetsLast;
-bool CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
+CANPacket CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
   if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
     packetsLast[adr] = packet;
     pushOut(packet);
   }
-  return true;
+  return packet;
 }
 
 void CANBus::write_rx_packet(CANPacket packet) {
-  int adr = 0;
+  uint16_t adr = 0;
   try {
     // if (xSemaphoreTake(mutex_out, (TickType_t)32) != pdTRUE) {
     //   console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);
@@ -209,7 +209,6 @@ string CANBus::print_raw_packet(string msg, CANPacket packet) {
 void CANBus::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-     
       if (counterR_notAvail > 8 || counterI_notAvail > 8 || counterW_notAvail > 8) {
         console << NL
                 << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}", counterI_notAvail, counterI, counterR_notAvail, counterR,

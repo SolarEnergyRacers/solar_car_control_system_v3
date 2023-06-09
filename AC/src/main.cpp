@@ -36,6 +36,8 @@
 // local components
 #include <CANBus.h>
 #include <CarControl.h>
+#include <CarState.h>
+#include <CarStateRadio.h>
 #include <CmdHandler.h>
 #include <Console.h>
 #include <Display.h>
@@ -70,6 +72,7 @@ uint64_t life_sign = 0;
 CANBus canBus;
 CarControl carControl;
 CarState carState;
+CarStateRadio carStateRadio;
 CmdHandler cmdHandler;
 Console console;
 DriverDisplay driverDisplay;
@@ -95,10 +98,12 @@ Display display = Display(&ili9341);
 void app_main(void) {
   string msg;
   carState.init_values();
+  carStateRadio.verboseModeRadioSend = false;
 
   // init console IO and radio console
-  msg = uart.init();
-  uart.verboseModeRadioSend = false;
+  // msg = uart.init();
+  msg = uart.init_t(1, 60, 1000, base_offset_suspend + 100);
+  console << msg << NL;
   console << "------------------------------------------------------------" << NL;
   console << "-- gpio pin settings ---------------------------------------" << NL;
   msg = gpio.init();
@@ -113,12 +118,11 @@ void app_main(void) {
   i2cBus.verboseModeI2C = false;
   delay(200);
 
-  std::array<std::string,7> wd = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};  // todo: rm
-  console << fmt::format("main.o compiletime: {}:{}:{}  {}-{}-{} ({})\n", 
-  compiletime.Hour(), compiletime.Minute(), compiletime.Second(),
-  compiletime.Day(), compiletime.Month(), compiletime.Year(), wd[compiletime.DayOfWeek()]);
+  std::array<std::string, 7> wd = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; // todo: rm
+  console << fmt::format("main.o compiletime: {}:{}:{}  {}-{}-{} ({})\n", compiletime.Hour(), compiletime.Minute(), compiletime.Second(),
+                         compiletime.Day(), compiletime.Month(), compiletime.Year(), wd[compiletime.DayOfWeek()]);
   int RTC_err = globalTime.init(DS1307SquareWaveOut_Low, 1);
-  console << "RTC init errorcode: "<< RTC_err << "\n";
+  console << "RTC init errorcode: " << RTC_err << "\n";
   console << "RTC time: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";
   // sleep(5);
   // console << "time 5s: " << globalTime.strTime("%H:%M:%S %Y-%m-%d (%a)") << "\n";
@@ -241,18 +245,18 @@ void app_main(void) {
   ss << NL;
   ss << "----------------------------------------------------" << NL;
   ss << "Initialization ready as AuxiliaryController" << NL;
-  ss << fmt::format("- i2cBus.verboseModeI2C         = {}", i2cBus.verboseModeI2C) << NL;
-  ss << fmt::format("- canBus.verboseModeCanIn       = {}", canBus.verboseModeCanIn) << NL;
-  ss << fmt::format("-        verboseModeCanInNative = {}", canBus.verboseModeCanInNative) << NL;
-  ss << fmt::format("-        verboseModeCanOut      = {}", canBus.verboseModeCanOut) << NL;
-  ss << fmt::format("-        verboseModeCanOutNative= {}", canBus.verboseModeCanOutNative) << NL;
-  ss << fmt::format("-        verboseModeCanBusLoad  = {}", canBus.verboseModeCanBusLoad) << NL;
-  ss << fmt::format("- carControl.verboseModeCC      = {}", carControl.verboseModeCarControl) << NL;
-  ss << fmt::format("-            verboseModeCCDebug = {}", carControl.verboseModeCarControlDebug) << NL;
-  ss << fmt::format("- engineerDisplay.verboseModeED = {}", engineerDisplay.verboseModeEngineer) << NL;
-  ss << fmt::format("- driverDisplay.verboseModeDD   = {}", driverDisplay.verboseModeDriver) << NL;
-  ss << fmt::format("- uart.verboseModeRadioSend     = {}", uart.verboseModeRadioSend) << NL;
-  ss << fmt::format("- sdCard.verboseModeSdCard      = {}", sdCard.verboseModeSdCard) << NL;
+  ss << fmt::format("- i2cBus.verboseModeI2C              = {}", i2cBus.verboseModeI2C) << NL;
+  ss << fmt::format("- canBus.verboseModeCanIn            = {}", canBus.verboseModeCanIn) << NL;
+  ss << fmt::format("-        verboseModeCanInNative      = {}", canBus.verboseModeCanInNative) << NL;
+  ss << fmt::format("-        verboseModeCanOut           = {}", canBus.verboseModeCanOut) << NL;
+  ss << fmt::format("-        verboseModeCanOutNative     = {}", canBus.verboseModeCanOutNative) << NL;
+  ss << fmt::format("-        verboseModeCanBusLoad       = {}", canBus.verboseModeCanBusLoad) << NL;
+  ss << fmt::format("- carControl.verboseModeCC           = {}", carControl.verboseModeCarControl) << NL;
+  ss << fmt::format("-            verboseModeCCDebug      = {}", carControl.verboseModeCarControlDebug) << NL;
+  ss << fmt::format("- engineerDisplay.verboseModeED      = {}", engineerDisplay.verboseModeEngineer) << NL;
+  ss << fmt::format("- driverDisplay.verboseModeDD        = {}", driverDisplay.verboseModeDriver) << NL;
+  ss << fmt::format("- carStateRadio.verboseModeRadioSend = {}", carStateRadio.verboseModeRadioSend) << NL;
+  ss << fmt::format("- sdCard.verboseModeSdCard           = {}", sdCard.verboseModeSdCard) << NL;
   ss << "----------------------------------------------------" << NL;
   // vTaskDelay(10);
   console << ss.str();

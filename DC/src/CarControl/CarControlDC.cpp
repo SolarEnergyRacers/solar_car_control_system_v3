@@ -22,7 +22,7 @@
 #include <DAC.h>
 #include <Helper.h>
 #include <I2CBus.h>
-// #include <IOExt.h>
+#include <IOExt.h>
 // #include <MCP23017.h>
 
 extern ADC adc;
@@ -33,7 +33,7 @@ extern CarState carState;
 extern Console console;
 extern DAC dac;
 extern I2CBus i2cBus;
-// extern IOExt ioExt;
+extern IOExt ioExt;
 
 extern bool SystemInited;
 
@@ -174,6 +174,11 @@ void CarControl::set_DAC() {
   }
 }
 
+void CarControl::switch_break_light() {
+  // -10 means to switch on brak light at approx. 4km/h / s (1.1m/s^2)
+  carState.getPin(PinDO_BreakLight)->value = carState.AccelerationDisplay < -10 ? 1 : 0;
+}
+
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
@@ -189,17 +194,14 @@ void CarControl::task(void *pvParams) {
         force = true;
       }
 
-      // update OUTPUT pins
-      // ioExt.writeAllPins(PinHandleMode::FORCED);
       read_reference_cell_data();
-      // vTaskDelay(10);
       read_speed();
-      // vTaskDelay(10);
       read_potentiometer();
-      // vTaskDelay(10);
       if (read_paddles())
         set_DAC();
-      // vTaskDelay(10);
+      switch_break_light();
+      // update OUTPUT pins
+      ioExt.writeAllPins(PinHandleMode::FORCED);
 
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign

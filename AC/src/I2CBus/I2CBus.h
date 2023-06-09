@@ -43,10 +43,10 @@ public:
 
   enum Address {
     _Master_ = 0x00,
-    _ExtIO_  = I2C_ADDRESS_MCP23017_IOExt0,
-    _DAC_    = I2C_ADDRESS_DS1803,
-    _ADC_    = I2C_ADDRESS_ADS1x15,
-    _RTC_    = I2C_ADDRESS_DS1307
+    _ExtIO_ = I2C_ADDRESS_MCP23017_IOExt0,
+    _DAC_ = I2C_ADDRESS_DS1803,
+    _ADC_ = I2C_ADDRESS_ADS1x15,
+    _RTC_ = I2C_ADDRESS_DS1307
   };
 };
 

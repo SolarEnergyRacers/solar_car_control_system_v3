@@ -73,6 +73,9 @@ public:
     }
   }
   bool getData_b(uint8_t index) { return this->data.b64 & BIT64(index); }
+
+  static const uint BUFFER_SIZE = 11;
+  void to_serial(uint16_t adr, std::array<uint8_t, BUFFER_SIZE> &buffer);
 };
 
 // if (status & BIT(1)) {

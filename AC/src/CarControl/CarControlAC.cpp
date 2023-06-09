@@ -15,21 +15,19 @@
 #include <CANBus.h>
 #include <CarControl.h>
 #include <CarState.h>
+#include <CarStateRadio.h>
 #include <Console.h>
-// #include <DriverDisplay.h>
-// #include <EngineerDisplay.h>
 #include <Helper.h>
 #include <I2CBus.h>
 #include <SDCard.h>
-#include <Serial.h>
 
 extern CANBus canBus;
 extern CarControl carControl;
 extern CarState carState;
+extern CarStateRadio carStateRadio;
 extern Console console;
 extern I2CBus i2cBus;
 extern SDCard sdCard;
-extern Uart uart;
 
 extern bool SystemInited;
 
@@ -155,19 +153,19 @@ void CarControl::task(void *pvParams) {
       // vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
       uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
-      canBus.writePacket(AC_BASE_ADDR | 0x00,
-                         carState.LifeSign,      // LifeSign
-                         (uint16_t)constantMode, // switch constant mode Speed / Power
-                         (uint16_t)0,            // Kp
-                         (uint16_t)0,            // Ki
-                         force                   // force or not
+      CANPacket packet = canBus.writePacket(AC_BASE0x00,
+                                            carState.LifeSign,      // LifeSign
+                                            (uint16_t)constantMode, // switch constant mode Speed / Power
+                                            (uint16_t)0,            // Kp
+                                            (uint16_t)0,            // Ki
+                                            force                   // force or not
       );
-      // vTaskDelay(10);
+      carStateRadio.push_if_radio_packet(AC_BASE0x00, packet);
 #endif
       if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[I:{:02d}|{:02d},O::{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ",
                                canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
-                               canBus.getMaxPacketsBufferOutUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
+                               canBus.getMaxPacketsBufferOutUsage(), AC_BASE0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
       // self destroying engineer info
       if (carState.EngineerInfo.compare(carStateEngineerInfoLast) != 0) {
@@ -177,7 +175,7 @@ void CarControl::task(void *pvParams) {
       if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
         carStateEngineerInfoLast = carState.EngineerInfo = "";
       }
-      //  log file one data row per LogInterval
+      // log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
         if (verboseModeCarControl)
           console << carState.drive_data();
@@ -190,15 +188,7 @@ void CarControl::task(void *pvParams) {
         }
         // vTaskDelay(10);
         if (millis() > millisNextStampSnd) {
-          // send serail2 --> radio
-          stringstream ss;
-          ss << "d: Interval=" << carState.CarDataSendPeriod << ", Rec: " << record;
-          console << ss.str();
-          if (uart.verboseModeRadioSend) {
-            stringstream sss; // prevent from hiding
-            sss << "RADIO:: " << ss.str();
-            console << sss.str();
-          }
+          carStateRadio.send();
           millisNextStampSnd = millis() + carState.CarDataSendPeriod;
         }
       }

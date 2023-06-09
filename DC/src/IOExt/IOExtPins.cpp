@@ -9,7 +9,7 @@
 #include <IOExtHandler.h>
 
 CarStatePin CarState::pins[] = {
-    // port (device|pin), mask, I/O mode, value, oldValue, inited, timestamp, name, 
+    // port (device|pin), mask, I/O mode, value, oldValue, inited, timestamp, name,
     // handler, continouse mode, debaunce time (==0 for toggles!)
     //
     // IOExtDev0-PortA (main board)

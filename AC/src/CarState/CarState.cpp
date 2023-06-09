@@ -85,7 +85,7 @@ bool CarState::initalize_config() {
     // [Communication]
     CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 3000);
     Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);
-    Serial2Baudrate = cf.get("Communication", "Serial2Baudrate", 9600);
+    Serial2Baudrate = cf.get("Communication", "Serial2Baudrate", 115200);
     // [Telemetry]
     SendInterval = cf.get("Telemetry", "", 1000);
     MaxCachedRecords = cf.get("Telemetry", "MaxCachedRecords", 100);
@@ -245,16 +245,12 @@ const string CarState::serialize(string msg) {
 }
 
 const string CarState::csv(string msg, bool withHeader) {
-  // string timeStamp = getDateTime();
-  // string timeStamp = globalTime.strTime("%F %R");
-  // timeStamp.erase(timeStamp.end() - 1);
-
   stringstream ss;
   if (withHeader) {
     // header
     ss << "DateTimeStamp,";
     ss << "uptime,";
-    ss << "LifeSign";
+    ss << "LifeSign,";
     ss << "msg,";
     ss << "potentiomenter,";
     ss << "speed,";
@@ -262,7 +258,6 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "deceleration,";
     ss << "accelerationDisplay,";
 
-    // ss << "batteryOn,";
     ss << "batteryVoltage,";
     ss << "batteryCurrent,";
     ss << "batteryErrors,";
@@ -286,8 +281,6 @@ const string CarState::csv(string msg, bool withHeader) {
 
     ss << "driveDirection,";
     ss << "constantMode,";
-    ss << "sdCardDetected,";
-
     ss << "displayStatus,";
 
     ss << "targetSpeed,";
@@ -298,10 +291,10 @@ const string CarState::csv(string msg, bool withHeader) {
     ss << "engineerInfo,";
     ss << "driverInfo,";
     ss << "speedArrow,";
-    ss << "light,";
-    ss << "greenLight,";
-    ss << "fan,";
-    ss << "io";
+    // ss << "light,";
+    // ss << "greenLight,";
+    // ss << "fan,";
+    // ss << "io";
     ss << NL;
   }
   // data
@@ -315,7 +308,6 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << (int)Deceleration << ", ";
   ss << (int)AccelerationDisplay << ", ";
 
-  // ss << BatteryOn << ", ";
   ss << floor(BatteryVoltage * 1000.0 + .5) / 1000.0 << ", ";
   ss << floor(BatteryCurrent * 1000.0 + .5) / 1000.0 << ", ";
   ss << batteryErrorsAsString() << ", ";
@@ -339,7 +331,6 @@ const string CarState::csv(string msg, bool withHeader) {
 
   ss << DRIVE_DIRECTION_str[(int)(DriveDirection)] << ", ";
   ss << CONSTANT_MODE_str[(int)(ConstantMode)] << ", ";
-  ss << SdCardDetect << ", ";
 
   ss << DISPLAY_STATUS_str[(int)displayStatus] << ", ";
 
@@ -350,12 +341,7 @@ const string CarState::csv(string msg, bool withHeader) {
   ss << TargetPower << ", ";
   ss << fmt::format("\"EngInf {}: {}\"", "", getCleanString(EngineerInfo)) << ", ";
   ss << fmt::format("\"DrvInf {}: {}\"", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo)) << ", ";
-  ss << SPEED_ARROW_str[(int)SpeedArrow] << ", ";
-  ss << LIGHT_str[(int)(Light)] << ", ";
-  ss << GreenLight << ", ";
-  ss << Fan << ", ";
-  ss << printIOs("", false).c_str() << ", ";
-  ss << NL;
+  ss << SPEED_ARROW_str[(int)SpeedArrow] << NL;
   return ss.str();
 }
 
@@ -410,42 +396,38 @@ const string CarState::printIOs(string msg, bool withColors, bool deltaOnly) {
 }
 
 const string CarState::batteryErrorsAsString(bool verbose /*= false*/) {
+  int counter = BatteryErrors.size();
   stringstream ss;
-
   ss << "[";
-
-  if (verbose) {
-    for (auto const &battErr : BatteryErrors) {
-      ss << BATTERY_ERROR_str[(int)(battErr)] << "-";
+  for (auto const &battErr : BatteryErrors) {
+    if (verbose) {
+      ss << BATTERY_ERROR_str[(int)(battErr)];
+    } else {
+      ss << (int)(battErr);
     }
-  } else {
-    for (auto const &battErr : BatteryErrors) {
-      ss << (int)(battErr) << "-";
-    }
+    ss << (--counter > 0 ? "-" : "");
   }
-
   ss << "]";
-
   return ss.str();
 }
 
 const string CarState::drive_data() {
-  const char *spaces = "                              ";
+  const char *ident = "                              ";
   stringstream ss;
-  ss << globalTime.strTime("%FT%X") << ", ";
-  ss << globalTime.strUptime() << ", ";
-  ss << LifeSign << " ";
-  ss << fmt::format("Spd:{:3d}, Accel:{:3d}\n{}", Speed, AccelerationDisplay, spaces);
-  ss << fmt::format("[MotC={:4.1f}A ({}) | BatV={:5.1f}V {} Umin={:5.3f} | Uavg={:5.3f} | Umax={:5.3f} | Tmin={:4.1f} "
-                    "Tmax={:4.1f}]\n{}",
-                    MotorCurrent, MotorOn ? "ON!" : "off", BatteryVoltage, batteryErrorsAsString(), Umin, Uavg, Umax, Tmin, Tmax, spaces);
-  ss << fmt::format("[PvC ={:4.1f}A (___) | MT1={:5.2f}A | MT2={:5.2f}A | MT3={:5.2f}A] ", PhotoVoltaicCurrent, Mppt1Current, Mppt2Current,
-                    Mppt3Current);
-  ss << DRIVE_DIRECTION_str[(int)(DriveDirection)] << ", ";
-  ss << fmt::format("sdCard detect:{}, mounted:{}\n{}", SdCardDetect, sdCard.isMounted(), spaces);
-  ss << fmt::format("\"DrvInf {}: {}\", ", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo));
-  ss << fmt::format("Target: {:2d}/{:4.1f} {} [p={:5.2f} i={:5.2f} d={:5.2f}]", (int)TargetSpeed, TargetPower,
-                    ConstantModeOn ? CONSTANT_MODE_str[(int)(ConstantMode)] : "off", (float)Kp, (float)Ki, (float)Kd);
+  ss << globalTime.strTime("%F %X") << " ~";
+  ss << globalTime.strUptime() << " ";
+  // ss << LifeSign << " ";
+  ss << fmt::format("Speed:  {:3d}km/h,  Accel:{:3d}%    ", Speed, AccelerationDisplay);
+  ss << fmt::format("Target({}): {:3d}km/h-{:4.1f}kW [p={:5.2f} i={:5.2f} d={:5.2f}] {}\n{}",
+                    ConstantModeOn ? CONSTANT_MODE_str[(int)(ConstantMode)] : "manual", (int)TargetSpeed, TargetPower, (float)Kp, (float)Ki,
+                    (float)Kd, DRIVE_DIRECTION_str[(int)(DriveDirection)], ident);
+  ss << fmt::format("[MotC={:4.1f}A ({}) | BatV={:5.1f}V [Umin={:5.3f}V | Uavg={:5.3f}V | Umax={:5.3f}V] Tmin={:4.1f}°C "
+                    "Tmax={:4.1f}°C] {}\n{}",
+                    MotorCurrent, MotorOn ? "ON!" : "off", BatteryVoltage, Umin, Uavg, Umax, Tmin, Tmax, batteryErrorsAsString(), ident);
+  ss << fmt::format("[PvC ={:4.1f}A (___) | MT1={:5.2f}A | MT2={:5.2f}A | MT3={:5.2f}A]\n{}", PhotoVoltaicCurrent, Mppt1Current,
+                    Mppt2Current, Mppt3Current, ident);
+  ss << fmt::format("[DrvInf {}: {}]\n{}", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo), ident);
+  ss << fmt::format("sdCard: {} detected & {} mounted", SdCardDetect ? "" : "not", sdCard.isMounted() ? "" : "not", ident);
   ss << NL;
   return ss.str();
 }

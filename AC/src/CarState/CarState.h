@@ -13,6 +13,7 @@
 
 #include <definitions.h>
 
+#include <CANPacket.h>
 #include <CarStatePin.h>
 
 using namespace std;
@@ -239,8 +240,8 @@ public:
 
   // [Communication]
   int CarDataSendPeriod;        // [ms]
-  int Serial1Baudrate = 115200; // baud
-  int Serial2Baudrate = 9600;   // baud
+  unsigned long Serial1Baudrate = 115200; // baud
+  unsigned long Serial2Baudrate = 115200;   // baud
 
   // [Telemetry]
   int SendInterval;     // [ms]
@@ -253,6 +254,9 @@ public:
   const string csv(string msg = "", bool withHeader = false);
   const string batteryErrorsAsString(bool verbose = false);
   const string drive_data();
+
+  // // CANBus
+  // std::map<uint16_t, CANPacket> packet_cache;
 };
 
 #endif // CARSTATE_H

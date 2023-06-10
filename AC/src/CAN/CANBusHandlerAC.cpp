@@ -77,6 +77,12 @@ void CANBus::init_ages() {
   max_ages[Mppt3Base0x05] = MAXAGE_MPPT_STATUS;
   max_ages[Mppt3Base0x06] = MAXAGE_MPPT_POWER_CONN;
 
+  max_ages[McBase0x00] = MAXAGE_MC;
+  max_ages[McBase0x0e] = MAXAGE_MC;
+  max_ages[McBase0x0f] = MAXAGE_MC;
+  max_ages[McBase0x10] = MAXAGE_MC;
+  max_ages[McBase0x1b] = MAXAGE_MC;
+
   // init ages
   ages[BmsBase0x00] = INT32_MAX;
   ages[BmsBase0x01] = INT32_MAX; // CMU1
@@ -122,6 +128,12 @@ void CANBus::init_ages() {
   ages[Mppt3Base0x04] = INT32_MAX;
   ages[Mppt3Base0x05] = INT32_MAX;
   ages[Mppt3Base0x06] = INT32_MAX;
+
+  ages[McBase0x00] = MAXAGE_MC_S;
+  ages[McBase0x0e] = MAXAGE_MC_S2;
+  ages[McBase0x0f] = MAXAGE_MC_S3;
+  ages[McBase0x10] = MAXAGE_MC_S4;
+  ages[McBase0x1b] = MAXAGE_MC_S5;
 }
 
 void CANBus::handle_rx_packet(CANPacket packet) {
@@ -328,5 +340,37 @@ void CANBus::handle_rx_packet(CANPacket packet) {
     if (verboseModeCanIn) {
       console << "T3=" << carState.T3 << NL;
     }
+
+  case McBase0x00:
+    // carState. = packet.getData();
+    // if (verboseModeCanIn) {
+    //   console << "=" << carState. << NL;
+    // }
+    break;
+  case McBase0x0e:
+    // carState. = packet.getData();
+    // if (verboseModeCanIn) {
+    //   console << "=" << carState. << NL;
+    // }
+    break;
+  case McBase0x0f:
+    // carState. = packet.getData();
+    // if (verboseModeCanIn) {
+    //   console << "=" << carState. << NL;
+    // }
+    break;
+  case McBase0x10:
+    // carState. = packet.getData();
+    // if (verboseModeCanIn) {
+    //   console << "=" << carState. << NL;
+    // }
+    break;
+  case McBase0x1b:
+    // carState. = packet.getData();
+    // if (verboseModeCanIn) {
+    //   console << "=" << carState. << NL;
+    // }
+
+    break;
   }
 }

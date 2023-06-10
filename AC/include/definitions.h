@@ -100,7 +100,7 @@
 #define MPPT1_BASE_ADDR 0x600
 #define MPPT2_BASE_ADDR 0x610
 #define MPPT3_BASE_ADDR 0x620
-#define MC_BASE_ADDR 0x700
+#define MC_BASE_ADDR 0x000
 #define CAN_RX_BUFFER_SIZE 20
 #define CAN_TASK_WAIT 50
 
@@ -135,6 +135,12 @@
 #define MAXAGE_MPPT_LIMITS 0
 #define MAXAGE_MPPT_STATUS 0
 #define MAXAGE_MPPT_POWER_CONN 5000
+
+#define MAXAGE_MC_S 0
+#define MAXAGE_MC_S2 0
+#define MAXAGE_MC_S3 0
+#define MAXAGE_MC_S4 0
+#define MAXAGE_MC_S5 0
 
 /*
  *  SPI

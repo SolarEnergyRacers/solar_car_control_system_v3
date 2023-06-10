@@ -42,6 +42,7 @@ AC/sdkconfig.esp32dev.old
 # local tools settings
 **/.vscode
 AC/.pio/**
+DC/.pio/**
 
 # console log files
 tio-USB*.log

@@ -218,10 +218,74 @@ f_16   | [0]    | 0,1    | Kp [float as value*1000]
 f_16   | [1]    | 2,3    | Ki [float as value*1000]
 f_16   | [2]    | 4,5    | Kd [float as value*1000]
 
-### MC
+### MC - Motor Controller
 
-MC CAN Definition: [github.com/vedderb/bldc/blob/master/documentation/comm_can.md](https://github.com/vedderb/bldc/blob/master/documentation/comm_can.md#status-commands)
+MC_BASE_ADDR: **0x000**
 
-MC_BASE_ADDR = 0x700
+Intervall: 1000ms
+
+MC CAN description: [github.com/vedderb/bldc/blob/master/documentation/comm_can.md](https://github.com/vedderb/bldc/blob/master/documentation/comm_can.md#status-commands)
 
 CAN_PACKET_STATUS_0 - CAN_PACKET_STATUS_5** 
+
+| Format | IdxFmt | Index8 | Meaning                  |
+| ------ | ------ | ------ | ------------------------ |
+|    |    |     |  |
+
+| **Command Name** | **Command Id** | **Content** |
+|--------------|------------|---------|
+| CAN_PACKET_STATUS   |  9 (0x09) | ERPM, Current, Duty Cycle |
+| CAN_PACKET_STATUS_2 | 14 (0x0e) | Ah Used, Ah Charged |
+| CAN_PACKET_STATUS_3 | 15 (0x0f) | Wh Used, Wh Charged |
+| CAN_PACKET_STATUS_4 | 16 (0x10) | Temp Fet, Temp Motor, Current In, PID position |
+| CAN_PACKET_STATUS_5 | 27 (0x1b) | Tachometer, Voltage In |
+| ~~CAN_PACKET_STATUS_6~~ | ~~28 (0x1c)~~ | ~~ADC1, ADC2, ADC3, PPM~~ |
+
+The content of the status messages is encoded as follows:
+
+**CAN_PACKET_STATUS**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | ERPM | RPM | 1 |
+| B4 - B5 | Current | A | 10 |
+| B6 - B7 | Duty Cycle | % / 100 | 1000 |
+
+**CAN_PACKET_STATUS_2**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | Amp Hours | Ah | 10000 |
+| B4 - B7 | Amp Hours Chg | Ah | 10000 |
+
+**CAN_PACKET_STATUS_3**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | Watt Hours | Wh | 10000 |
+| B4 - B7 | Watt Hours Chg | Wh | 10000 |
+
+**CAN_PACKET_STATUS_4**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B1 | Temp FET | DegC | 10 |
+| B2 - B3 | Temp Motor | DegC | 10 |
+| B4 - B5 | Current In | A | 10 |
+| B6 - B7 | PID Pos | Deg | 50 |
+
+**CAN_PACKET_STATUS_5**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | Tachometer | EREV | 6 |
+| B4 - B5 | Volts In | V | 10 |
+
+~~**CAN_PACKET_STATUS_6**~~
+
+| ~~**Byte**~~ | ~~**Data**~~ | ~~**Unit**~~ | ~~**Scale**~~ |
+|------|------|------|-------|
+| ~~B0 - B1~~ | ~~ADC1~~ | ~~V~~ | ~~1000~~ |
+| ~~B2 - B3~~ | ~~ADC2~~ | ~~V~~ | ~~1000~~ |
+| ~~B4 - B5~~ | ~~ADC3~~ | ~~V~~ | ~~1000~~ |
+| ~~B6 - B7~~ | ~~PPM~~ | ~~% / 100~~ | ~~1000~~ |

@@ -42,6 +42,7 @@ private:
       (uint16_t)BmsBase0xF9,   //
       (uint16_t)BmsBase0xFA,   //
       (uint16_t)BmsBase0xFD,   //
+      MC_BASE_ADDR
       // nice to have
       (uint16_t)Mppt1Base0x00, //
       (uint16_t)Mppt1Base0x02, //

@@ -66,6 +66,13 @@
 #define Mppt3Base0x05 MPPT3_BASE_ADDR | 0x05 // MPPT_STATUS
 #define Mppt3Base0x06 MPPT3_BASE_ADDR | 0x06 // MPPT_POWER_CONN
 
+#define McBase0x00 MC_BASE_ADDR | 0x09 // ERPM, Current, Duty Cycle
+#define McBase0x0e MC_BASE_ADDR | 0x0e // Ah Used, Ah Charged
+#define McBase0x0f MC_BASE_ADDR | 0x0f // Wh Used, Wh Charged
+#define McBase0x10 MC_BASE_ADDR | 0x10 // Temp Fet, Temp Motor, Current In, PID position
+#define McBase0x1b MC_BASE_ADDR | 0x1b // Tachometer, Voltage In
+
+
 // init
 class CANBus : public AbstractTask {
 

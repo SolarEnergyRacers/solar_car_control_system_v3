@@ -107,6 +107,8 @@ private:
   void handle_rx_packet(CANPacket packet);
   CANPacket popOut() { return rxBufferOut.pop(); }
   void write_rx_packet(CANPacket packet);
+  
+  uint16_t normalize_CAN_address(CANPacket *packet); // H-L-byte exchange for som addresses comming from MC
 
 public:
   CANBus();

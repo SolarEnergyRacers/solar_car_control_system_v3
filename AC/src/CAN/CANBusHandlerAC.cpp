@@ -77,11 +77,11 @@ void CANBus::init_ages() {
   max_ages[Mppt3Base0x05] = MAXAGE_MPPT_STATUS;
   max_ages[Mppt3Base0x06] = MAXAGE_MPPT_POWER_CONN;
 
-  max_ages[McBase0x00] = MAXAGE_MC;
-  max_ages[McBase0x0e] = MAXAGE_MC;
-  max_ages[McBase0x0f] = MAXAGE_MC;
-  max_ages[McBase0x10] = MAXAGE_MC;
-  max_ages[McBase0x1b] = MAXAGE_MC;
+  max_ages[McBase0x00] = MAXAGE_MC_S;
+  max_ages[McBase0x0e] = MAXAGE_MC_S2;
+  max_ages[McBase0x0f] = MAXAGE_MC_S3;
+  max_ages[McBase0x10] = MAXAGE_MC_S4;
+  max_ages[McBase0x1b] = MAXAGE_MC_S5;
 
   // init ages
   ages[BmsBase0x00] = INT32_MAX;
@@ -136,11 +136,22 @@ void CANBus::init_ages() {
   ages[McBase0x1b] = MAXAGE_MC_S5;
 }
 
+std::map<uint16_t, uint16_t> can_address_map = {{0x950, 0x509}, {0xe50, 0x50e}, {0xf50, 0x50f}, {0x1050, 0x510}, {0x1b50, 0x51b}};
+uint16_t CANBus::normalize_CAN_address(CANPacket *packet) {
+  uint16_t packetId = packet->getId();
+  if (can_address_map.find(packetId) == can_address_map.end()) {
+    packet->setId(can_address_map[packetId]);
+  }
+  return packet->getId();
+}
+
 void CANBus::handle_rx_packet(CANPacket packet) {
   uint16_t packetId = packet.getId();
   if (packetId == 0)
     return;
   counterR++;
+  normalize_CAN_address(&packet);
+
   if (canBus.verboseModeCanInNative)
     console << print_raw_packet("R", packet) << NL;
 

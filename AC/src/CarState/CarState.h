@@ -239,9 +239,9 @@ public:
   int ConstPowerIncrease; // [W] per click
 
   // [Communication]
-  int CarDataSendPeriod = 1000;        // [ms]
+  int CarDataSendPeriod = 1000;           // [ms]
   unsigned long Serial1Baudrate = 115200; // baud
-  unsigned long Serial2Baudrate = 115200;   // baud
+  unsigned long Serial2Baudrate = 115200; // baud
 
   // [Telemetry]
   int SendInterval;     // [ms]

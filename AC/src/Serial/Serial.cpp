@@ -46,7 +46,7 @@ string Uart::init() {
   Serial2.begin(carState.Serial2Baudrate, SERIAL_8N1, SERIAL2_RX, SERIAL2_TX);
   // Serial2.enableIntTx(false);
   // Serial2.onReceive(receiveHandler);
-  //delay(1000);
+  // delay(1000);
   // both Serial and Serial2 inited -> from now the Console class is usable
   console << "     ---Serial2 HC-12------\n";
   console << "     Serial2 TX2 is on pin: " << to_string(SERIAL2_TX) << "\n";

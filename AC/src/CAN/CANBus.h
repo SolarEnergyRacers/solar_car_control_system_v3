@@ -72,7 +72,6 @@
 #define McBase0x10 MC_BASE_ADDR | 0x10 // Temp Fet, Temp Motor, Current In, PID position
 #define McBase0x1b MC_BASE_ADDR | 0x1b // Tachometer, Voltage In
 
-
 // init
 class CANBus : public AbstractTask {
 
@@ -107,7 +106,7 @@ private:
   void handle_rx_packet(CANPacket packet);
   CANPacket popOut() { return rxBufferOut.pop(); }
   void write_rx_packet(CANPacket packet);
-  
+
   uint16_t normalize_CAN_address(CANPacket *packet); // H-L-byte exchange for som addresses comming from MC
 
 public:

@@ -325,9 +325,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {

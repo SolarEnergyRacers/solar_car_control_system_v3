@@ -351,37 +351,28 @@ void CANBus::handle_rx_packet(CANPacket packet) {
     if (verboseModeCanIn) {
       console << "T3=" << carState.T3 << NL;
     }
-
-  case McBase0x00:
-    // carState. = packet.getData();
-    // if (verboseModeCanIn) {
-    //   console << "=" << carState. << NL;
-    // }
     break;
-  case McBase0x0e:
-    // carState. = packet.getData();
-    // if (verboseModeCanIn) {
-    //   console << "=" << carState. << NL;
-    // }
+  case McBase0x00: // ERPM, Current, Duty Cycle
+    carState.MotorCurrent = packet.getData_u16(4) / 10;
+    if (verboseModeCanIn) {
+      console << "McCurrent=" << carState.MotorCurrent << NL;
+    }
     break;
-  case McBase0x0f:
-    // carState. = packet.getData();
-    // if (verboseModeCanIn) {
-    //   console << "=" << carState. << NL;
-    // }
+  case McBase0x0e: // Tachometer, Voltage In
+    if (verboseModeCanIn) {
+    }
     break;
-  case McBase0x10:
-    // carState. = packet.getData();
-    // if (verboseModeCanIn) {
-    //   console << "=" << carState. << NL;
-    // }
+  case McBase0x0f: // Ah Used, Ah Charged
+    if (verboseModeCanIn) {
+    }
     break;
-  case McBase0x1b:
-    // carState. = packet.getData();
-    // if (verboseModeCanIn) {
-    //   console << "=" << carState. << NL;
-    // }
-
+  case McBase0x10: // Wh Used, Wh Charged
+    if (verboseModeCanIn) {
+    }
+    break;
+  case McBase0x1b: // Temp Fet, Temp Motor, Current In, PID position
+    if (verboseModeCanIn) {
+    }
     break;
   }
 }

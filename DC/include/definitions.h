@@ -107,7 +107,6 @@
 #define AC_BASE_ADDR 0x630
 #define DC_BASE_ADDR 0x660
 
-
 /* CAN Frame max ages
  *  ------------------
  *  in ms
@@ -139,6 +138,12 @@
 #define MAXAGE_MPPT_LIMITS 0
 #define MAXAGE_MPPT_STATUS 0
 #define MAXAGE_MPPT_POWER_CONN 5000
+
+#define MAXAGE_MC_S 0
+#define MAXAGE_MC_S2 1000
+#define MAXAGE_MC_S3 1000
+#define MAXAGE_MC_S4 0
+#define MAXAGE_MC_S5 0
 
 /*
  *  SPI

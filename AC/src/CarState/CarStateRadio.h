@@ -37,12 +37,35 @@ private:
       (uint16_t)Mppt2Base0x01, //
       (uint16_t)Mppt3Base0x01, //
       (uint16_t)BmsBase0x00,   //
+      (uint16_t)BmsBase0x01,   //
+      (uint16_t)BmsBase0x02,   //
+      (uint16_t)BmsBase0x03,   //
+      (uint16_t)BmsBase0x03,   //
+      (uint16_t)BmsBase0x04,   //
+      (uint16_t)BmsBase0x05,   //
+      (uint16_t)BmsBase0x06,   //
+      (uint16_t)BmsBase0x07,   //
+      (uint16_t)BmsBase0x08,   //
+      (uint16_t)BmsBase0x09,   //
+      (uint16_t)BmsBase0x0A,   //
+      (uint16_t)BmsBase0x0B,   //
+      (uint16_t)BmsBase0x0C,   //
+      (uint16_t)BmsBase0xF4,   //
+      (uint16_t)BmsBase0xF5,   //
+      (uint16_t)BmsBase0xF6,   //
+      (uint16_t)BmsBase0xF7,   //
+      (uint16_t)BmsBase0xF8,   //
+      (uint16_t)BmsBase0xF9,   //
+      (uint16_t)BmsBase0xFA,   //
+      (uint16_t)BmsBase0xFB,   //
+      (uint16_t)BmsBase0xFC,   //
+      (uint16_t)BmsBase0xFD,   //
       (uint16_t)BmsBase0xF7,   //
       (uint16_t)BmsBase0xF8,   //
       (uint16_t)BmsBase0xF9,   //
       (uint16_t)BmsBase0xFA,   //
       (uint16_t)BmsBase0xFD,   //
-      (uint16_t)McBase0x00,    //
+      (uint16_t)McBase0x09,    //
       (uint16_t)McBase0x0e,    //
       (uint16_t)McBase0x0f,    //
       (uint16_t)McBase0x10,    //

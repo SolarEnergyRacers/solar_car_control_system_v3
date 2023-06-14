@@ -198,7 +198,7 @@ public:
   bool SdCardDetect;
 
   float TargetSpeed;
-  float TargetRecuperation;
+  // TODO: delete: float TargetRecuperation;
   float TargetPower;
   string EngineerInfo;
   string DriverInfo;

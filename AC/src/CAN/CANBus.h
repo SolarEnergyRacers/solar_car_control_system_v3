@@ -25,6 +25,10 @@
 #define BmsBase0x07 BMS_BASE_ADDR | 0x07 // CMU_VOLTAGES_CMU2
 #define BmsBase0x08 BMS_BASE_ADDR | 0x08 // CMU_VOLTAGES_CMU3
 #define BmsBase0x09 BMS_BASE_ADDR | 0x09 // CMU_VOLTAGES_CMU3
+#define BmsBase0x09 BMS_BASE_ADDR | 0x09 //
+#define BmsBase0x0A BMS_BASE_ADDR | 0x0A //
+#define BmsBase0x0B BMS_BASE_ADDR | 0x0B //
+#define BmsBase0x0C BMS_BASE_ADDR | 0x0C //
 #define BmsBase0xF4 BMS_BASE_ADDR | 0xF4 // PACK_SOC
 #define BmsBase0xF5 BMS_BASE_ADDR | 0xF5 // BALANCE_SOC
 #define BmsBase0xF6 BMS_BASE_ADDR | 0xF6 // CHARGER_CONTROL
@@ -66,7 +70,7 @@
 #define Mppt3Base0x05 MPPT3_BASE_ADDR | 0x05 // MPPT_STATUS
 #define Mppt3Base0x06 MPPT3_BASE_ADDR | 0x06 // MPPT_POWER_CONN
 
-#define McBase0x00 MC_BASE_ADDR | 0x09 // ERPM, Current, Duty Cycle
+#define McBase0x09 MC_BASE_ADDR | 0x09 // ERPM, Current, Duty Cycle
 #define McBase0x0e MC_BASE_ADDR | 0x0e // Ah Used, Ah Charged
 #define McBase0x0f MC_BASE_ADDR | 0x0f // Wh Used, Wh Charged
 #define McBase0x10 MC_BASE_ADDR | 0x10 // Temp Fet, Temp Motor, Current In, PID position

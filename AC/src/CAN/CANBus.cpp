@@ -158,7 +158,7 @@ CANPacket CANBus::writePacket(uint16_t adr,
                               uint8_t data_u8_2,   // Kp * 100
                               uint8_t data_u8_3,   // Ki * 100
                               uint8_t data_u8_4,   // Kd * 100
-                              bool data_b_33,      // ConstantMode Speed/Power
+                              bool data_b_41,      // ConstantMode Speed/Power
                               bool force) {
   uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
@@ -166,7 +166,7 @@ CANPacket CANBus::writePacket(uint16_t adr,
   packet.setData_u8(2, data_u8_2);
   packet.setData_u8(3, data_u8_3);
   packet.setData_u8(4, data_u8_4);
-  packet.setData_b(33, data_b_33);
+  packet.setData_b(41, data_b_41);
   return writePacket(adr, packet, force);
 }
 

@@ -129,10 +129,10 @@ void CANBus::handle_rx_packet(CANPacket packet) {
   switch (packetId) {
   case AC_BASE_ADDR | 0x00:
     carState.LifeSign = packet.getData_u16(0);
-    carState.Kp = packet.getData_u8(2) / 100.;
-    carState.Ki = packet.getData_u8(3) / 100.;
-    carState.Kd = packet.getData_u8(4) / 100.;
-    carState.ConstantMode = packet.getData_b(33) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+    carState.Kp = (double)packet.getData_u8(2) / 10.;
+    carState.Ki = (double)packet.getData_u8(3) / 10.;
+    carState.Kd = (double)packet.getData_u8(4) / 10.;
+    carState.ConstantMode = packet.getData_b(41) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
     if (canBus.verboseModeCanIn)
       console << fmt::format("LifeSign= {:4x}, Kp={5.2f}, Ki={5.2f}, Kd={5.2f} carState.ConstantMode={}\n", carState.LifeSign, carState.Kp,
                              carState.Ki, carState.Kd, CONSTANT_MODE_str[(int)(carState.ConstantMode)]);

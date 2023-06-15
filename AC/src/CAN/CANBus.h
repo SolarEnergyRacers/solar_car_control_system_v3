@@ -123,7 +123,7 @@ public:
                         bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
   CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3,
                         bool force = false);
-  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint8_t data_u8_2, uint8_t data_u8_3, uint8_t data_u8_4, bool data_b_33,
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint8_t data_u8_2, uint8_t data_u8_3, uint8_t data_u8_4, bool data_b_41,
                         bool force);
   CANPacket writePacket(uint16_t adr, CANPacket packet, bool force = false);
 

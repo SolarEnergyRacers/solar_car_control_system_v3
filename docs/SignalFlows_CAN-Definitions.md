@@ -35,8 +35,12 @@ Version 2023.01.01
 | Deceleration          | >   | analog 0-5V |                       |
 | Speed                 | <   | analog 0-5V |                       |
 
+>  look below for MC-CAN packets
+
 ### Communication BMS - MC
+
 [BMS Comm Documentation](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/blob/add_comm_documentation/docs/PRH67.010v2-BMS-BMU-Communications-Protocol.pdf)
+
 | BMS (battery management system) | Dir | Type | DC (drive controller) |
 |---------------------------------|-----|------|-----------------------|
 | (see docs)                      | >   | CAN  |                       |
@@ -126,11 +130,21 @@ The CAN frames to be transmitted can be defined in property `radio_packages` of 
 
 ## CAN Signals
 
+### BMS _ Battery Management System
+
+BMS_BASE_ADDR: **0x700**
+
+### MPPT
+
+MPPT1_BASE_ADDR: **0x600**
+MPPT2_BASE_ADDR: **0x610**
+MPPT3_BASE_ADDR: **0x620**
+
 ### DC - Drive Controller
 
-DC_BASE_ADDR: **0x460**
+DC_BASE_ADDR: **0x660**
 
-#### CAN id: 0x00 - Speed Control
+#### CAN Address Offset: 0x00 - Speed Control
 
 Interval: 1000ms
 
@@ -142,7 +156,7 @@ u_8   | [3]    | 3      | Ki
 u_8   | [4]    | 4      | Kd 
 b_33 | [33] | 5 | ConstantMode: true-SPEED, false-POWER 
 
-#### CAN id: 0x01 - Speed, Acceleration, buttons
+#### CAN Address Offset: 0x01 - Speed, Acceleration, buttons
 
 Interval: 1000ms
 
@@ -162,13 +176,7 @@ b      | [61]   | 7      |
 b      | [62]   | 7      | 
 b      | [63]   | 7      | 
 
-~~b    | [48]   | 6      | Button Lvl Plus~~
-~~b    | [49]   | 6      | Button Lvl Minus~~
-~~b    | [50]   | 6      | Button Lvl Const Mode Set~~
-~~b    | [51]   | 6      | Button Lvl Const Mode Reset~~
-~~b    | [52]   | 6      | Button Lvl Const Mode v/P~~
-
-#### CAN id: 0x02 - Motor, Bat, PV
+#### CAN Address Offset: 0x02 - Motor, Bat, PV
 
 Interval: ?ms
 
@@ -181,57 +189,29 @@ b      | [48]   | 6      | Motor On [1] / Off [0]
 b      | [49]   | 6      | Bat On [1] / Off [0]
 b      | [51]   | 6      | PV On [1] / Off [0]
 
-#### CAN id: 0x02 - PID
-
-Interval: ?ms
-
-Format | IdxFmt | Index8 | Meaning
--------|--------|--------|--------------------------
-f_16   | [1]    | 0,1    | Kp [float as value\*1000]
-f_16   | [2]    | 2,3    | Ki [float as value\*1000]
-f_16   | [3]    | 4,5    | Kd [float as value\*1000]
-
 ### AC - Auxiliary Controller
 
-AC_BASE_ADDR: **0x430**
+AC_BASE_ADDR: **0x630**
 
-#### CAN id: 0x00 - Display Data
+#### CAN Address Offset: 0x00 - Display Data
 
-Interval: ?ms
-
-Format | IdxFmt   | Index8 | Meaning
--------|----------|--------|------------------------------------------
-u_16   | [0]      | 0,1    | LifeSign
-f_16   | [1]      | 2,3    | Target Power DAC value [0-65535]
-f_16   | [2]      | 4,5    | Target Speed DAC value [0-65535]
-~~b~~  | ~~[48]~~ | ~~6~~  | ~~Constant Mode On [0] / Off [1]~~
-b      | [49]     | 6      | Constant Mode Type Speed [0] / Power [1]
-~~b~~  | ~~[50]~~ | ~~6~~  | ~~Button 1~~ Next Screen
-b      | [51]     | 6      | Button 2 Constant Mode toggle Power/Speed
-
-#### CAN id: 0x01 - SET PID Params
-
-Interval: ?ms
+Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
--------|--------|--------|-------------------------
-f_16   | [0]    | 0,1    | Kp [float as value*1000]
-f_16   | [1]    | 2,3    | Ki [float as value*1000]
-f_16   | [2]    | 4,5    | Kd [float as value*1000]
+-------|--------|--------|----------------------------------
+u_16   | [0]    | 0,1    | LifeSign
+u_8   | [2]    | 2    | Kp [int (float * 100)] 
+u_8   | [3]    | 3      | Ki [int (float * 100)] 
+u_8   | [4]    | 4      | Kd [int (float * 100)] 
+b_33 | [33] | 5 | ConstantMode: true-SPEED, false-POWER 
 
 ### MC - Motor Controller
 
-MC_BASE_ADDR: **0x000**
+MC_BASE_ADDR: **0x500**
 
 Intervall: 1000ms
 
 MC CAN description: [github.com/vedderb/bldc/blob/master/documentation/comm_can.md](https://github.com/vedderb/bldc/blob/master/documentation/comm_can.md#status-commands)
-
-CAN_PACKET_STATUS_0 - CAN_PACKET_STATUS_5** 
-
-| Format | IdxFmt | Index8 | Meaning                  |
-| ------ | ------ | ------ | ------------------------ |
-|    |    |     |  |
 
 | **Command Name** | **Command Id** | **Content** |
 |--------------|------------|---------|

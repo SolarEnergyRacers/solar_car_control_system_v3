@@ -155,9 +155,9 @@ void CarControl::task(void *pvParams) {
       bool constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? true : false;
       CANPacket packet = canBus.writePacket(AC_BASE0x00,
                                             carState.LifeSign,            // LifeSign
-                                            (uint8_t)(carState.Kp * 100), // Kp
-                                            (uint8_t)(carState.Kd * 100), // Ki
-                                            (uint8_t)(carState.Ki * 100), // Kd
+                                            (uint8_t)(carState.Kp * 10), // Kp
+                                            (uint8_t)(carState.Ki * 10), // Ki
+                                            (uint8_t)(carState.Kd * 10), // Kd
                                             (bool)constantMode,           // switch constant mode Speed / Power
                                             force                         // force or not
       );

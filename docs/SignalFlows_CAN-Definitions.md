@@ -132,18 +132,19 @@ DC_BASE_ADDR: **0x460**
 
 #### CAN id: 0x00 - Speed Control
 
-Interval: ?ms
+Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------------
 u_16   | [0]    | 0,1    | LifeSign
-u_16   | [2]    | 4,5    | Potentiometer value
-u_16   | [6]    | 6      | HAL-paddle Acceleration ADC value
-u_16   | [7]    | 7      | HAL-paddle Deceleration ADC value
+u_8   | [2]    | 2    | Kp 
+u_8   | [3]    | 3      | Ki 
+u_8   | [4]    | 4      | Kd 
+b_33 | [33] | 5 | ConstantMode: true-SPEED, false-POWER 
 
 #### CAN id: 0x01 - Speed, Acceleration, buttons
 
-Interval: ?ms
+Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------------------------

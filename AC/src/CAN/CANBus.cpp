@@ -141,8 +141,8 @@ CANPacket CANBus::writePacket(uint16_t adr,
 CANPacket CANBus::writePacket(uint16_t adr,
                               uint16_t data_u16_0, // LifeSign
                               uint16_t data_u16_1, // Potentiometer value
-                              uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
-                              uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
+                              uint16_t data_u16_2, //
+                              uint16_t data_u16_3, //
                               bool force) {
   uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
@@ -150,6 +150,23 @@ CANPacket CANBus::writePacket(uint16_t adr,
   packet.setData_u16(1, data_u16_1);
   packet.setData_u16(2, data_u16_2);
   packet.setData_u16(3, data_u16_3);
+  return writePacket(adr, packet, force);
+}
+
+CANPacket CANBus::writePacket(uint16_t adr,
+                              uint16_t data_u16_0, // LifeSign
+                              uint8_t data_u8_2,   // Kp * 100
+                              uint8_t data_u8_3,   // Ki * 100
+                              uint8_t data_u8_4,   // Kd * 100
+                              bool data_b_33,      // ConstantMode Speed/Power
+                              bool force) {
+  uint64_t data = 0UL;
+  CANPacket packet = CANPacket(adr, data);
+  packet.setData_u16(0, data_u16_0);
+  packet.setData_u8(2, data_u8_2);
+  packet.setData_u8(3, data_u8_3);
+  packet.setData_u8(4, data_u8_4);
+  packet.setData_b(33, data_b_33);
   return writePacket(adr, packet, force);
 }
 

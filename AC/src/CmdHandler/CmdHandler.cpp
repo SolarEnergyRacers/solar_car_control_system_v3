@@ -273,29 +273,26 @@ void CmdHandler::task(void *pvParams) {
           console << "RTC deactivated\n";
 #endif
         } break;
-        case 'K':
-          // #if CARSPEED_ON
-          //           console << "Received: '" << input.c_str() << "' --> ";
-          //           if (input[1] == 'v') {
-          //             carSpeed.verboseModePID = !carSpeed.verboseModePID;
-          //           } else {
-          //             string arr[4];
-          //             int count = splitString(arr, &input[1]);
-          //             if (count == 0) {
-          //               console << "PID parameters: ";
-          //             } else {
-          //               float Kp = atof(arr[0].c_str());
-          //               float Ki = atof(arr[1].c_str());
-          //               float Kd = atof(arr[2].c_str());
-          //               carSpeed.update_pid(Kp, Ki, Kd);
-          //               console << "PID set parameters: ";
-          //             }
-          //             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
-          //           }
-          // #else
+        case 'K': {
+#if CARSPEED_ON
+          console << "Received: '" << input.c_str() << "' --> ";
+          string arr[4];
+          int count = splitString(arr, &input[1]);
+          if (count == 0) {
+            console << "PID parameters: ";
+          } else {
+            carState.Kp = atof(arr[0].c_str());
+            carState.Ki = atof(arr[1].c_str());
+            carState.Kd = atof(arr[2].c_str());
+            // later Kp,Ki,Kd will be sent by CAN to DC
+            console << "PID set parameters: ";
+          }
+          console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
+          // }
+#else
           console << "Car speed control settings only on DC possible yet\n";
-          // #endif
-          break;
+#endif
+        } break;
         case 'i':
           carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
           console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
@@ -325,9 +322,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {

@@ -152,13 +152,14 @@ void CarControl::task(void *pvParams) {
       read_const_mode_and_mountrequest();
       // vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
-      uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
+      bool constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? true : false;
       CANPacket packet = canBus.writePacket(AC_BASE0x00,
-                                            carState.LifeSign,      // LifeSign
-                                            (uint16_t)constantMode, // switch constant mode Speed / Power
-                                            (uint16_t)0,            // Kp
-                                            (uint16_t)0,            // Ki
-                                            force                   // force or not
+                                            carState.LifeSign,            // LifeSign
+                                            (uint8_t)(carState.Kp * 100), // Kp
+                                            (uint8_t)(carState.Kd * 100), // Ki
+                                            (uint8_t)(carState.Ki * 100), // Kd
+                                            (bool)constantMode,           // switch constant mode Speed / Power
+                                            force                         // force or not
       );
       carStateRadio.push_if_radio_packet(AC_BASE0x00, packet);
 #endif

@@ -62,11 +62,16 @@ double ConstSpeed::get_target_speed() { return target_speed; }
 
 double ConstSpeed::get_current_speed() { return carState.Speed; }
 
-void ConstSpeed::update_pid(double Kp, double Ki, double Kd) {
+void ConstSpeed::set_pid(double Kp, double Ki, double Kd) {
   carState.Kp = Kp;
   carState.Ki = Ki;
   carState.Kd = Kd;
   pid.SetTunings(carState.Kp, carState.Ki, carState.Kd);
+}
+
+void ConstSpeed::update_pid() {
+  if (carState.Kp != pid.GetKp() || carState.Ki != pid.GetKi() || carState.Kd != pid.GetKd())
+    pid.SetTunings(carState.Kp, carState.Ki, carState.Kd);
 }
 
 void ConstSpeed::task(void *pvParams) {

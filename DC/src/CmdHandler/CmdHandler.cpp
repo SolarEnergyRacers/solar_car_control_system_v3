@@ -235,7 +235,7 @@ void CmdHandler::task(void *pvParams) {
               float Kp = atof(arr[0].c_str());
               float Ki = atof(arr[1].c_str());
               float Kd = atof(arr[2].c_str());
-              constSpeed.update_pid(Kp, Ki, Kd);
+              constSpeed.set_pid(Kp, Ki, Kd);
               console << "PID set parameters: ";
             }
             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;

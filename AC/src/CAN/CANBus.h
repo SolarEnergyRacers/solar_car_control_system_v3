@@ -13,38 +13,38 @@
 // #include <CarState.h>
 
 // all handled CAN addresses:
-#define AC_BASE0x00 AC_BASE_ADDR | 0x00 // AC: LifeSign, switch constant mode Speed / Power, Kp,  Ki
+#define AC_BASE0x00 AC_BASE_ADDR | 0x00      // AC: LifeSign, switch constant mode Speed / Power, Kp,  Ki
 
-#define BmsBase0x00 BMS_BASE_ADDR | 0x00 // BMU_HEARTBEAT
-#define BmsBase0x01 BMS_BASE_ADDR | 0x01 // CMU_TEMP_CMU1
-#define BmsBase0x02 BMS_BASE_ADDR | 0x02 // CMU_TEMP_CMU2
-#define BmsBase0x03 BMS_BASE_ADDR | 0x03 // CMU_TEMP_CMU3
-#define BmsBase0x04 BMS_BASE_ADDR | 0x04 // CMU_VOLTAGES_CMU1
-#define BmsBase0x05 BMS_BASE_ADDR | 0x05 // CMU_VOLTAGES_CMU1
-#define BmsBase0x06 BMS_BASE_ADDR | 0x06 // CMU_VOLTAGES_CMU2
-#define BmsBase0x07 BMS_BASE_ADDR | 0x07 // CMU_VOLTAGES_CMU2
-#define BmsBase0x08 BMS_BASE_ADDR | 0x08 // CMU_VOLTAGES_CMU3
-#define BmsBase0x09 BMS_BASE_ADDR | 0x09 // CMU_VOLTAGES_CMU3
-#define BmsBase0x09 BMS_BASE_ADDR | 0x09 //
-#define BmsBase0x0A BMS_BASE_ADDR | 0x0A //
-#define BmsBase0x0B BMS_BASE_ADDR | 0x0B //
-#define BmsBase0x0C BMS_BASE_ADDR | 0x0C //
-#define BmsBase0xF4 BMS_BASE_ADDR | 0xF4 // PACK_SOC
-#define BmsBase0xF5 BMS_BASE_ADDR | 0xF5 // BALANCE_SOC
-#define BmsBase0xF6 BMS_BASE_ADDR | 0xF6 // CHARGER_CONTROL
-#define BmsBase0xF7 BMS_BASE_ADDR | 0xF7 // PRECHARGE_STATUS
-#define BmsBase0xF8 BMS_BASE_ADDR | 0xF8 // MIN_MAX_U_CELL
-#define BmsBase0xF9 BMS_BASE_ADDR | 0xF9 // MIN_MAX_T_CELL
-#define BmsBase0xFA BMS_BASE_ADDR | 0xFA // PACK_VOLTAGE
-#define BmsBase0xFB BMS_BASE_ADDR | 0xFB // PACK_STATUS
-#define BmsBase0xFC BMS_BASE_ADDR | 0xFC // PACK_FAN_STATUS
-#define BmsBase0xFD BMS_BASE_ADDR | 0xFD // EXT_PACK_STATUS
+#define BmsBase0x00 BMS_BASE_ADDR | 0x00     // BMU_HEARTBEAT
+#define BmsBase0x01 BMS_BASE_ADDR | 0x01     // CMU_TEMP_CMU1
+#define BmsBase0x02 BMS_BASE_ADDR | 0x02     // CMU_TEMP_CMU2
+#define BmsBase0x03 BMS_BASE_ADDR | 0x03     // CMU_TEMP_CMU3
+#define BmsBase0x04 BMS_BASE_ADDR | 0x04     // CMU_VOLTAGES_CMU1
+#define BmsBase0x05 BMS_BASE_ADDR | 0x05     // CMU_VOLTAGES_CMU1
+#define BmsBase0x06 BMS_BASE_ADDR | 0x06     // CMU_VOLTAGES_CMU2
+#define BmsBase0x07 BMS_BASE_ADDR | 0x07     // CMU_VOLTAGES_CMU2
+#define BmsBase0x08 BMS_BASE_ADDR | 0x08     // CMU_VOLTAGES_CMU3
+#define BmsBase0x09 BMS_BASE_ADDR | 0x09     // CMU_VOLTAGES_CMU3
+#define BmsBase0x09 BMS_BASE_ADDR | 0x09     //
+#define BmsBase0x0A BMS_BASE_ADDR | 0x0A     //
+#define BmsBase0x0B BMS_BASE_ADDR | 0x0B     //
+#define BmsBase0x0C BMS_BASE_ADDR | 0x0C     //
+#define BmsBase0xF4 BMS_BASE_ADDR | 0xF4     // PACK_SOC
+#define BmsBase0xF5 BMS_BASE_ADDR | 0xF5     // BALANCE_SOC
+#define BmsBase0xF6 BMS_BASE_ADDR | 0xF6     // CHARGER_CONTROL
+#define BmsBase0xF7 BMS_BASE_ADDR | 0xF7     // PRECHARGE_STATUS
+#define BmsBase0xF8 BMS_BASE_ADDR | 0xF8     // MIN_MAX_U_CELL
+#define BmsBase0xF9 BMS_BASE_ADDR | 0xF9     // MIN_MAX_T_CELL
+#define BmsBase0xFA BMS_BASE_ADDR | 0xFA     // PACK_VOLTAGE
+#define BmsBase0xFB BMS_BASE_ADDR | 0xFB     // PACK_STATUS
+#define BmsBase0xFC BMS_BASE_ADDR | 0xFC     // PACK_FAN_STATUS
+#define BmsBase0xFD BMS_BASE_ADDR | 0xFD     // EXT_PACK_STATUS
 
-#define DC_BASE0x00 DC_BASE_ADDR | 0x00 // DC: LifeSign, Potentiometer, Acceleration, Deceleration
+#define DC_BASE0x00 DC_BASE_ADDR | 0x00      // DC: LifeSign, Potentiometer, Acceleration, Deceleration
 #define DC_BASE0x01                                                                                                                        \
-  DC_BASE_ADDR | 0x01 // DC: TargetSpeed, TargetPower, AccelerationDisplay,
-                      //     Speed, Direction, DriveDirection, BreakPedal,
-                      //     MotorOn, ConstantModeOn
+  DC_BASE_ADDR | 0x01                        // DC: TargetSpeed, TargetPower, AccelerationDisplay,
+                                             //     Speed, Direction, DriveDirection, BreakPedal,
+                                             //     MotorOn, ConstantModeOn
 
 #define Mppt1Base0x00 MPPT1_BASE_ADDR | 0x00 // MPPT_INPUT
 #define Mppt1Base0x01 MPPT1_BASE_ADDR | 0x01 // MPPT_OUTPUT
@@ -70,11 +70,11 @@
 #define Mppt3Base0x05 MPPT3_BASE_ADDR | 0x05 // MPPT_STATUS
 #define Mppt3Base0x06 MPPT3_BASE_ADDR | 0x06 // MPPT_POWER_CONN
 
-#define McBase0x09 MC_BASE_ADDR | 0x09 // ERPM, Current, Duty Cycle
-#define McBase0x0e MC_BASE_ADDR | 0x0e // Ah Used, Ah Charged
-#define McBase0x0f MC_BASE_ADDR | 0x0f // Wh Used, Wh Charged
-#define McBase0x10 MC_BASE_ADDR | 0x10 // Temp Fet, Temp Motor, Current In, PID position
-#define McBase0x1b MC_BASE_ADDR | 0x1b // Tachometer, Voltage In
+#define McBase0x09 MC_BASE_ADDR | 0x09       // ERPM, Current, Duty Cycle
+#define McBase0x0e MC_BASE_ADDR | 0x0e       // Ah Used, Ah Charged
+#define McBase0x0f MC_BASE_ADDR | 0x0f       // Wh Used, Wh Charged
+#define McBase0x10 MC_BASE_ADDR | 0x10       // Temp Fet, Temp Motor, Current In, PID position
+#define McBase0x1b MC_BASE_ADDR | 0x1b       // Tachometer, Voltage In
 
 // init
 class CANBus : public AbstractTask {
@@ -123,6 +123,8 @@ public:
                         bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
   CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3,
                         bool force = false);
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint8_t data_u8_2, uint8_t data_u8_3, uint8_t data_u8_4, bool data_b_33,
+                        bool force);
   CANPacket writePacket(uint16_t adr, CANPacket packet, bool force = false);
 
   void pushIn(CANPacket packet) {

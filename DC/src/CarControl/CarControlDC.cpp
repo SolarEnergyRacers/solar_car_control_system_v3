@@ -15,8 +15,8 @@
 #include <ADC_SER.h>
 #include <CANBus.h>
 #include <CarControl.h>
-// #include <CarSpeed.h>
 #include <CarState.h>
+#include <ConstSpeed.h>
 // #include <ConfigFile.h>
 #include <Console.h>
 #include <DAC.h>
@@ -28,7 +28,7 @@
 extern ADC adc;
 extern CANBus canBus;
 extern CarControl carControl;
-// extern CarSpeed carSpeed;
+extern ConstSpeed constSpeed;
 extern CarState carState;
 extern Console console;
 extern DAC dac;
@@ -202,6 +202,7 @@ void CarControl::task(void *pvParams) {
       switch_break_light();
       // update OUTPUT pins
       ioExt.writeAllPins(PinHandleMode::FORCED);
+      constSpeed.update_pid();
 
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign

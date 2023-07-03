@@ -198,7 +198,7 @@ public:
   bool SdCardDetect;
 
   float TargetSpeed;
-  float TargetRecuperation;
+  // TODO: delete: float TargetRecuperation;
   float TargetPower;
   string EngineerInfo;
   string DriverInfo;
@@ -239,9 +239,9 @@ public:
   int ConstPowerIncrease; // [W] per click
 
   // [Communication]
-  int CarDataSendPeriod;        // [ms]
+  int CarDataSendPeriod = 1000;           // [ms]
   unsigned long Serial1Baudrate = 115200; // baud
-  unsigned long Serial2Baudrate = 115200;   // baud
+  unsigned long Serial2Baudrate = 115200; // baud
 
   // [Telemetry]
   int SendInterval;     // [ms]

@@ -35,8 +35,12 @@ Version 2023.01.01
 | Deceleration          | >   | analog 0-5V |                       |
 | Speed                 | <   | analog 0-5V |                       |
 
+>  look below for MC-CAN packets
+
 ### Communication BMS - MC
+
 [BMS Comm Documentation](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/blob/add_comm_documentation/docs/PRH67.010v2-BMS-BMU-Communications-Protocol.pdf)
+
 | BMS (battery management system) | Dir | Type | DC (drive controller) |
 |---------------------------------|-----|------|-----------------------|
 | (see docs)                      | >   | CAN  |                       |
@@ -126,24 +130,35 @@ The CAN frames to be transmitted can be defined in property `radio_packages` of 
 
 ## CAN Signals
 
+### BMS _ Battery Management System
+
+BMS_BASE_ADDR: **0x700**
+
+### MPPT
+
+MPPT1_BASE_ADDR: **0x600**
+MPPT2_BASE_ADDR: **0x610**
+MPPT3_BASE_ADDR: **0x620**
+
 ### DC - Drive Controller
 
-DC_BASE_ADDR: **0x460**
+DC_BASE_ADDR: **0x660**
 
-#### CAN id: 0x00 - Speed Control
+#### CAN Address Offset: 0x00 - Speed Control
 
-Interval: ?ms
+Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------------
 u_16   | [0]    | 0,1    | LifeSign
-u_16   | [2]    | 4,5    | Potentiometer value
-u_16   | [6]    | 6      | HAL-paddle Acceleration ADC value
-u_16   | [7]    | 7      | HAL-paddle Deceleration ADC value
+u_8   | [2]    | 2    | Kp 
+u_8   | [3]    | 3      | Ki 
+u_8   | [4]    | 4      | Kd 
+b_33 | [33] | 5 | ConstantMode: true-SPEED, false-POWER 
 
-#### CAN id: 0x01 - Speed, Acceleration, buttons
+#### CAN Address Offset: 0x01 - Speed, Acceleration, buttons
 
-Interval: ?ms
+Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------------------------
@@ -161,13 +176,7 @@ b      | [61]   | 7      |
 b      | [62]   | 7      | 
 b      | [63]   | 7      | 
 
-~~b    | [48]   | 6      | Button Lvl Plus~~
-~~b    | [49]   | 6      | Button Lvl Minus~~
-~~b    | [50]   | 6      | Button Lvl Const Mode Set~~
-~~b    | [51]   | 6      | Button Lvl Const Mode Reset~~
-~~b    | [52]   | 6      | Button Lvl Const Mode v/P~~
-
-#### CAN id: 0x02 - Motor, Bat, PV
+#### CAN Address Offset: 0x02 - Motor, Bat, PV
 
 Interval: ?ms
 
@@ -180,48 +189,107 @@ b      | [48]   | 6      | Motor On [1] / Off [0]
 b      | [49]   | 6      | Bat On [1] / Off [0]
 b      | [51]   | 6      | PV On [1] / Off [0]
 
-#### CAN id: 0x02 - PID
-
-Interval: ?ms
-
-Format | IdxFmt | Index8 | Meaning
--------|--------|--------|--------------------------
-f_16   | [1]    | 0,1    | Kp [float as value\*1000]
-f_16   | [2]    | 2,3    | Ki [float as value\*1000]
-f_16   | [3]    | 4,5    | Kd [float as value\*1000]
-
 ### AC - Auxiliary Controller
 
-AC_BASE_ADDR: **0x430**
+AC_BASE_ADDR: **0x630**
 
-#### CAN id: 0x00 - Display Data
+#### CAN Address Offset: 0x00 - Display Data
 
-Interval: ?ms
-
-Format | IdxFmt   | Index8 | Meaning
--------|----------|--------|------------------------------------------
-u_16   | [0]      | 0,1    | LifeSign
-f_16   | [1]      | 2,3    | Target Power DAC value [0-65535]
-f_16   | [2]      | 4,5    | Target Speed DAC value [0-65535]
-~~b~~  | ~~[48]~~ | ~~6~~  | ~~Constant Mode On [0] / Off [1]~~
-b      | [49]     | 6      | Constant Mode Type Speed [0] / Power [1]
-~~b~~  | ~~[50]~~ | ~~6~~  | ~~Button 1~~ Next Screen
-b      | [51]     | 6      | Button 2 Constant Mode toggle Power/Speed
-
-#### CAN id: 0x01 - SET PID Params
-
-Interval: ?ms
+Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
--------|--------|--------|-------------------------
-f_16   | [0]    | 0,1    | Kp [float as value*1000]
-f_16   | [1]    | 2,3    | Ki [float as value*1000]
-f_16   | [2]    | 4,5    | Kd [float as value*1000]
+-------|--------|--------|----------------------------------
+u_16   | [0]    | 0,1    | LifeSign
+u_8   | [2]    | 2    | Kp [int (float * 100)] 
+u_8   | [3]    | 3      | Ki [int (float * 100)] 
+u_8   | [4]    | 4      | Kd [int (float * 100)] 
+b_33 | [33] | 5 | ConstantMode: true-SPEED, false-POWER 
 
-### MC
+### MC - Motor Controller
 
-MC CAN Definition: [github.com/vedderb/bldc/blob/master/documentation/comm_can.md](https://github.com/vedderb/bldc/blob/master/documentation/comm_can.md#status-commands)
+MC_BASE_ADDR: **0x500**
 
-MC_BASE_ADDR = 0x700
+Intervall: 1000ms
 
-CAN_PACKET_STATUS_0 - CAN_PACKET_STATUS_5** 
+MC CAN description: [github.com/vedderb/bldc/blob/master/documentation/comm_can.md](https://github.com/vedderb/bldc/blob/master/documentation/comm_can.md#status-commands)
+
+| **Command Name** | **Command Id** | **Content** |
+|--------------|------------|---------|
+| CAN_PACKET_STATUS   |  9 (0x09) | ERPM, Current, Duty Cycle |
+| CAN_PACKET_STATUS_2 | 14 (0x0e) | Ah Used, Ah Charged |
+| CAN_PACKET_STATUS_3 | 15 (0x0f) | Wh Used, Wh Charged |
+| CAN_PACKET_STATUS_4 | 16 (0x10) | Temp Fet, Temp Motor, Current In, PID position |
+| CAN_PACKET_STATUS_5 | 27 (0x1b) | Tachometer, Voltage In |
+| ~~CAN_PACKET_STATUS_6~~ | ~~28 (0x1c)~~ | ~~ADC1, ADC2, ADC3, PPM~~ |
+
+The content of the status messages is encoded as follows:
+
+**CAN_PACKET_STATUS**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | ERPM | RPM | 1 |
+| B4 - B5 | Current | A | 10 |
+| B6 - B7 | Duty Cycle | % / 100 | 1000 |
+
+**CAN_PACKET_STATUS_2**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | Amp Hours | Ah | 10000 |
+| B4 - B7 | Amp Hours Chg | Ah | 10000 |
+
+**CAN_PACKET_STATUS_3**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | Watt Hours | Wh | 10000 |
+| B4 - B7 | Watt Hours Chg | Wh | 10000 |
+
+**CAN_PACKET_STATUS_4**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B1 | Temp FET | DegC | 10 |
+| B2 - B3 | Temp Motor | DegC | 10 |
+| B4 - B5 | Current In | A | 10 |
+| B6 - B7 | PID Pos | Deg | 50 |
+
+**CAN_PACKET_STATUS_5**
+
+| **Byte** | **Data** | **Unit** | **Scale** |
+|------|------|------|-------|
+| B0 - B3 | Tachometer | EREV | 6 |
+| B4 - B5 | Volts In | V | 10 |
+
+~~**CAN_PACKET_STATUS_6**~~
+
+| ~~**Byte**~~ | ~~**Data**~~ | ~~**Unit**~~ | ~~**Scale**~~ |
+|------|------|------|-------|
+| ~~B0 - B1~~ | ~~ADC1~~ | ~~V~~ | ~~1000~~ |
+| ~~B2 - B3~~ | ~~ADC2~~ | ~~V~~ | ~~1000~~ |
+| ~~B4 - B5~~ | ~~ADC3~~ | ~~V~~ | ~~1000~~ |
+| ~~B6 - B7~~ | ~~PPM~~ | ~~% / 100~~ | ~~1000~~ |
+
+### Convert MC-CAN Address
+
+```
+===============
+14:19:48.187 > C0-474-[I:04|117,O:00|07]=R=Id=0x 624-data: 40e0000042e2cccd -- 40 - e0 - 00 - 00 - 42 - e2 - cc - cd
+---------------
+14:19:48.209 > C0-474-[I:06|117,O:00|07]=R=Id=0x 950-data: 0000000000000000 -- 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00
+14:19:48.209 > C0-474-[I:05|117,O:00|07]=R=Id=0x e50-data: 0000000000000000 -- 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00
+14:19:48.209 > C0-474-[I:04|117,O:00|07]=R=Id=0x f50-data: 0000000000000000 -- 00 - 00 - 00 - 00 - 00 - 00 - 00 - 00
+14:19:48.232 > C0-474-[I:03|117,O:00|07]=R=Id=0x1050-data: 7e360000fc030001 -- 7e - 36 - 00 - 00 - fc - 03 - 00 - 01
+14:19:48.232 > C0-474-[I:02|117,O:00|07]=R=Id=0x1b50-data: 0000ea0301000000 -- 00 - 00 - ea - 03 - 01 - 00 - 00 - 00
+---------------
+14:19:48.254 > C0-474-[I:01|117,O:00|07]=R=Id=0x7f8-data: 060400010e3b0e2e -- 06 - 04 - 00 - 01 - 0e - 3b - 0e - 2e
+===============
+
+Eingestellt MC: 0x50 
+
+1b50
+ 51b
+       5     1    b  
+11111xxx  xxxx xxxx
+```

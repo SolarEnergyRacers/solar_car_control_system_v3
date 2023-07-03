@@ -16,6 +16,7 @@
 #include <sstream>
 #include <string>
 
+
 extern Console console;
 
 // #include <../.pio/libdeps/esp32dev/ESP32Time/ESP32Time.h>
@@ -49,6 +50,14 @@ template <typename any_in, typename any_out> any_out normalize_0(any_in minOrigi
   value = value > maxOriginValue ? maxOriginValue : value; // - 0.500001;
   return static_cast<any_out>(round((value - minOriginValue) * k));
 }
+
+// #define countof(a) (sizeof(a) / sizeof(a[0]))
+// template <class T, std::size_t N>
+// constexpr std::size_t countof(const T (&array)[N]) noexcept
+// {
+//     return N;
+// }
+
 
 /**
  * @brief try to take mux within timeout.

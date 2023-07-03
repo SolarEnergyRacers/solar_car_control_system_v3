@@ -38,7 +38,8 @@ public:
   void set_target_speed(double speed);
   double get_target_speed();
   double get_current_speed(); // speed in m/s
-  void update_pid(double Kp, double Ki, double Kd);
+  void set_pid(double Kp, double Ki, double Kd);
+  void update_pid();
   void target_speed_incr(void);
   void target_speed_decr(void);
   double GetKp() { return pid.GetKp(); }

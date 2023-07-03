@@ -1,5 +1,9 @@
 # solar_car_control_system_v3
 
+---
+(**Branch with state of Thun 2023 challange**](https://github.com/SolarEnergyRacers/solar_car_control_system_v3)
+---
+
 [solarenergyracers.ch](https://www.solarenergyracers.ch) - control system (two controller based control system for SER4)
 
 ## Folder Structure

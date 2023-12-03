@@ -14,6 +14,8 @@
 #include <AbstractTask.h>
 #include <definitions.h>
 
+#define CONST_SPEED_DECELERATION false
+
 const int MAX_ACCELERATION_DISPLAY_VALUE = 99; // absolute of minimal or maximal value for acceleration scaling
 
 class CarControl : public AbstractTask {

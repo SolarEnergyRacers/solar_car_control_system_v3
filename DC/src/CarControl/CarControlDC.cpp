@@ -87,7 +87,7 @@ bool CarControl::read_potentiometer() {
 }
 
 bool CarControl::read_speed() {
-  float diameter = 0.50;                                  // wheel diameter [m]
+  float diameter = 0.55;                                  // wheel diameter [m]
   int16_t value = adc.motor_speed;                        // native input
   float voltage = value * adc.get_multiplier();           // voltage multiplier
   float rpm = 370 * voltage;                              // round per minute

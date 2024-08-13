@@ -34,11 +34,13 @@
 
 ## Draft for Electro Schema
 
+![steering wheel](drafts/SteeringWheel-v0_20221016.png)
+
 ![signal 2](drafts/signal-2022-10-04-140540_002.jpeg)
 ![signal 3](drafts/signal-2022-10-04-140540_003.jpeg)
 ![signal 4](drafts/signal-2022-10-04-140540_004.jpeg)
 ![signal 5](drafts/signal-2022-10-04-140540_005.jpeg)
-![steering wheel](drafts/SteeringWheel-v0_20221016.png)
+
 
 ## Documentation and Data Sheets
 ### Signal Flows

@@ -11,11 +11,14 @@
 - [ ] Signalhorn
 - [x] MPPTs
 - [ ] MPPT-Adapter, Programmiersoftware
+- [ ] STecksystem für > 120A Cont.
 
 ### Machen
 
 - [ ] Batterie bauen
 - [ ] Batterie einbauen
+- [ ] Ladegerät bauen
+- [ ] Ladegerät testen
 - [ ] Rücklichter einbauen
 - [ ] Fronlichter einbauen
 - [ ] Green-Light einbauen

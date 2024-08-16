@@ -5,11 +5,11 @@
 
 - [ ] Rücklichter
 - [ ] Frontscheinwerfer
-- [ ] Rückfahrlkamera
+- [x] Rückfahrkamera (Aus SER4) 
 - [ ] Geschirmte Kabel für PV Anschluss
 - [ ] Geschirmte Netzwerkkabel
 - [ ] Signalhorn
-- [ ] MPPTs
+- [x] MPPTs
 - [ ] MPPT-Adapter, Programmiersoftware
 
 ### Machen

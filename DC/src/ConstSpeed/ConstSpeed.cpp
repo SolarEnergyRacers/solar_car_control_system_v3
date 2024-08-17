@@ -32,6 +32,8 @@ extern CarControl carControl;
 extern bool SystemInited;
 extern DAC dac;
 
+float normalisation_factor = (float)MAX_ACCELERATION_DISPLAY_VALUE / DAC_MAX;
+
 string ConstSpeed::re_init() {
   pid = PID(&input_value, &output_setpoint, &target_speed, carState.Kp, carState.Ki, carState.Kd, DIRECT);
   output_setpoint = 0;
@@ -108,17 +110,24 @@ void ConstSpeed::task(void *pvParams) {
 
       // set acceleration & deceleration
       uint8_t acc = 0;
+#if CONST_SPEED_DECELERATION == true
       uint8_t dec = 0;
+#endif
       if (output_setpoint > 0) {
         acc = round(output_setpoint);
         if (verboseModePID)
           console << "acc=" << acc;
-      } else if (output_setpoint < 0) {
+      }
+#if CONST_SPEED_DECELERATION == false
+      carState.AccelerationDisplay = round(acc * normalisation_factor);
+#else
+      else if (output_setpoint < 0) {
         dec = round(-output_setpoint);
         if (verboseModePID)
           console << "dec=" << dec;
       }
-      carState.AccelerationDisplay = round((acc > 0 ? acc : -dec) * MAX_ACCELERATION_DISPLAY_VALUE / DAC_MAX);
+      carState.AccelerationDisplay = round((acc > 0 ? acc : -dec) * normalisation_factor);
+#endif
       carControl.set_DAC();
 
       if (verboseModePID) {

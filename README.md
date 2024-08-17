@@ -42,11 +42,11 @@
 
 ## Documentation and Data Sheets
 ### Signal Flows
-### Signal Flows
 
 - [Signal Flows](docs/SignalFlows_CAN-Definitions.md)
 
 ### Electrical schema
+
 ![AC schema](docs/AC_Schematic_2022-11-20.svg)
 ![AC PCB](docs/AC_PCB_2022-11-20.svg)
 ![DC schema](docs/DC_Schematic_2022-11-20.svg)

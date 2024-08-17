@@ -3,15 +3,22 @@
 ## Elektrik
 ### Bestellen
 
-- [ ] Rücklichter
+- [x] Blinker
+- [x] Rücklichter/Bremslichter
 - [ ] Frontscheinwerfer
-- [x] Rückfahrkamera (Aus SER4) 
+- [x] Greenlight
+- [x] Rückfahrkamera (Aus SER4)
 - [ ] Geschirmte Kabel für PV Anschluss
 - [ ] Geschirmte Netzwerkkabel
-- [ ] Signalhorn
+- [x] Signalhorn
 - [x] MPPTs
-- [ ] MPPT-Adapter, Programmiersoftware
+- [ ] MPPT-Adapter, Programmiersoftware, Firmwarefiles
 - [ ] STecksystem für > 120A Cont.
+- [ ] CAN Buskabel (DC-AC, DC-BMS, BMS-MS)
+- [ ] CAN Busadapter zum Einabu in Batteriekiste
+- [ ] Taster notaus
+- [ ] Taster Bremspedal
+- [ ] Lenkradkuppling
 
 ### Machen
 

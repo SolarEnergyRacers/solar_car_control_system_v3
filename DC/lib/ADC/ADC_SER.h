@@ -26,8 +26,6 @@ public:
   // Class member and functions
 private:
   ADS1115 adsDevice;
-  int startOffset_acc = 0;
-  int startOffset_dec = 0;
 
 public:
   enum Pin { // high nibble: device number, low nibble: port

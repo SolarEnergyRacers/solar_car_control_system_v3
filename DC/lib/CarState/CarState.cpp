@@ -57,7 +57,8 @@ void CarState::init_values() {
 
   // read from SER4CONFIG.INI file
   initalize_config();
-  console << print("State after reading SER4CONFIG.INI") << NL;
+  console << printP1("State after reading SER4CONFIG.INI") << NL;
+  console << printP2() << NL;
 }
 
 bool CarState::initalize_config() {
@@ -73,7 +74,6 @@ bool CarState::initalize_config() {
   //   Kd = cf.get("PID", "Kd", 0.05);
   //   // [Dynamic]
   //   PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
-  //   PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
   //   ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
   //   ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
   //   ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
@@ -99,16 +99,15 @@ const char *getCleanString(string str) {
   return str.c_str();
 }
 
-const string CarState::print(string msg, bool withColors) {
+const string CarState::printP1(string msg, bool withColors) {
   stringstream ss(msg);
-  string tempStr = getCleanString(DriverInfo);
   ss << "====SER4 Car Status====" << VERSION << "==";
   // ss << t.tm_year << "." << t.tm_mon << "." << t.tm_mday << "_" << t.tm_hour << ":" << t.tm_min << ":" << t.tm_sec;
   ss << "====uptime:" << getTimeStamp() << "s====" << getDateTime() << "==\n";
   if (msg.length() > 0)
     ss << msg << NL;
   ss << "Display Status ........ " << DISPLAY_STATUS_str[(int)displayStatus] << NL;
-  ss << "otentiometer .......... " << Potentiometer << NL;
+  ss << "Potentiometer ......... " << Potentiometer << NL;
   ss << "Speed ................. " << Speed << NL;
   ss << "Acceleration locked ... " << BOOL_str[(int)(AccelerationLocked)] << NL;
   ss << "Acceleration .......... " << Acceleration << NL;
@@ -135,19 +134,18 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Green Light ........... " << GreenLight << NL;
   ss << "Fan ................... " << Fan << NL;
   ss << "------------------------" << NL;
+  return ss.str();
+}
+
+const string CarState::printP2(bool withColors) {
+  stringstream ss("");
+
   ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << NL;
   ss << "Target Speed .......... " << TargetSpeed << NL;
   ss << "Target Power .......... " << TargetPower << NL;
-  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << NL;
-  ss << "Info Last ............. "
-     << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << tempStr << NL;
   ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << NL;
   ss << "Light ................. " << LIGHT_str[(int)(Light)] << NL;
   ss << "IO .................... " << printIOs("", false) << NL;
-
-  ss << "Log file name ......... " << LogFilename << NL;
-  ss << "Log file period [h].... " << LogFilePeriod << NL;
-  ss << "Log file interval [ms]. " << LogInterval << NL;
 
   // [PID]
   ss << "Kp .................... " << Kp << NL;
@@ -156,7 +154,7 @@ const string CarState::print(string msg, bool withColors) {
 
   // [Dynamic]
   ss << "Paddle damping ........ " << PaddleDamping << NL;
-  ss << "Paddle offset ......... " << PaddleOffset << NL;
+  ss << "Paddle offset ......... " << "acc " << carState.StartOffset_acc << ", dec "<<carState.StartOffset_dec << NL;
   ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
   ss << "Const power invrease .. " << ConstPowerIncrease << NL;
 

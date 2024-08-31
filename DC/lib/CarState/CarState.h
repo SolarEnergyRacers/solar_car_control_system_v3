@@ -230,8 +230,10 @@ public:
   double Kd = 0.01; // differential
 
   // [Dynamic]
-  int PaddleDamping = 200;            // 0...ca.30000
-  int PaddleOffset;                   // 0 ... 65535: offset when paddle recognize not 0 values
+  int PaddleDamping = 160;            // 0...ca.30000
+  int StartOffset_acc = 0;            // 0 ... 65535: offset calculated for paddle at start
+  int StartOffset_dec = 0;            // 0 ... 65535: offset calculated for paddle at start
+
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode
   int ButtonControlModeIncreaseHeigh; // ButtonControlModeIncrease hight mode
@@ -248,7 +250,8 @@ public:
   int MaxCachedRecords; // number of telemetry records hold in cache in case of trasmit errors
 
   // tools
-  const string print(string msg, bool withColors = true);
+  const string printP1(string msg, bool withColors = true);
+  const string printP2(bool withColors = true);
   const string printIOs(string msg, bool withColors = true, bool deltaOnly = false);
   const string serialize(string msg = "");
   const string csv(string msg = "", bool withHeader = false);

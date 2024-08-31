@@ -42,10 +42,10 @@ public:
   bool verboseModeDebug = false;
 
 private:
-  int ads_min_dec = 4800;
-  int ads_min_acc = 5200;
-  int ads_max_dec = 26000;
-  int ads_max_acc = 26000;
+  int ads_min_dec = 0;
+  int ads_min_acc = 0;
+  int ads_max_dec = 45000;
+  int ads_max_acc = 45000;
   int accelLast = INT_MAX;
   int recupLast = INT_MAX;
   int accelerationDisplayLast = INT_MAX;

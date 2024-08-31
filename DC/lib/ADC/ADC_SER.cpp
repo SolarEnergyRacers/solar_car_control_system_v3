@@ -64,11 +64,11 @@ string ADC::init() {
     }
     // do not adjust in case of flying restart! int mot = read(Pin::MOTOR_SPEED_PORT);
     // do not adjust: potentiometer static set! int pot = read(Pin::SWITCH_POTENTIOMETER_PORT);
-    startOffset_acc = read(Pin::STW_ACC_PORT) + 50;
-    startOffset_dec = read(Pin::STW_DEC_PORT) + 50;
+    carState.StartOffset_acc = read(Pin::STW_ACC_PORT) + carState.PaddleDamping;
+    carState.StartOffset_dec = read(Pin::STW_DEC_PORT) + carState.PaddleDamping;
     
-    console << fmt::format("       startOffset_acc={}", startOffset_acc) << NL;
-    console << fmt::format("       startOffset_dec={}", startOffset_dec) << NL;
+    console << fmt::format("       startOffset_acc={}", carState.StartOffset_acc) << NL;
+    console << fmt::format("       startOffset_dec={}", carState.StartOffset_dec) << NL;
     console << fmt::format("     ADC at 0x{:x} inited.", I2C_ADDRESS_ADS1x15) << NL;
   }
   return fmt::format("[{}] ADC initialized.", adcInited ? "ok" : "--");
@@ -101,12 +101,13 @@ void ADC::task(void *pvParams) {
       // ADC0
       int mot = read(Pin::MOTOR_SPEED_PORT);
       int pot = read(Pin::SWITCH_POTENTIOMETER_PORT);
-      int acc = read(Pin::STW_ACC_PORT) - startOffset_acc;
-      int dec = read(Pin::STW_DEC_PORT) - startOffset_dec;
-
-      if (abs(motor_speed - mot) > 2 || abs(switch_potentiometer - pot) > 2 || abs(stw_acc - acc) > 2 || abs(stw_dec - dec) > 2) {
+      int acc = read(Pin::STW_ACC_PORT) - carState.StartOffset_acc;
+      int dec = read(Pin::STW_DEC_PORT) - carState.StartOffset_dec;
+      if(acc < 0) acc = 0;
+      if(dec < 0) dec = 0;
+      if (abs(motor_speed - mot) > 2 || abs(switch_potentiometer - pot) > 2 || abs(stw_acc - acc) > 1 || abs(stw_dec - dec) > 1) {
         if (adc.verboseModeADC)
-          console << fmt::format("ADC: speed={:6d} | acc={:6d} | dec={:6d} | poti= {:6d}\n", mot, acc, dec, pot);
+          console << fmt::format("ADC: speed={:6d} | dec={:6d} | acc={:6d} | poti= {:6d}\n", mot, dec, acc, pot);
 
         motor_speed = mot;
         switch_potentiometer = pot;

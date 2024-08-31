@@ -117,25 +117,16 @@ bool CarControl::read_paddles() {
     if (carState.Deceleration < dec_procent) {
       carState.Deceleration = dec_procent;
     }
-    carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
+    carState.AccelerationDisplay = -64; //calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
     if (carControl.verboseMode) {
-      console << fmt::format(
-          "paddle mode BREAK PEDAL: valueDAC_dec={:5d}, valueDAC_acc={:5d} | valueDec={:5d}, valueAcc={:5d}, valueDisplay={:5d}\n", DAC_MAX,
-          0, ADC_MAX, 0, -64);
+      console << fmt::format("paddle with BREAK PEDAL: Decl={:6d}, {:6d} | Accl={:6d}, {:6d} | => [{:4d}]\n", carState.Deceleration, adc.stw_dec, carState.Acceleration, adc.stw_acc, carState.AccelerationDisplay);
     }
   } else {
     carState.Deceleration = normalize_0_UINT16(ads_min_dec, ads_max_dec, adc.stw_dec);
     carState.Acceleration = normalize_0_UINT16(ads_min_acc, ads_max_acc, adc.stw_acc);
-    // // check if change is in damping
-    // if (abs(accelLast - carState.Acceleration) < carState.PaddleDamping && abs(recupLast - carState.Deceleration) <
-    // carState.PaddleDamping)
-    //   return false;
-    //
-    // accelLast = carState.Acceleration;
-    // recupLast = carState.Deceleration;
-
+    
     // #SAFETY#: Reset constant mode on deceleration paddel touched
-    if (carState.Deceleration > carState.PaddleDamping) {
+    if (carState.Deceleration > 0) {
       carState.ConstantModeOn = false;
       carState.Acceleration = 0;
       carState.AccelerationDisplay = calculate_acceleration_display(carState.Deceleration, carState.Acceleration);
@@ -153,9 +144,9 @@ bool CarControl::read_paddles() {
 
   if (accelerationDisplayLast != carState.AccelerationDisplay) {
     accelerationDisplayLast = carState.AccelerationDisplay;
-    if (carControl.verboseMode)
-      console << fmt::format("Accl={:5d} |{:5d}, Decl={:5d} |{:5d} => {:4d}\n", carState.Acceleration, adc.stw_acc, carState.Deceleration,
-                             adc.stw_dec, carState.AccelerationDisplay);
+    if (carControl.verboseMode) {
+      console << fmt::format("paddle w/o  BREAK PEDAL: Decl={:6d}, {:6d} | Accl={:6d}, {:6d} | => [{:4d}]\n", carState.Deceleration, adc.stw_dec, carState.Acceleration, adc.stw_acc, carState.AccelerationDisplay);
+    }
     return true;
   }
   return false;
@@ -170,8 +161,8 @@ void CarControl::set_DAC() {
   dac.set_pot(valueDAC_acc, DAC::pot_chan::POT_CHAN0_ACC);
 
   if (carControl.verboseMode) {
-    console << fmt::format("valueDAC_dec={:5d}, valueDAC_acc={:5d} | valueDec={:5d}, valueAcc={:5d} [valueDisplay={:5d}]\n", valueDAC_dec,
-                           valueDAC_acc, carState.Deceleration, carState.Acceleration, carState.AccelerationDisplay);
+    console << fmt::format("set DAC:: valueDAC_dec={:6d}, valueDAC_acc={:6d} | valueDec={:6d}, valueAcc={:6d} [valueDisplay={:4d}] > Speed={:3d} ({:6d})\n", 
+                            valueDAC_dec, valueDAC_acc, carState.Deceleration, carState.Acceleration, carState.AccelerationDisplay, carState.Speed, adc.motor_speed);
   }
 }
 

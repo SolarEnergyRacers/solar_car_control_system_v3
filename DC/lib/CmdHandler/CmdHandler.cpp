@@ -104,7 +104,8 @@ void CmdHandler::task(void *pvParams) {
           if (input[1] == 'a') {
             console << printSystemValues();
           } else {
-            console << carState.print("Recent State") << NL;
+            console << carState.printP1("Recent State") << NL;
+            console << carState.printP2() << NL;
           }
           break;
         case 'V':

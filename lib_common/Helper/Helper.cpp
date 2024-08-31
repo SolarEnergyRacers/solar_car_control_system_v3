@@ -1,7 +1,7 @@
 //
 // Helper Functions
 //
-#include <definitions.h>
+#include <global_definitions.h>
 
 #include <fmt/core.h>
 #include <freertos/FreeRTOS.h>
@@ -14,7 +14,13 @@
 
 #include <Console.h>
 #include <Helper.h>
-// #include <RTC.h>
+#ifdef DCMODE
+#pragma message "Helper - DCMODE"
+/*no rtc timer available*/
+#else
+#pragma message "Helper - ACMODE"
+#include <RtcDateTime.h>
+#endif
 
 extern Console console;
 // extern RTC rtc;
@@ -44,40 +50,50 @@ char *fgets_stdio_blocking(char *str, int n) {
 
 void xSemaphoreTakeT(xQueueHandle mutex) {
   if (!xSemaphoreTake(mutex, portMAX_DELAY)) {
-    console << "ERROR: mutex ************************************ " << mutex << " ****************\n";
+    console << "ERROR: mutex ************************************ " << mutex
+            << " ****************\n";
     throw runtime_error("ERROR: mutex");
   }
 }
 
+#ifdef DCMODE
+#pragma message "Helper - DCMODE"
+string getDateTime() {
+  return "xx.xx.xxxx xx:xx";
+} // esp32time.getTime("%Y-%m-%d,%H:%M:%S").c_str(); }
+string getTime() { return "xx:xx"; } // esp32time.getTime("%H:%M:%S").c_str(); }
+#else
+#pragma message "Helper - ACMODE"
 // https://github.com/fbiego/ESP32Time
-// string getDateTime() { return "xx.xx.xxxx xx:xx"; } // esp32time.getTime("%Y-%m-%d,%H:%M:%S").c_str(); }
-// string getTime() { return "xx:xx"; }                // esp32time.getTime("%H:%M:%S").c_str(); }
+string formatDateTime(RtcDateTime now) {
+  string static dateTimeString = fmt::format(
+      "{:04d}-{:02d}-{:02d},{:02d}:{:02d}:{:02d}", now.Year(), now.Month(),
+      now.Day(), now.Hour(), now.Minute(), now.Second());
+  return dateTimeString;
+}
+#endif
 
-// string formatDateTime(RtcDateTime now) {
-//   string static dateTimeString =
-//       fmt::format("{:04d}-{:02d}-{:02d},{:02d}:{:02d}:{:02d}", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(),
-//       now.Second());
-//   return dateTimeString;
-// }
+string getTimeStamp() {
+  unsigned long seconds = millis() / 1000;
+  unsigned long secsRemaining = seconds % 3600;
+  int runHours = seconds / 3600;
+  int runMinutes = secsRemaining / 60;
+  int runSeconds = secsRemaining % 60;
+  return fmt::format("T{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
+}
 
-// string getTimeStamp() {
-//   unsigned long seconds = millis() / 1000;
-//   unsigned long secsRemaining = seconds % 3600;
-//   int runHours = seconds / 3600;
-//   int runMinutes = secsRemaining / 60;
-//   int runSeconds = secsRemaining % 60;
-//   return fmt::format("T{:02d}:{:02d}:{:02d}", runHours, runMinutes, runSeconds);
-// }
-
-uint16_t normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue, uint16_t value) {
+uint16_t normalize_0_UINT16(uint16_t minOriginValue, uint16_t maxOriginValue,
+                            uint16_t value) {
   float k = (float)UINT16_MAX / (maxOriginValue - minOriginValue);
   value = value < minOriginValue ? minOriginValue : value;
   value = value > maxOriginValue ? maxOriginValue : value;
   return (uint16_t)round((value - minOriginValue) * k);
 }
 
-int transformArea(int minViewValue, int maxViewValue, int minOriginValue, int maxOriginValue, int value) {
-  float k = (float)(maxViewValue - minViewValue) / (maxOriginValue - minOriginValue);
+int transformArea(int minViewValue, int maxViewValue, int minOriginValue,
+                  int maxOriginValue, int value) {
+  float k =
+      (float)(maxViewValue - minViewValue) / (maxOriginValue - minOriginValue);
   value = value < minOriginValue ? minOriginValue : value;
   value = value > maxOriginValue ? maxOriginValue : value;
   value = (int)round((value - minOriginValue) * k);

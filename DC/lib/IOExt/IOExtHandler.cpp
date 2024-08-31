@@ -1,7 +1,7 @@
 //
 // MCP23017 I/O Extension over I2C
 //
-#include <definitions.h>
+#include "../definitions.h"
 
 #include <stdio.h>
 

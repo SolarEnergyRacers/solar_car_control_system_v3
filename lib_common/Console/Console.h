@@ -10,7 +10,7 @@
 #define SOLAR_CAR_CONTROL_SYSTEM_CONSOLE_H
 
 // local definitions
-#include <definitions.h>
+#include <global_definitions.h>
 // standard libraries
 #include <Streaming.h>
 #include <cstdlib>

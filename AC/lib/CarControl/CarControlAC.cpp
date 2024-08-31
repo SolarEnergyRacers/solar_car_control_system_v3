@@ -1,7 +1,8 @@
 //
 // CarControlx: Main control module of SER4
 //
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <fmt/core.h>
 #include <fmt/printf.h>
@@ -15,9 +16,8 @@
 #include <CANBus.h>
 #include <CarControl.h>
 #include <CarState.h>
+#include <CarStateRadio.h>
 #include <Console.h>
-#include <DriverDisplay.h>
-#include <EngineerDisplay.h>
 #include <Helper.h>
 #include <I2CBus.h>
 #include <SDCard.h>
@@ -25,9 +25,8 @@
 extern CANBus canBus;
 extern CarControl carControl;
 extern CarState carState;
+extern CarStateRadio carStateRadio;
 extern Console console;
-// extern DriverDisplay driverDisplay;
-// extern EngineerDisplay engineerDisplay;
 extern I2CBus i2cBus;
 extern SDCard sdCard;
 
@@ -67,7 +66,7 @@ bool CarControl::read_nextScreenButton() {
   switch (carState.displayStatus) {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::DRIVER_SETUP;
-    console << "Switch Next Screen toggle: switch from eng --> driver" << NL;
+    console << "Switch Next Screen toggle: switch from engineer --> driver" << NL;
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::ENGINEER_SETUP;
@@ -88,14 +87,16 @@ bool CarControl::read_sd_card_detect() {
   // console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
 
   if (carState.SdCardDetect && !sdCardDetectOld) {
-    carState.EngineerInfo = "SD card detected, try to start logging...";
+    // carState.EngineerInfo = "SD card detected, try to start logging...";
+    carState.EngineerInfo = "SD card detected. Not mounted yet.";
     console << "     " << carState.EngineerInfo << NL;
-    string msg = sdCard.init();
-    console << msg << NL;
-    if (sdCard.check_log_file()) {
-      string state = carState.csv("Recent State", true); // with header
-      sdCard.write_log_line(state);
-    }
+    // Do not mount automatically
+    // string msg = sdCard.init();
+    // console << msg << NL;
+    // if (sdCard.check_log_file()) {
+    //   string state = carState.csv("Recent State", true); // with header
+    //   sdCard.write_log_line(state);
+    // }
   } else if (!carState.SdCardDetect && sdCardDetectOld) {
     carState.EngineerInfo = "SD card removed.";
     console << "     " << carState.EngineerInfo << NL;
@@ -134,37 +135,39 @@ bool CarControl::read_const_mode_and_mountrequest() {
 
 // int cyclecounter = 0;
 string carStateEngineerInfoLast = "";
-
+uint16_t carStateLifeSignLast = 0;
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
 
-      bool refreshRequest = false;
-      if (millis() > millisNextCanSend) {
+      bool force = false;
+      if (millis() > millisNextCanSend || carStateLifeSignLast != carState.LifeSign) {
         millisNextCanSend = millis() + 1000;
-        // console << "." << NL;
-        refreshRequest = true;
+        force = true;
+        carStateLifeSignLast = carState.LifeSign;
       }
       bool button_nextScreen_pressed = read_nextScreenButton();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       read_sd_card_detect();
-      vTaskDelay(10);
+      // vTaskDelay(10);
       read_const_mode_and_mountrequest();
-      vTaskDelay(10);
+      // vTaskDelay(10);
 #ifndef SUPRESS_CAN_OUT_AC
-      uint8_t constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? 0 : 1;
-      canBus.writePacket(AC_BASE_ADDR | 0x00,
-                         carState.LifeSign,      // LifeSign
-                         (uint16_t)constantMode, // switch constant mode Speed / Power
-                         (uint16_t)0,            // empty
-                         (uint16_t)0,            // empty
-                         refreshRequest          // force or not
+      bool constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? true : false;
+      CANPacket packet = canBus.writePacket(AC_BASE0x00,
+                                            carState.LifeSign,            // LifeSign
+                                            (uint8_t)(carState.Kp * 10), // Kp
+                                            (uint8_t)(carState.Ki * 10), // Ki
+                                            (uint8_t)(carState.Kd * 10), // Kd
+                                            (bool)constantMode,           // switch constant mode Speed / Power
+                                            force                         // force or not
       );
-      vTaskDelay(10);
+      carStateRadio.push_if_radio_packet(AC_BASE0x00, packet);
 #endif
       if (carControl.verboseModeCarControlDebug)
-        console << fmt::format("[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ", canBus.availiblePackets(),
-                               canBus.getMaxPacketsBufferUsage(), AC_BASE_ADDR | 0x00, carState.LifeSign, button_nextScreen_pressed)
+        console << fmt::format("[I:{:02d}|{:02d},O::{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ",
+                               canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
+                               canBus.getMaxPacketsBufferOutUsage(), AC_BASE0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
       // self destroying engineer info
       if (carState.EngineerInfo.compare(carStateEngineerInfoLast) != 0) {
@@ -174,22 +177,22 @@ void CarControl::task(void *pvParams) {
       if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
         carStateEngineerInfoLast = carState.EngineerInfo = "";
       }
-      //  log file one data row per LogInterval
+      // log file one data row per LogInterval
       if ((millis() > millisNextStampCsv) || (millis() > millisNextStampSnd)) {
-        string record = carState.csv();
+        if (verboseModeCarControl)
+          console << carState.drive_data();
+        string record = carState.csv("log");
         if (sdCard.isMounted() && millis() > millisNextStampCsv) {
           millisNextStampCsv = millis() + carState.LogInterval;
           if (sdCard.verboseModeSdCard)
-            console << "d: Interval=" << carState.LogInterval << ", Rec: " << record << NL;
-          sdCard.write_log_line(record);
+            console << "SDCARD:: Interval=" << carState.LogInterval << ", Rec: " << record;
+          sdCard.write_log(record);
         }
         // vTaskDelay(10);
-        // if (verboseModeRadioSend) {
-        //   if (millis() > millisNextStampSnd) {
-        //     // send serail2 --> radio
-        //     millisNextStampSnd = millis() + carState.CarDataSendPeriod;
-        //   }
-        // }
+        if (millis() > millisNextStampSnd) {
+          carStateRadio.send();
+          millisNextStampSnd = millis() + carState.CarDataSendPeriod;
+        }
       }
     }
     taskSuspend();

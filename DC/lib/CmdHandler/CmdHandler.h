@@ -29,7 +29,7 @@ public:
                     "\t  [i|o]               - show in|out continuously\n"
                     "\t  [h]                 - show in handler results\n"
                     "\t  [a|d]               - show ADC|DAC continuously\n"
-                    "\t  [c]                 - show controls acc/dec continuously\n"
+                    "\t  [c]                 - show controls acc/dec continuously, breakPedal\n"
                     "\t  [R]                 - reinit\n"
                     "\tC _ _ _ _ _ _ _ _ _ _ set CAN verbose mode\n"
                     "\t  [i]                 - verbose CAN in\n"

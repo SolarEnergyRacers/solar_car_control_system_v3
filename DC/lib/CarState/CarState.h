@@ -11,7 +11,7 @@
 #include <sstream>
 #include <string>
 
-#include <definitions.h>
+#include "../definitions.h"
 
 #include <CarStatePin.h>
 

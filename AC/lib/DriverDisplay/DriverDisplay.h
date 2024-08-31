@@ -11,7 +11,7 @@
 #include <CarState.h>
 #include <Display.h>
 #include <DisplayValue.h>
-#include <LocalFunctionsAndDevices.h>
+#include "../LocalFunctionsAndDevices.h"
 
 using namespace std;
 

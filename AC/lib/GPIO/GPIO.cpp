@@ -2,7 +2,8 @@
 // General Purpose Input / Output
 //
 
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <fmt/core.h>
 #include <iostream>
@@ -25,7 +26,8 @@ string GPInputOutput::init() {
   bool hasError = false;
   // vPortCPUInitializeMutex(&mutex);
   // Init GPIO pins for CS of SD-card and TFT
-  pinMode(ESP32_AC_SD_DETECT, INPUT_PULLDOWN);
+  pinMode(ESP32_AC_SD_DETECT, INPUT);
+
   pinMode(SPI_CS_SDCARD, OUTPUT);
   digitalWrite(SPI_CS_SDCARD, HIGH);
 

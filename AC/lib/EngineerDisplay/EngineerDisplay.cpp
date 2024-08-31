@@ -9,8 +9,9 @@
 #include <SPIBus.h>
 
 #include <AbstractTask.h>
-#include <LocalFunctionsAndDevices.h>
-#include <definitions.h>
+#include "../LocalFunctionsAndDevices.h"
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <CarState.h>
 #include <Console.h>

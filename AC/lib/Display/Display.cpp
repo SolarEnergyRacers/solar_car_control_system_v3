@@ -5,10 +5,11 @@
  * This means that all sensors send their values to the display.
  */
 
-#include <LocalFunctionsAndDevices.h>
+#include "../LocalFunctionsAndDevices.h"
 
 #include <AbstractTask.h>
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <fmt/core.h>
 #include <iostream>

@@ -2,7 +2,8 @@
 // Command Receiver and Handler
 //
 // reads commands from serial console and deploy it
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -28,6 +29,7 @@
 #include <CarControl.h>
 #include <CarState.h>
 #include <CarStatePin.h>
+#include <CarStateRadio.h>
 #include <CmdHandler.h>
 #include <Console.h>
 #include <Display.h>
@@ -37,11 +39,13 @@
 #include <I2CBus.h>
 // #include <RTC.h>
 #include <SDCard.h>
+#include <Serial.h>
 #include <System.h>
 
 extern CANBus can;
 extern I2CBus i2cBus;
 extern CarState carState;
+extern CarStateRadio carStateRadio;
 extern CANBus canBus;
 extern CarControl carControl;
 extern Display display;
@@ -49,6 +53,7 @@ extern DriverDisplay driverDisplay;
 extern EngineerDisplay engineerDisplay;
 extern SDCard sdCard;
 extern Console console;
+extern Uart uart;
 #if RTC_ON
 extern GlobalTime globalTime;
 #endif
@@ -75,25 +80,24 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
-      //       if (Serial.available() || Serial2.available()) {
-      //         // read the incoming chars:
-      //         String input = "";
-      //         if (Serial.available()) {
-      //           input = Serial.readString();
-      //           Serial.flush();
-      //         } else if (Serial2.available()) {
-      //           input = Serial2.readString();
-      //           Serial2.flush();
-      //         }
-      // #if SERIAL_RADIO_ON
-      // #endif
-      while (SystemInited && Serial.available()) {
+      while (SystemInited && (Serial.available()
+                              // #if SERIAL_RADIO_ON
+                              //                               || Serial2.available()
+                              // #endif
+                              )) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
+          // #if SERIAL_RADIO_ON
+          //         } else if (Serial2.available()) {
+          //           input = Serial2.readString();
+          //           Serial2.flush();
+          // #endif
         }
+        if (input.length() == 0)
+          break;
         if (input.endsWith("\n")) {
           input = input.substring(0, input.length() - 1);
         }
@@ -124,15 +128,15 @@ void CmdHandler::task(void *pvParams) {
           if (input[1] == 'a') {
             console << printSystemValues();
           } else {
-            console << carState.print("Recent State") << NL;
+            console << carState.print("Recent State (CMD-S)") << NL;
           }
           break;
         case 'J':
-          state = carState.serialize("Recent State");
+          state = carState.serialize("Recent State (CMD-J)");
           console << state;
           break;
         case 'V':
-          state = carState.csv("Recent State", input[1] == '+' ? true : false); // +: with header
+          state = carState.csv("Recent State (CMD-V)", input[1] == '+' ? true : false); // +: with header
           sdCard.write_log(state);
           console << state;
           break;
@@ -156,12 +160,22 @@ void CmdHandler::task(void *pvParams) {
         case 'B':
           if (input[1] == '\0') {
             console << "Serial2 baudrate=" << carState.Serial2Baudrate << NL;
-          } else {
-            carState.Serial2Baudrate = atof(&input[1]);
+          } else if (input[1] == 'v') {
+            carStateRadio.verboseModeRadioSend = !carStateRadio.verboseModeRadioSend;
+            console << "set verboseModeRadioSend: " << carStateRadio.verboseModeRadioSend << NL;
+          } else if (input[1] == 'm') {
+            if (carStateRadio.mode == SEND_MODE::ASCII)
+              carStateRadio.mode = SEND_MODE::BINARY;
+            else
+              carStateRadio.mode = SEND_MODE::ASCII;
+            console << "set radio send: " << SEND_MODE_str[(int)carStateRadio.mode] << NL;
+          } else if (input[1] == 'r') {
+            carState.Serial2Baudrate = atof(&input[2]);
             Serial2.end();
             Serial2.begin(carState.Serial2Baudrate, SERIAL_8N1, SERIAL2_RX, SERIAL2_TX);
-            console << "Restart Serial2 with baudrate=" << carState.Serial2Baudrate << NL;
           }
+          console << "Serial2(radio) baudrate=" << carState.Serial2Baudrate << ", send mode: " << SEND_MODE_str[(int)carStateRadio.mode]
+                  << NL;
           break;
         case 'I':
           // console << "Received: '" << input << "' --> ";
@@ -181,9 +195,6 @@ void CmdHandler::task(void *pvParams) {
           // } else if (input[1] == 'd') {
           //   dac.verboseModeDAC = !dac.verboseModeDAC;
           //   console << "set verboseModeDAC: " << dac.verboseModeDAC << NL;
-          // } else if (input[1] == 'c') {
-          //   carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
-          //   console << "set verboseModeCarControl for acc-/dec-controls: " << carControl.verboseModeCarControl << NL;
           // } else if (input[1] == 'R') {
           //   console << ioExt.re_init() << NL;
           //   msg = ioExt.re_init();
@@ -207,6 +218,9 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'O') {
             canBus.verboseModeCanOutNative = !canBus.verboseModeCanOutNative;
             console << "set verboseModeCanOutNative: " << canBus.verboseModeCanOutNative << NL;
+          } else if (input[1] == 'L') {
+            canBus.verboseModeCanBusLoad = !canBus.verboseModeCanBusLoad;
+            console << "set verboseModeCanBusLoad: " << canBus.verboseModeCanBusLoad << NL;
           } else if (input[1] == 'S') {
             sdCard.verboseModeSdCard = !sdCard.verboseModeSdCard;
             console << "set verboseModeSdCard: " << sdCard.verboseModeSdCard << NL;
@@ -217,14 +231,14 @@ void CmdHandler::task(void *pvParams) {
             float batVoltage = atof(arr[1].c_str());
             float batCurrent = atof(arr[2].c_str());
             carState.MotorCurrent = motCurrent;
-            uint64_t data = 0;
             // Injection into BMS-CAN!!
-            int address = BMS_BASE_ADDR | 0xFA;
-            CANPacket packet = CANPacket(address, data);
+            int packetId = BMS_BASE_ADDR | 0xFA;
+            CANPacket packet = CANPacket(packetId, (uint64_t)0);
             packet.setData_i32(0, batVoltage * 1000);
             packet.setData_i32(1, batCurrent * 1000);
-            canBus.handle_rx_packet(packet);
-            console << fmt::format("CAN inject for AdrId[{:04x}]: batCurrent={}, batVoltage={}\n", address, batCurrent, batVoltage);
+            canBus.pushIn(packet);
+            console << fmt::format("CarState direct set motCurrent={}; CAN inject for AdrId[{:3x}]: batCurrent={}, batVoltage={}\n",
+                                   motCurrent, packetId, batCurrent, batVoltage);
           }
           break;
         case 'O':
@@ -243,9 +257,8 @@ void CmdHandler::task(void *pvParams) {
           string arr[6];
           int count = splitString(arr, &input[1]);
           if (count == 0) {
-            console << "Received: '" << input.c_str() 
-              << "' --> DateTime: " << globalTime.strTime("%X %F (%a)") 
-              << ", Uptime: " << globalTime.strUptime(true) << NL;
+            console << "Received: '" << input.c_str() << "' --> DateTime: " << globalTime.strTime("%X %F (%a)")
+                    << ", Uptime: " << globalTime.strUptime(true) << NL;
           } else {
             int yy = atof(arr[0].c_str());
             int mm = atof(arr[1].c_str());
@@ -261,28 +274,29 @@ void CmdHandler::task(void *pvParams) {
           console << "RTC deactivated\n";
 #endif
         } break;
-        case 'K':
+        case 'K': {
 #if CARSPEED_ON
           console << "Received: '" << input.c_str() << "' --> ";
-          if (input[1] == 'v') {
-            carSpeed.verboseModePID = !carSpeed.verboseModePID;
+          string arr[4];
+          int count = splitString(arr, &input[1]);
+          if (count == 0) {
+            console << "PID parameters: ";
           } else {
-            string arr[4];
-            int count = splitString(arr, &input[1]);
-            if (count == 0) {
-              console << "PID parameters: ";
-            } else {
-              float Kp = atof(arr[0].c_str());
-              float Ki = atof(arr[1].c_str());
-              float Kd = atof(arr[2].c_str());
-              carSpeed.update_pid(Kp, Ki, Kd);
-              console << "PID set parameters: ";
-            }
-            console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
+            carState.Kp = atof(arr[0].c_str());
+            carState.Ki = atof(arr[1].c_str());
+            carState.Kd = atof(arr[2].c_str());
+            // later Kp,Ki,Kd will be sent by CAN to DC
+            console << "PID set parameters: ";
           }
+          console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
+          // }
 #else
-          console << "Car speed control deactivated\n";
+          console << "Car speed control settings only on DC possible yet\n";
 #endif
+        } break;
+        case 'i':
+          carControl.verboseModeCarControl = !carControl.verboseModeCarControl;
+          console << "set verboseModeCarControl: " << carControl.verboseModeCarControl << NL;
           break;
         //-------- DRIVER INFO COMMANDS --------------------
         case 's':
@@ -309,9 +323,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {
@@ -327,6 +341,7 @@ void CmdHandler::task(void *pvParams) {
           break;
         // -------- Command Help -----------------
         case 'h':
+        case '?':
           console << helpText << NL;
           break;
         }
@@ -339,7 +354,7 @@ void CmdHandler::task(void *pvParams) {
 }
 
 string CmdHandler::printSystemValues() {
-  stringstream ss("");
+  stringstream ss("nothing to show");
 #if ADC_ON
   int16_t valueDec = adc.STW_DEC;
   int16_t valueAcc = adc.STW_ACC;

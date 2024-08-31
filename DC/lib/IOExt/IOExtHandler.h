@@ -5,7 +5,7 @@
 #ifndef SER_IOEXT_HANDLER_H
 #define SER_IOEXT_HANDLER_H
 
-#include <definitions.h>
+#include "../definitions.h"
 
 #include <MCP23017.h>
 #include <list>

@@ -5,7 +5,7 @@
 #ifndef SER_IOEXT_H
 #define SER_IOEXT_H
 
-#include <definitions.h>
+#include "../definitions.h"
 
 #include <MCP23017.h>
 #include <list>
@@ -36,6 +36,7 @@
 #define PinGPB0 "GPB0"
 
 enum class PinHandleMode { NORMAL, FORCED };
+// extern OneWireBus oneWireBus;
 
 class IOExt : public AbstractTask {
 public:
@@ -67,6 +68,9 @@ private:
   void setPortMode(int port, uint8_t mode);
   void handleIoInterrupt();
 
+  // MCP23017 t = MCP23017(I2C_ADDRESS_MCP23017_IOExt0);
+  //MCP23017 IOExtDev = MCP23017(I2C_ADDRESS_MCP23017_IOExt0);
   MCP23017 IOExtDevs[MCP23017_NUM_DEVICES] = {MCP23017(I2C_ADDRESS_MCP23017_IOExt0)};
+  //MCP23017 IOExtDevs[MCP23017_NUM_DEVICES] = {MCP23017(I2C_ADDRESS_MCP23017_IOExt0)};
 };
 #endif // SER_IOEXT_H

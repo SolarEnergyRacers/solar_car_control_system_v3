@@ -5,8 +5,9 @@
 #ifndef SER_DISPLAYVALUE_H
 #define SER_DISPLAYVALUE_H
 
-#include <LocalFunctionsAndDevices.h>
-#include <definitions.h>
+#include "../LocalFunctionsAndDevices.h"
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <Adafruit_GFX.h>     // graphics library
 #include <Adafruit_ILI9341.h> // display

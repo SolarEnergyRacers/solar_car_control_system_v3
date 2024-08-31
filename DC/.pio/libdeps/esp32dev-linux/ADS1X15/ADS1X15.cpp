@@ -1,9 +1,9 @@
 //
 //    FILE: ADS1X15.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.3.9
+// VERSION: 0.5.0
 //    DATE: 2013-03-24
-// PUPROSE: Arduino library for ADS1015 and ADS1115
+// PURPOSE: Arduino library for ADS1015 and ADS1115
 //     URL: https://github.com/RobTillaart/ADS1X15
 
 
@@ -24,7 +24,7 @@
 
 //  CONFIG REGISTER
 
-//  BIT 15      Operational Status           // 1 << 15
+//  BIT 15      Operational Status           //  1 << 15
 #define ADS1X15_OS_BUSY             0x0000
 #define ADS1X15_OS_NOT_BUSY         0x8000
 #define ADS1X15_OS_START_SINGLE     0x8000
@@ -53,7 +53,7 @@
 #define ADS1X15_MODE_CONTINUE       0x0000
 #define ADS1X15_MODE_SINGLE         0x0100
 
-//  BIT 5-7     data rate sample per second  // (0..7) << 5
+//  BIT 5-7     data rate sample per second  //  (0..7) << 5
 /*
 differs for different devices, check datasheet or readme.md
 
@@ -69,26 +69,26 @@ differs for different devices, check datasheet or readme.md
 |     7       |   3300    |    860    |  fastest  |
 */
 
-//  BIT 4 comparator modi                    // 1 << 4
+//  BIT 4 comparator modi                    //  1 << 4
 #define ADS1X15_COMP_MODE_TRADITIONAL   0x0000
 #define ADS1X15_COMP_MODE_WINDOW        0x0010
 
-//  BIT 3 ALERT active value                 // 1 << 3
+//  BIT 3 ALERT active value                 //  1 << 3
 #define ADS1X15_COMP_POL_ACTIV_LOW      0x0000
 #define ADS1X15_COMP_POL_ACTIV_HIGH     0x0008
 
-//  BIT 2 ALERT latching                     // 1 << 2
+//  BIT 2 ALERT latching                     //  1 << 2
 #define ADS1X15_COMP_NON_LATCH          0x0000
 #define ADS1X15_COMP_LATCH              0x0004
 
-//  BIT 0-1 ALERT mode                       // (0..3)
+//  BIT 0-1 ALERT mode                       //  (0..3)
 #define ADS1X15_COMP_QUE_1_CONV         0x0000  //  trigger alert after 1 convert
 #define ADS1X15_COMP_QUE_2_CONV         0x0001  //  trigger alert after 2 converts
 #define ADS1X15_COMP_QUE_4_CONV         0x0002  //  trigger alert after 4 converts
 #define ADS1X15_COMP_QUE_NONE           0x0003  //  disable comparator
 
 
-// _CONFIG masks
+//  _CONFIG masks
 //
 //  |  bit  |  description           |
 //  |:-----:|:-----------------------|
@@ -131,58 +131,20 @@ void ADS1X15::reset()
   setMode(1);      //  _mode = ADS1X15_MODE_SINGLE;
   setDataRate(4);  //  middle speed, depends on device.
 
-  //  COMPARATOR variables   # see notes .h
+  //  COMPARATOR variables   #  see notes .h
   _compMode       = 0;
   _compPol        = 1;
   _compLatch      = 0;
   _compQueConvert = 3;
+  _lastRequest    = 0xFFFF;  //  no request yet
 }
 
-
-#if defined (ESP8266) || defined(ESP32)
-bool ADS1X15::begin(int sda, int scl)
-{
-  _wire = &Wire;
-  _wire->begin(sda, scl);
-  if ((_address < 0x48) || (_address > 0x4B)) return false;
-  if (! isConnected()) return false;
-  return true;
-}
-#endif
-
-#if defined (ARDUINO_ARCH_RP2040)
-
-bool ADS1X15::begin(int sda, int scl)
-{
-  _wire->setSDA(sda);
-  _wire->setSCL(scl);
-  _wire->begin();
-  if ((_address < 0x48) || (_address > 0x4B)) return false;
-  if (! isConnected()) return false;
-  return true;
-}
-
-#endif
 
 bool ADS1X15::begin()
 {
-  _wire->begin();
   if ((_address < 0x48) || (_address > 0x4B)) return false;
   if (! isConnected()) return false;
   return true;
-}
-
-
-bool ADS1X15::isBusy()
-{
-  return isReady() == false;
-}
-
-
-bool ADS1X15::isReady()
-{
-  uint16_t val = _readRegister(_address, ADS1X15_REG_CONFIG);
-  return ((val & ADS1X15_OS_NOT_BUSY) > 0);
 }
 
 
@@ -221,8 +183,8 @@ uint8_t ADS1X15::getGain()
     case ADS1X15_PGA_0_512V: return 8;
     case ADS1X15_PGA_0_256V: return 16;
   }
-  _err = ADS1X15_INVALID_GAIN;
-  return _err;
+  _error = ADS1X15_INVALID_GAIN;
+  return _error;
 }
 
 
@@ -231,7 +193,7 @@ float ADS1X15::toVoltage(int16_t value)
   if (value == 0) return 0;
 
   float volts = getMaxVoltage();
-  if (volts < 0) return volts;
+  if (volts < 0) return volts;    //  propagate error
 
   volts *= value;
   if (_config & ADS_CONF_RES_16)
@@ -257,8 +219,8 @@ float ADS1X15::getMaxVoltage()
     case ADS1X15_PGA_0_512V: return 0.512;
     case ADS1X15_PGA_0_256V: return 0.256;
   }
-  _err = ADS1X15_INVALID_VOLTAGE;
-  return _err;
+  _error = ADS1X15_INVALID_VOLTAGE;
+  return _error;
 }
 
 
@@ -280,8 +242,8 @@ uint8_t ADS1X15::getMode(void)
     case ADS1X15_MODE_CONTINUE: return 0;
     case ADS1X15_MODE_SINGLE:   return 1;
   }
-  _err = ADS1X15_INVALID_MODE;
-  return _err;
+  _error = ADS1X15_INVALID_MODE;
+  return _error;
 }
 
 
@@ -307,23 +269,9 @@ int16_t ADS1X15::readADC(uint8_t pin)
 }
 
 
-void  ADS1X15::requestADC_Differential_0_1()
-{
-  _requestADC(ADS1X15_MUX_DIFF_0_1);
-}
-
-
 int16_t ADS1X15::readADC_Differential_0_1()
 {
   return _readADC(ADS1X15_MUX_DIFF_0_1);
-}
-
-
-void ADS1X15::requestADC(uint8_t pin)
-{
-  if (pin >= _maxPorts) return;
-  uint16_t mode = ((4 + pin) << 12);   //  pin to mask
-  _requestADC(mode);
 }
 
 
@@ -335,10 +283,103 @@ int16_t ADS1X15::getValue()
 }
 
 
+void ADS1X15::requestADC(uint8_t pin)
+{
+  if (pin >= _maxPorts) return;
+  uint16_t mode = ((4 + pin) << 12);   //  pin to mask
+  _requestADC(mode);
+}
+
+
+void  ADS1X15::requestADC_Differential_0_1()
+{
+  _requestADC(ADS1X15_MUX_DIFF_0_1);
+}
+
+
+bool ADS1X15::isBusy()
+{
+  return isReady() == false;
+}
+
+
+bool ADS1X15::isReady()
+{
+  uint16_t val = _readRegister(_address, ADS1X15_REG_CONFIG);
+  return ((val & ADS1X15_OS_NOT_BUSY) > 0);
+}
+
+
+uint8_t ADS1X15::lastRequest()
+{
+  switch (_lastRequest)
+  {
+    case ADS1X15_READ_0:       return 0x00;
+    case ADS1X15_READ_1:       return 0x01;
+    case ADS1X15_READ_2:       return 0x02;
+    case ADS1X15_READ_3:       return 0x03;
+    //  technically 0x01 -- but would collide with READ_1
+    case ADS1X15_MUX_DIFF_0_1: return 0x10;
+    case ADS1X15_MUX_DIFF_0_3: return 0x30;
+    case ADS1X15_MUX_DIFF_1_3: return 0x31;
+    case ADS1X15_MUX_DIFF_2_3: return 0x32;
+  }
+  return 0xFF;
+}
+
+
+void ADS1X15::setComparatorMode(uint8_t mode)
+{
+  _compMode = mode == 0 ? 0 : 1;
+}
+
+
+uint8_t ADS1X15::getComparatorMode()
+{
+  return _compMode;
+}
+
+
+void ADS1X15::setComparatorPolarity(uint8_t pol)
+{
+  _compPol = pol == 0 ? 0 : 1;
+}
+
+
+uint8_t ADS1X15::getComparatorPolarity()
+{
+  return _compPol;
+}
+
+
+void ADS1X15::setComparatorLatch(uint8_t latch)
+{
+  _compLatch = latch == 0 ? 0 : 1;
+}
+
+
+uint8_t ADS1X15::getComparatorLatch()
+{
+  return _compLatch;
+}
+
+
+void ADS1X15::setComparatorQueConvert(uint8_t mode)
+{
+  _compQueConvert = (mode < 3) ? mode : 3;
+}
+
+
+uint8_t ADS1X15::getComparatorQueConvert()
+{
+  return _compQueConvert;
+}
+
+
 void ADS1X15::setComparatorThresholdLow(int16_t lo)
 {
   _writeRegister(_address, ADS1X15_REG_LOW_THRESHOLD, lo);
-};
+}
 
 
 int16_t ADS1X15::getComparatorThresholdLow()
@@ -361,16 +402,9 @@ int16_t ADS1X15::getComparatorThresholdHigh()
 
 int8_t ADS1X15::getError()
 {
-  int8_t rv = _err;
-  _err = ADS1X15_OK;
+  int8_t rv = _error;
+  _error = ADS1X15_OK;
   return rv;
-}
-
-
-void ADS1X15::setWireClock(uint32_t clockSpeed)
-{
-  _clockSpeed = clockSpeed;
-  _wire->setClock(_clockSpeed);
 }
 
 
@@ -378,12 +412,18 @@ void ADS1X15::setWireClock(uint32_t clockSpeed)
 //
 //  EXPERIMENTAL
 //
+void ADS1X15::setWireClock(uint32_t clockSpeed)
+{
+  _clockSpeed = clockSpeed;
+  _wire->setClock(_clockSpeed);
+}
+
 //  see https://github.com/RobTillaart/ADS1X15/issues/22
 //      https://github.com/arduino/Arduino/issues/11457
 //  TODO: get the real clock speed from the I2C interface if possible.
 uint32_t ADS1X15::getWireClock()
 {
-// UNO 328 and
+//  UNO 328 and
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
   uint32_t speed = F_CPU / ((TWBR * 2) + 16);
   return speed;
@@ -396,7 +436,7 @@ uint32_t ADS1X15::getWireClock()
 //  not supported.
 //  return -1;
 
-#else  // best effort is remembering it
+#else  //  best effort is remembering it
   return _clockSpeed;
 #endif
 }
@@ -411,11 +451,23 @@ int16_t ADS1X15::_readADC(uint16_t readmode)
   _requestADC(readmode);
   if (_mode == ADS1X15_MODE_SINGLE)
   {
-    while ( isBusy() ) yield();   //  wait for conversion; yield for ESP.
+    uint32_t start = millis();
+    //  timeout == { 129, 65, 33, 17, 9, 5, 3, 2 }
+    //  a few ms more than max conversion time.
+    uint8_t timeOut = (128 >> (_datarate >> 5)) + 1;
+    while (isBusy())
+    {
+      yield();   //  wait for conversion; yield for ESP.
+      if ( (millis() - start) > timeOut)
+      {
+        return ADS1X15_ERROR_TIMEOUT;
+      }
+    }
   }
   else
   {
-    delay(_conversionDelay);      //  TODO needed in continuous mode?
+    //  needed in continuous mode too, otherwise one get old value.
+    delay(_conversionDelay);
   }
   return getValue();
 }
@@ -437,6 +489,9 @@ void ADS1X15::_requestADC(uint16_t readmode)
   else            config |= ADS1X15_COMP_NON_LATCH;           //  bit 2      ALERT latching
   config |= _compQueConvert;                                  //  bit 0..1   ALERT mode
   _writeRegister(_address, ADS1X15_REG_CONFIG, config);
+
+  //  remember last request type.
+  _lastRequest = readmode;
 }
 
 
@@ -446,7 +501,13 @@ bool ADS1X15::_writeRegister(uint8_t address, uint8_t reg, uint16_t value)
   _wire->write((uint8_t)reg);
   _wire->write((uint8_t)(value >> 8));
   _wire->write((uint8_t)(value & 0xFF));
-  return (_wire->endTransmission() == 0);
+  int rv = _wire->endTransmission();
+  if (rv != 0)
+  {
+    _error =  ADS1X15_ERROR_I2C;
+    return false;
+  }
+  return true;
 }
 
 
@@ -454,15 +515,18 @@ uint16_t ADS1X15::_readRegister(uint8_t address, uint8_t reg)
 {
   _wire->beginTransmission(address);
   _wire->write(reg);
-  _wire->endTransmission();
-
-  int rv = _wire->requestFrom((int) address, (int) 2);
-  if (rv == 2)
+  int rv = _wire->endTransmission();
+  if (rv == 0)
   {
-    uint16_t value = _wire->read() << 8;
-    value += _wire->read();
-    return value;
+    rv = _wire->requestFrom((int) address, (int) 2);
+    if (rv == 2)
+    {
+      uint16_t value = _wire->read() << 8;
+      value += _wire->read();
+      return value;
+    }
   }
+  _error =  ADS1X15_ERROR_I2C;
   return 0x0000;
 }
 
@@ -486,6 +550,22 @@ ADS1013::ADS1013(uint8_t address, TwoWire *wire)
   _conversionDelay = ADS1015_CONVERSION_DELAY;
   _bitShift = 4;
   _maxPorts = 1;
+  _gain     = ADS1X15_PGA_2_048V;  //  fixed value
+}
+
+
+//  ADS1x13 has no gain so set default.
+//  Table 8. Config Register Field Descriptions
+void ADS1013::setGain(uint8_t gain)
+{
+  _gain = gain;  //  keep compiler happy.
+  _gain = ADS1X15_PGA_2_048V;  //  fixed value
+}
+
+
+uint8_t ADS1013::getGain()
+{
+  return 2;  //  fixed value
 }
 
 
@@ -579,6 +659,22 @@ ADS1113::ADS1113(uint8_t address, TwoWire *wire)
   _conversionDelay = ADS1115_CONVERSION_DELAY;
   _bitShift = 0;
   _maxPorts = 1;
+  _gain     = ADS1X15_PGA_2_048V;  //  fixed value
+}
+
+
+//  ADS1x13 has no gain so set default.
+//  Table 8. Config Register Field Descriptions
+void ADS1113::setGain(uint8_t gain)
+{
+  _gain = gain;  //  keep compiler happy.
+  _gain = ADS1X15_PGA_2_048V;  //  fixed value
+}
+
+
+uint8_t ADS1113::getGain()
+{
+  return 2;  //  fixed value
 }
 
 

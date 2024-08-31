@@ -4,7 +4,8 @@
  *
  ***/
 
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 // standard libraries
 #include <fmt/core.h>
@@ -14,7 +15,7 @@
 #include <string>
 
 #include <AbstractTask.h>
-#include <LocalFunctionsAndDevices.h>
+#include "../LocalFunctionsAndDevices.h"
 
 // #include <ADC.h>
 #include <CarState.h>
@@ -330,9 +331,9 @@ void DriverDisplay::write_speed() {
 // acceleration value: -99...+99
 void DriverDisplay::write_acceleration() {
   int value = Acceleration.get_recent_overtake_last();
-  if (value <= -99)
+  if (value <= -MAX_ACCELERATION_DISPLAY_VALUE)
     value = -99;
-  if (value > 99)
+  if (value > MAX_ACCELERATION_DISPLAY_VALUE)
     value = 99;
   accelerationLast =
       display.write_ganz_99(accFrameX + 4, accFrameY + 4, accelerationLast, value, accTextSize, justInited, ILI9341_GREENYELLOW);

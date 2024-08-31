@@ -1,9 +1,71 @@
-# Change Log
+# Change Log ADS1x15
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.5.0] - 2024-08-20
+- Fix #80, setComparatorPolarity() and setComparatorLatch() inverting.
+- add test example to test parameters.
+- add unit tests to test parameters.
+
+----
+
+## [0.4.5] - 2024-07-03
+- Fix #78, prevent infinite loop. (Thanks to devmirek).
+- Fix #76 (again), update readme.md Comparator Polarity.
+- add ADS1X15_ERROR_I2C, communication error.
+- add minimal section in readme.md about error codes.
+- minor edits.
+
+## [0.4.4] - 2024-06-28
+- Fix #76, update readme.md Comparator Polarity
+- added defines to replace magic numbers (not used in code yet)
+- minor edits
+
+## [0.4.3] - 2024-06-25
+- Fix #74, ALERT/RDY pin documentation
+- update readme.md
+- minor edits examples
+
+## [0.4.2] - 2024-03-04
+- fix #68, gain bugs ADS1x13
+- add unit test for ADS1x13
+- update GitHub/actions to v4
+- removed depreciated **getLastValue()**
+- add multiplexer section to readme.md
+
+## [0.4.1] - 2024-01-02
+- fix some typos
+- minor edits
+
+## [0.4.0] - 2023-12-06
+- refactor API, begin()
+- update readme.md
+- update examples
+
+----
+
+## [0.3.13] - 2023-09-20
+- fix #61 ESP32 begin()
+
+## [0.3.12] - 2023-09-11
+- update and add examples
+- add **getLastRequest()** to track last type of measurement.
+- update readme.md
+- minor edits.
+
+## [0.3.11] - 2023-08-31
+- update readme.md
+- move code from .h to .cpp
+- reordered code in .cpp to follow .h
+- minor edits
+
+## [0.3.10] - 2023-06-07
+- fix NANO RP2040
+- update and add examples
+- minor edits
 
 ## [0.3.9] - 2023-01-21
 - update GitHub actions
@@ -11,13 +73,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update readme.md
 - minor edits
 
-
 ## [0.3.8] - 2022-10-17
 - add RP2040 support (kudos to intubun)
 - simplified changelog.md
 
 ## [0.3.7] - 2022-06-21
-- fix ESP32 Wire.begin datatype
+- fix ESP32 Wire.begin data type
 
 ## [0.3.6] - 2022-03-10
 

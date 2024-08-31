@@ -11,8 +11,10 @@
 #include <sstream>
 #include <string>
 
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
+#include <CANPacket.h>
 #include <CarStatePin.h>
 
 using namespace std;
@@ -197,7 +199,7 @@ public:
   bool SdCardDetect;
 
   float TargetSpeed;
-  float TargetRecuperation;
+  // TODO: delete: float TargetRecuperation;
   float TargetPower;
   string EngineerInfo;
   string DriverInfo;
@@ -238,9 +240,9 @@ public:
   int ConstPowerIncrease; // [W] per click
 
   // [Communication]
-  int CarDataSendPeriod;        // [ms]
-  int Serial1Baudrate = 115200; // baud
-  int Serial2Baudrate = 9600;   // baud
+  int CarDataSendPeriod = 1000;           // [ms]
+  unsigned long Serial1Baudrate = 115200; // baud
+  unsigned long Serial2Baudrate = 115200; // baud
 
   // [Telemetry]
   int SendInterval;     // [ms]
@@ -252,6 +254,10 @@ public:
   const string serialize(string msg = "");
   const string csv(string msg = "", bool withHeader = false);
   const string batteryErrorsAsString(bool verbose = false);
+  const string drive_data();
+
+  // // CANBus
+  // std::map<uint16_t, CANPacket> packet_cache;
 };
 
 #endif // CARSTATE_H

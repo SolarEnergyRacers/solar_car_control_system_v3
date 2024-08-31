@@ -5,7 +5,8 @@
 #ifndef SER_ENGINEER_DISPLAY_H
 #define SER_ENGINEER_DISPLAY_H
 
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <Display.h>
 #include <DisplayValue.h>

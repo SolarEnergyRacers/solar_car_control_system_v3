@@ -12,7 +12,8 @@
 // #include <MCP23017.h>
 
 #include <AbstractTask.h>
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 class CarControl : public AbstractTask {
 

@@ -7,6 +7,63 @@
 #include "TaskManagerIO.h"
 #include "ExecWithParameter.h"
 
+#ifdef BUILD_FOR_PICO_CMAKE
+critical_section_t* tm_internal::tmLock;
+
+void tm_internal::initPicoTmLock() {
+    tmLock = new critical_section_t;
+    critical_section_init(tmLock);
+}
+
+#include <cctype>
+
+void yield() {
+    sleep_us(1);
+}
+
+unsigned long millis() {
+    return to_ms_since_boot(get_absolute_time());
+}
+
+unsigned long micros() {
+    return to_us_since_boot(get_absolute_time());
+}
+
+#endif
+
+#ifdef IOA_USE_MBED
+
+volatile bool timingStarted = false;
+Timer ioaTimer;
+
+void yield() {
+
+# if !defined(PIO_NEEDS_RTOS_WORKAROUND)
+    ThisThread::yield();
+#else
+    wait(0.0000001);
+#endif
+}
+
+unsigned long millis() {
+    if(!timingStarted) {
+        timingStarted = true;
+        ioaTimer.start();
+    }
+    return ioaTimer.read_ms();
+}
+
+unsigned long micros() {
+    if(!timingStarted) {
+        timingStarted = true;
+        ioaTimer.start();
+    }
+    return (unsigned long) ioaTimer.read_high_resolution_us();
+}
+
+#endif
+
+
 TaskManager taskManager;
 
 namespace tm_internal {
@@ -47,6 +104,9 @@ ISR_ATTR void TaskManager::markInterrupted(pintype_t interruptNo) {
 }
 
 TaskManager::TaskManager() : taskBlocks {} {
+#ifdef BUILD_FOR_PICO_CMAKE
+    tm_internal::initPicoTmLock();
+#endif
 	interrupted = false;
 	tm_internal::atomicWritePtr(&first, nullptr);
 	interruptCallback = nullptr;
@@ -450,34 +510,26 @@ TimerTask *TaskManager::getTask(taskid_t taskId) {
     return nullptr;
 }
 
-#ifdef IOA_USE_MBED
-
-volatile bool timingStarted = false;
-Timer ioaTimer;
-
-void yield() {
-
-# if !defined(PIO_NEEDS_RTOS_WORKAROUND)
-    ThisThread::yield();
-#else
-    wait(0.0000001);
-#endif
-}
-
-unsigned long millis() {
-    if(!timingStarted) {
-        timingStarted = true;
-        ioaTimer.start();
+taskid_t TaskManager::schedule(const TimePeriod &when, TimerFn timerFunction) {
+    if(when.getRepeating()) {
+        return scheduleFixedRate(when.getAmount(), timerFunction, when.getUnit());
+    } else {
+        return scheduleOnce(when.getAmount(), timerFunction, when.getUnit());
     }
-    return ioaTimer.read_ms();
 }
 
-unsigned long micros() {
-    if(!timingStarted) {
-        timingStarted = true;
-        ioaTimer.start();
+taskid_t TaskManager::schedule(const TimePeriod &when, Executable *execRef, bool deleteWhenDone) {
+    if(when.getRepeating()) {
+        return scheduleFixedRate(when.getAmount(), execRef, when.getUnit(), deleteWhenDone);
+    } else {
+        return scheduleOnce(when.getAmount(), execRef, when.getUnit(), deleteWhenDone);
     }
-    return (unsigned long) ioaTimer.read_high_resolution_us();
 }
 
-#endif
+TimePeriod::TimePeriod() {
+    amount = 0;
+    unit = TIME_MILLIS;
+    repeating = 0;
+}
+
+TimePeriod::TimePeriod(uint32_t amount, TimerUnit unit, bool repeat) : amount(amount), unit(unit), repeating(repeat != false) {}

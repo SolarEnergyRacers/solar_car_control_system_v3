@@ -6,7 +6,7 @@
 #define SOLAR_CAR_CONTROL_SYSTEM_GPIO_H
 
 #include <AbstractTask.h>
-#include <definitions.h>
+#include "../definitions.h"
 #include <driver/gpio.h>
 
 class GPInputOutput : public AbstractTask {

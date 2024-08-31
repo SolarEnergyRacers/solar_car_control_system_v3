@@ -12,8 +12,9 @@
 // project variables
 #include <sdkconfig.h>
 
-// local definitions
-#include <definitions.h>
+// definitions
+#include <global_definitions.h>
+#include "../lib/definitions.h"
 // standard libraries
 #include <Streaming.h>
 #include <fmt/core.h>
@@ -32,7 +33,6 @@
 #include <freertos/task.h>
 // local includes
 #include <AbstractTask.h>
-#include <LocalFunctionsAndDevices.h>
 // local components
 #include <ADC_SER.h>
 #include <CANBus.h>
@@ -48,7 +48,6 @@
 #include <I2CBus.h>
 #include <IOExt.h>
 #include <OneWire.h>
-#include <OneWireBus.h>
 #include <SPIBus.h>
 #include <Serial.h>
 #include <System.h>
@@ -60,7 +59,7 @@ void app_main(void);
 
 using namespace std;
 
-int base_offset_suspend = 0;
+int base_offset_suspend = 10;
 bool SystemInited = false;
 bool SystemJustInited = true;
 bool adcInited = false;
@@ -78,7 +77,6 @@ DAC dac;
 GPInputOutput gpio; // I2C Interrupts, GPInputOutput pin settings
 I2CBus i2cBus;
 IOExt ioExt;
-// OneWireBus oneWireBus;
 SPIBus spiBus;
 Uart uart; // SERIAL
 
@@ -125,7 +123,7 @@ void app_main(void) {
   // Engineer Display
   // NOT available on DC
   // CAN Bus
-  msg = canBus.init_t(0, 20, 10000, base_offset_suspend + 90);
+  msg = canBus.init_t(0, 20, 10000, base_offset_suspend + 10);
   console << msg << NL;
   canBus.verboseModeCanIn = false;
   canBus.verboseModeCanInNative = false;
@@ -163,7 +161,7 @@ void app_main(void) {
 #endif
 
   // Car Control AC
-  msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 90);
+  msg = carControl.init_t(1, 25, 10000, base_offset_suspend + 10);
   console << msg << NL;
   carControl.verboseMode = false;
   carControl.verboseModeDebug = false;
@@ -252,7 +250,8 @@ void app_main(void) {
   ss << fmt::format("- carControl.verboseMode        = {}", carControl.verboseMode) << NL;
   ss << fmt::format("- carControl.verboseModeDebug   = {}", carControl.verboseModeDebug) << NL;
   ss << fmt::format("- constSpeed.verboseModePID     = {}", constSpeed.verboseModePID) << NL;
-  ss << "----------------------------------------------------" << NL;vTaskDelay(10);
+  ss << "----------------------------------------------------" << NL;
+  vTaskDelay(10);
   console << ss.str();
   SystemInited = true;
 }

@@ -2,7 +2,7 @@
 // Car Speed PID Control
 //
 
-#include <definitions.h>
+#include "../definitions.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -32,14 +32,13 @@ extern CarControl carControl;
 extern bool SystemInited;
 extern DAC dac;
 
-// ------------------
-// FreeRTOS functions
+float normalisation_factor = (float)MAX_ACCELERATION_DISPLAY_VALUE / DAC_MAX;
 
 string ConstSpeed::re_init() {
-  //pid = NULL;
-  // pid.SetMode(MANUAL);
-  // pid.SetMode(AUTOMATIC);
-  return init();
+  pid = PID(&input_value, &output_setpoint, &target_speed, carState.Kp, carState.Ki, carState.Kd, DIRECT);
+  output_setpoint = 0;
+  pid.SetMode(AUTOMATIC);
+  return "PID reinited";
 }
 
 string ConstSpeed::init() {
@@ -47,6 +46,7 @@ string ConstSpeed::init() {
   console << "[  ] Init 'ConstSpeed'...\n";
   target_speed = 0;
   pid = PID(&input_value, &output_setpoint, &target_speed, carState.Kp, carState.Ki, carState.Kd, DIRECT);
+  output_setpoint = 0;
   pid.SetMode(AUTOMATIC);
   pid.SetOutputLimits(-DAC_MAX, DAC_MAX);
   return fmt::format("[{}] ConstSpeed initialized.", hasError ? "--" : "ok");
@@ -65,11 +65,16 @@ double ConstSpeed::get_target_speed() { return target_speed; }
 
 double ConstSpeed::get_current_speed() { return carState.Speed; }
 
-void ConstSpeed::update_pid(double Kp, double Ki, double Kd) {
+void ConstSpeed::set_pid(double Kp, double Ki, double Kd) {
   carState.Kp = Kp;
   carState.Ki = Ki;
   carState.Kd = Kd;
   pid.SetTunings(carState.Kp, carState.Ki, carState.Kd);
+}
+
+void ConstSpeed::update_pid() {
+  if (carState.Kp != pid.GetKp() || carState.Ki != pid.GetKi() || carState.Kd != pid.GetKd())
+    pid.SetTunings(carState.Kp, carState.Ki, carState.Kd);
 }
 
 void ConstSpeed::task(void *pvParams) {
@@ -106,17 +111,24 @@ void ConstSpeed::task(void *pvParams) {
 
       // set acceleration & deceleration
       uint8_t acc = 0;
+#if CONST_SPEED_DECELERATION == true
       uint8_t dec = 0;
+#endif
       if (output_setpoint > 0) {
         acc = round(output_setpoint);
         if (verboseModePID)
           console << "acc=" << acc;
-      } else if (output_setpoint < 0) {
+      }
+#if CONST_SPEED_DECELERATION == false
+      carState.AccelerationDisplay = round(acc * normalisation_factor);
+#else
+      else if (output_setpoint < 0) {
         dec = round(-output_setpoint);
         if (verboseModePID)
           console << "dec=" << dec;
       }
-      carState.AccelerationDisplay = round((acc > 0 ? acc : -dec) * MAX_ACCELERATION_DISPLAY_VALUE / DAC_MAX);
+      carState.AccelerationDisplay = round((acc > 0 ? acc : -dec) * normalisation_factor);
+#endif
       carControl.set_DAC();
 
       if (verboseModePID) {

@@ -5,7 +5,8 @@
 #ifndef SOLAR_CAR_CONTROL_SYSTEM_SPIBUS_H
 #define SOLAR_CAR_CONTROL_SYSTEM_SPIBUS_H
 
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 
 #include <fmt/core.h>
 #include <inttypes.h>

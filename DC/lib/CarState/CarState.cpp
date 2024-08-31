@@ -15,7 +15,7 @@
 #include <Helper.h>
 #include <IOExt.h>
 // #include <RTC.h>
-#include <definitions.h>
+#include "../definitions.h"
 
 using namespace std;
 
@@ -184,7 +184,7 @@ const string CarState::serialize(string msg) {
 
   cJSON_AddItemToObject(carData, "dynamicData", dynData);
   cJSON_AddStringToObject(dynData, "timeStamp", timeStamp.c_str());
-  cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str());
+  cJSON_AddStringToObject(dynData, "uptime", getTimeStamp().c_str()); // getUpTime().c_str()); // getTimeStamp().c_str());
   cJSON_AddStringToObject(dynData, "msg", msg.c_str());
   cJSON_AddNumberToObject(dynData, "potentiometer", Potentiometer);
   cJSON_AddNumberToObject(dynData, "speed", Speed);

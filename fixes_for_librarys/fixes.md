@@ -1,5 +1,7 @@
 # Fixes to loaded Library Packages 
 
+[TOC]
+
 platform: espressif32@5.2.0
 
 ## General / Tools
@@ -59,6 +61,8 @@ remove `-D CURRENT_TIME=$UNIX_TIME` from `build_flags`
   - Windows:  `.pio/libdeps/esp32dev-windows/fmt/include/fmt/core.h`
 
 #### FIX
+
+To avoid problem in `binary.h` change the following file:
 
 - Change for Linux: `.pio/libdeps/esp32dev-linux/fmt/include/fmt/core.h` at line 1120ff
 - Change for Windows: `.pio/libdeps/esp32dev-windows/fmt/include/fmt/core.h` at line 1120ff

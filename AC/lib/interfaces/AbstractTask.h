@@ -5,7 +5,8 @@
 #ifndef ABSTRACTTASK_H
 #define ABSTRACTTASK_H
 
-#include <definitions.h>
+#include <global_definitions.h>
+#include "../definitions.h"
 #include <stdint.h>
 #include <string>
 

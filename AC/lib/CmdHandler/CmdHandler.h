@@ -17,7 +17,7 @@ public:
   void task(void *pvParams);
 
   // Class functions and members
-  string commands = "REDPSVJMUFBICOTK:!sc?";
+  string commands = "REDPSVJMUFBICOTKi:!sc?";
   string helpText = "Available commands (" + commands +
                     "):\n"
                     "\t-------- SYSTEM COMMANDS -------------------------\n"
@@ -31,7 +31,7 @@ public:
                     "\tM _ _ _ _ _ _ _ _ _ _ mount sdcard and eneable logging\n"
                     "\tU _ _ _ _ _ _ _ _ _ _ unmount sdcard and disable logging\n"
                     "\tH _ _ _ _ _ _ _ _ _ _ memory_info\n"
-                    "\tB [rate]  _ _ _ _ _ _ show or set baud rate of Serial2\n"
+                    "\tB [v|m|<rate>]  _ _ _ _ show or set baud rate of Serial2, v-verbose mode\n"
                     "\tF _ _ _ _ _ _ _ _ _ _ Re-read configuration\n"
                     "\tI _ _ _ _ _ _ _ _ _ _ read and show IOs\n"
                     "\t  [s]                   - scan and show I2C devices\n"
@@ -52,6 +52,7 @@ public:
                     "\tT _ _ _ _ _ _ _ _ _ _ get system time\n"
                     "\t  [yyyy mm dd hh MM ss] - set RTC date and time\n"
                     "\tK [|kp ki kd] _ _ _ _ show / update PID constants\n"
+                    "\ti _ _ _ _ _ _ _ _ _ _ minimal drive to console\n"
                     "\t-------- DRIVER INFO COMMANDS --------------------\n"
                     "\t:<text> _ _ _ _ _ _ _ display driver info text\n"
                     "\t!<text> _ _ _ _ _ _ _ display driver warn text\n"

@@ -17,27 +17,24 @@ enum InterruptMode;
 /**
  * @file TaskManagerIO.h
  *
- * Task manager is a simple co-routine style implementation for Arduino which supports scheduling work to be done
+ * @brief Task manager is a simple co-routine style implementation for Arduino which supports scheduling work to be done
  * at a given time, repeating tasks, interrupt marshalling and events. It is generally thread safe such that code
  * outside of task manager can add, remove and manage tasks even while task manager is running.
- *
- * Note that you should never add tasks from a raw ISR, instead use task manager's marshalling of interrupts or
- * use an event that triggers on the interrupt occurring.
- *
- * The API for this class is compatible across Arduino, ESP and mbed. It is mainly thread safe on tested platforms.
- *
- * Both Commercial and Community support for task manager are available from http://www.thecoderscorner.com
  */
 
-#ifdef IOA_USE_MBED
+#if defined(IOA_USE_MBED) || defined(BUILD_FOR_PICO_CMAKE)
 #include <cstdint>
-/** MBED ONLY: This defines the yield function for mbed boards, as per framework on Arduino */
+/** This defines the yield function for environments that don't have the function, as per framework on Arduino */
 void yield();
-/** MBED ONLY: This defines the millis function for mbed boards by using a timer, as per framework on Arduino */
+/** MBED ONLY: This defines the millis function for environments that don't have the function, as per framework on Arduino */
 uint32_t millis();
-/** MBED ONLY: This defines the micros function to use the standard mbed us timer, as per framework on Arduino */
+/** MBED ONLY: This defines the micros function as per framework on Arduino on environments that don't have it */
 uint32_t micros();
+#ifdef IOA_USE_MBED
 #define delayMicroseconds(x) wait_us(x)
+#else
+#define delayMicroseconds(x) sleep_us(x)
+#endif // DELAY Microseconds code
 #endif // IOA_USE_MBED
 
 /**
@@ -72,6 +69,78 @@ public:
 };
 
 class TaskExecutionRecorder;
+
+/**
+ * A scheduling object that makes it easier to represent schedules in taskManager, they can be applied in a neater
+ * written form that makes for quicker code understanding. The are used along with the helper function to provide a
+ * single schedule method. For example: `taskManager.schedule(onceMicros(100), [] { workToDo() });`.
+ */
+class TimePeriod {
+private:
+    uint32_t amount: 24;
+    uint32_t unit: 7;
+    uint32_t repeating: 1;
+public:
+    TimePeriod();
+    TimePeriod(uint32_t amount, TimerUnit unit, bool repeat);
+
+    TimePeriod(const TimePeriod& other) =default;
+    TimePeriod& operator= (const TimePeriod& other) =default;
+
+    uint32_t getAmount() const {
+        return amount;
+    }
+
+    TimerUnit getUnit() const {
+        return (TimerUnit)unit;
+    }
+
+    bool getRepeating() const {
+        return repeating != 0;
+    }
+};
+
+/**
+ * Create a repeating time period for scheduling in seconds
+ * @param seconds the number of seconds to schedule in
+ * @return the time period for scheduling.
+ */
+inline TimePeriod repeatSeconds(uint32_t seconds) { return {seconds, TIME_SECONDS, true}; }
+
+/**
+ * Create a repeating time period for scheduling in millis
+ * @param millis the number of milliseconds to schedule in
+ * @return the time period for scheduling.
+ */
+inline TimePeriod repeatMillis(uint32_t millis) { return {millis, TIME_MILLIS, true}; }
+
+/**
+ * Create a repeating time period for scheduling in microseconds
+ * @param micros the number of microseconds to schedule in
+ * @return the time period for scheduling.
+ */
+inline TimePeriod repeatMicros(uint32_t micros) { return {micros, TIME_MICROS, true}; }
+
+/**
+ * Create a time period for scheduling once in seconds
+ * @param seconds the number of seconds to schedule in
+ * @return the time period for scheduling.
+ */
+inline TimePeriod onceSeconds(uint32_t seconds) { return {seconds, TIME_SECONDS, false}; }
+
+/**
+ * Create a time period for scheduling once in milliseconds
+ * @param millis the number of milliseconds to schedule in
+ * @return the time period for scheduling.
+ */
+inline TimePeriod onceMillis(uint32_t millis) { return {millis, TIME_MILLIS, false}; }
+
+/**
+ * Create a time period for scheduling once in microseconds
+ * @param millis the number of microseconds to schedule in
+ * @return the time period for scheduling.
+ */
+inline TimePeriod onceMicros(uint32_t micros) { return {micros, TIME_MICROS, false}; }
 
 /**
  * TaskManager is a lightweight cooperative co-routine implementation for Arduino, it works by scheduling tasks to be
@@ -140,6 +209,27 @@ public:
     inline taskid_t execute(Executable* execToDo, bool deleteWhenDone = false) {
         return scheduleOnce(2, execToDo, TIME_MICROS, deleteWhenDone);
     }
+
+    /**
+     * Schedule using a time period, normally using the helper functions to quickly create the period, underneath this
+     * calls one of the existing schedule... methods. This schedules a no parameter function to be called. On larger
+     * boards with lambda support enabled, it actually schedules a std::function.
+     * @param when the time period providing the schedule details
+     * @param timerFunction the function to call
+     * @return the task ID that can be queried and cancelled.
+     */
+    taskid_t schedule(const TimePeriod& when, TimerFn timerFunction);
+
+    /**
+     * Schedule using a time period, normally using the helper functions to quickly create the period, underneath this
+     * calls one of the existing schedule... methods. This schedules an executable to be called back.
+     * @param when the time period providing the schedule details
+     * @param execRef the function to call
+     * @param deleteWhenDone if true, once the task ends (cancelled or finished in once mode) it is deleted.
+     * @return the task ID that can be queried and cancelled.
+     */
+    taskid_t schedule(const TimePeriod& when, Executable* execRef, bool deleteWhenDone = false);
+
 
     /**
      * Schedules a task for one shot execution in the timeframe provided.

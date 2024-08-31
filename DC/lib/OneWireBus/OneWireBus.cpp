@@ -1,7 +1,7 @@
 //
 // One Wire Bus
 //
-#include <definitions.h>
+#include "../definitions.h"
 
 #include <fmt/core.h>
 #include <inttypes.h>

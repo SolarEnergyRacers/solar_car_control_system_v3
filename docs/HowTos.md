@@ -20,3 +20,25 @@ writes the file `sdconfig` and sdconfig.esp32dev
 
 [Hardware and Software Solution](https://arduino.stackexchange.com/questions/76690/esp32-brownout-detector-was-triggered-upon-wifi-begin)
 
+## Platformio vscode
+
+### Change `Upload` to `Upload and Monitor`
+
+in `~/.config/Code/User/settings.json`:
+
+change
+```json
+{
+  "text": "$(arrow-right)",
+  "tooltip": "PlatformIO: Upload",
+  "commands": "platformio-ide.upload"
+},
+```
+to
+```json
+{
+  "text": "$(arrow-right)",
+  "tooltip": "PlatformIO: Upload and Monitor",
+  "commands": "platformio-ide.uploadAndMonitor"
+},
+```

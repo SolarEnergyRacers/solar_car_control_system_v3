@@ -117,8 +117,6 @@ public:
     EngineerInfo = "";
     DriverInfo = "starting...";
     DriverInfoType = INFO_TYPE::STATUS;
-    Light = LIGHT::OFF;
-    Fan = false;
 
     // init state flags
     // #SAFETY#: acceleration lock
@@ -205,16 +203,15 @@ public:
   string DriverInfo;
   SPEED_ARROW SpeedArrow;
   INFO_TYPE DriverInfoType;
-  LIGHT Light;
   bool GreenLight;
-  bool Fan;
+
 
   // All IO pins
   static CarStatePin pins[IOExtPINCOUNT];
-  int getIdx(string pinName);
+  int getIdx(const string pinName);
   CarStatePin *getPin(int devNr, int pinNr);
   CarStatePin *getPin(int port);
-  CarStatePin *getPin(string pinName);
+  CarStatePin *getPin(const string pinName);
 
   std::map<string, int> idxOfPin;
   // std::map<int, Pin> pins; // pins by index
@@ -249,10 +246,10 @@ public:
   int MaxCachedRecords; // number of telemetry records hold in cache in case of trasmit errors
 
   // tools
-  const string print(string msg, bool withColors = true);
-  const string printIOs(string msg, bool withColors = true, bool deltaOnly = false);
-  const string serialize(string msg = "");
-  const string csv(string msg = "", bool withHeader = false);
+  const string print(const string msg = "", bool withColors = true);
+  const string printIOs(const string msg = "", bool withColors = true, bool deltaOnly = false);
+  const string serialize(const string msg = "");
+  const string csv(const string msg = "", bool withHeader = false);
   const string batteryErrorsAsString(bool verbose = false);
   const string drive_data();
 

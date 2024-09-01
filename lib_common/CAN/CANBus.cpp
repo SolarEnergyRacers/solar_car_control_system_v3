@@ -309,7 +309,7 @@ void CANBus::write_rx_packet(CANPacket packet) {
   }
 }
 
-string CANBus::print_raw_packet(string msg, CANPacket packet) {
+string CANBus::print_raw_packet(const string msg, CANPacket packet) {
   return fmt::format(
       "C{}-{}-[I:{:02d}|{:02d},O:{:02d}|{:02d}]={}=Id=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
       "{:02x} - {:02x} - {:02x}",

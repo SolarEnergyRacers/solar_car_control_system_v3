@@ -33,7 +33,6 @@ private:
   DisplayValue<string> DriverInfo = DisplayValue<string>(0, 0, "", "%s", "");
   DisplayValue<INFO_TYPE> DriverInfoType = DisplayValue<INFO_TYPE>(0, 0, "", "%s", "");
   DisplayValue<DRIVE_DIRECTION> DriveDirection = DisplayValue<DRIVE_DIRECTION>(0, 0, "", "%s", "");
-  DisplayValue<LIGHT> Light = DisplayValue<LIGHT>(0, 0, "", "%s", "");
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");
   DisplayValue<bool> ConstantModeOn = DisplayValue<bool>(0, 0, "", "%s", "");
 

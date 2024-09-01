@@ -102,7 +102,7 @@ private:
   std::map<uint16_t, int32_t> ages;
 
   void init_ages();
-  string print_raw_packet(string msg, CANPacket packet);
+  string print_raw_packet(const string msg, CANPacket packet);
 
   // optimize with: https://learn.microsoft.com/en-us/cpp/cpp/functions-with-variable-argument-lists-cpp?view=msvc-170
   CANPacket popIn() { return rxBufferIn.pop(); }

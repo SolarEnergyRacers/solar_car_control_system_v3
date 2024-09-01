@@ -18,15 +18,15 @@ private:
   std::map<string, string> content_;
 
 public:
-  ConfigFile(string const &configFile);
+  ConfigFile(const string &configFile);
   // ConfigFile();
 
-  //  string const get(string const &section, string const &entry, string default_value) const;
-  string const get(string const &section, string const &entry, char const *default_value);
-  bool get(string const &section, string const &entry, bool default_value);
-  int get(string const &section, string const &entry, int default_value);
-  float get(string const &section, string const &entry, float default_value);
-  double get(string const &section, string const &entry, double default_value);
+  //  const string get(const string &section, const string &entry, string default_value) const;
+  const string get(const string &section, const string &entry, char const *default_value);
+  bool get(const string &section, const string &entry, bool default_value);
+  int get(const string &section, const string &entry, int default_value);
+  float get(const string &section, const string &entry, float default_value);
+  double get(const string &section, const string &entry, double default_value);
 };
 
 #endif

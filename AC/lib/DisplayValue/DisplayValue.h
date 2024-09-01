@@ -80,7 +80,7 @@ public:
   int getBgColor() { return BgColor; };
   int getTextSize() { return TextSize; };
 
-  void change_format(string fmt) { Format = fmt; }
+  void change_format(const string fmt) { Format = fmt; }
 
   void set_epsilon(T theEpsilon) { _epsilon = theEpsilon; }
 
@@ -113,7 +113,7 @@ public:
 
   void showValue(Adafruit_ILI9341 *tft, bool force = false) { showValue(Value, tft, force); }
 
-  void showValue(string s, Adafruit_ILI9341 *tft, bool force = false) {
+  void showValue(const string s, Adafruit_ILI9341 *tft, bool force = false) {
     if (s.compare(ValueLast) == 0 || !IsInited || force) {
       _showValue(tft, Value.c_str());
     }

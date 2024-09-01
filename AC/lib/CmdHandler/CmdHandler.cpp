@@ -178,31 +178,10 @@ void CmdHandler::task(void *pvParams) {
                   << NL;
           break;
         case 'I':
-          // console << "Received: '" << input << "' --> ";
           if (input[1] == 's') {
             console << "Received: '" << input << "' -->  i2cBus.scan_i2c_devices()\n";
             i2cBus.scan_i2c_devices();
           }
-          // } else if (input[1] == 'i') {
-          //   ioExt.verboseModeDigitalIn = !ioExt.verboseModeDigitalIn;
-          //   console << "set verboseModeDigitalIn: " << ioExt.verboseModeDigitalIn << NL;
-          // } else if (input[1] == 'o') {
-          //   ioExt.verboseModeDigitalOut = !ioExt.verboseModeDigitalOut;
-          //   console << "set verboseModeDigitalOut: " << ioExt.verboseModeDigitalOut << NL;
-          // } else if (input[1] == 'a') {
-          //   adc.verboseModeADC = !adc.verboseModeADC;
-          //   console << "set verboseModeADC: " << adc.verboseModeADC << NL;
-          // } else if (input[1] == 'd') {
-          //   dac.verboseModeDAC = !dac.verboseModeDAC;
-          //   console << "set verboseModeDAC: " << dac.verboseModeDAC << NL;
-          // } else if (input[1] == 'R') {
-          //   console << ioExt.re_init() << NL;
-          //   msg = ioExt.re_init();
-          //   console << msg << NL;
-          // } else {
-          //   ioExt.readAllPins();
-          //   console << carState.printIOs("", true, false) << NL;
-          // }
           break;
         // -------------- chase car commands
         case 'C':
@@ -253,7 +232,6 @@ void CmdHandler::task(void *pvParams) {
           }
           break;
         case 'T': {
-#if RTC_ON
           string arr[6];
           int count = splitString(arr, &input[1]);
           if (count == 0) {
@@ -270,9 +248,6 @@ void CmdHandler::task(void *pvParams) {
             globalTime.set_RTC(dateTime);
             console << "Received: '" << input.c_str() << "' --> Onboard time now: " << globalTime.strTime("%X %F (%a)") << NL;
           }
-#else
-          console << "RTC deactivated\n";
-#endif
         } break;
         case 'K': {
 #if CARSPEED_ON

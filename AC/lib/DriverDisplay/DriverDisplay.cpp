@@ -248,55 +248,6 @@ void DriverDisplay::step_width_show() {
   display.tft->print(valueString.c_str());
   xSemaphoreGive(spiBus.mutex);
 }
-// #define ECO_MODE_STRING " eco"
-// #define PWR_MODE_STRING " power"
-// void DriverDisplay::eco_power_mode_show() {
-//   bool isEco = EcoModeOn.get_recent_overtake_last();
-//   int width = getPixelWidthOfTexts(ecoPwrModeTextSize, ECO_MODE_STRING, PWR_MODE_STRING) + 4;
-
-//   xSemaphoreTakeT(spiBus.mutex);
-//   display.tft->fillRoundRect(ecoPwrModeX - 2, ecoPwrModeY - 2, width, 18, 3, ILI9341_BLACK);
-//   display.tft->setCursor(ecoPwrModeX, ecoPwrModeY);
-//   display.tft->setTextSize(ecoPwrModeTextSize);
-//   if (isEco) {
-//     display.tft->setTextColor(ILI9341_GREEN);
-//     display.tft->print(ECO_MODE_STRING);
-//   } else {
-//     display.tft->setTextColor(ILI9341_BLUE);
-//     display.tft->print(PWR_MODE_STRING);
-//   }
-//   xSemaphoreGive(spiBus.mutex);
-// }
-
-// #define LIGHT1_STRING "Light"
-// #define LIGHT2_STRING "LIGHT"
-// void DriverDisplay::_hide_light() {
-//   int width = getPixelWidthOfTexts(lightTextSize, LIGHT1_STRING, LIGHT2_STRING) + 4;
-//   xSemaphoreTakeT(spiBus.mutex);
-//   display.tft->fillRoundRect(lightX - 2, lightY - 2, width, 18, 3, ILI9341_BLACK);
-//   xSemaphoreGive(spiBus.mutex);
-// }
-
-// void DriverDisplay::show_light() {
-//   LIGHT light = Light.get_recent_overtake_last();
-//   if (light == LIGHT::OFF) {
-//     _hide_light();
-//     return;
-//   }
-// int width = getPixelWidthOfTexts(lightTextSize, LIGHT1_STRING, LIGHT2_STRING) + 4;
-// xSemaphoreTakeT(spiBus.mutex);
-// display.tft->setCursor(lightX, lightY);
-// display.tft->setTextSize(lightTextSize);
-// display.tft->fillRoundRect(lightX - 2, lightY - 2, width, 18, 3, ILI9341_BLACK);
-// if (light == LIGHT::L1) {
-//   display.tft->setTextColor(ILI9341_YELLOW);
-//   display.tft->print(LIGHT1_STRING);
-// } else {
-//   display.tft->setTextColor(ILI9341_BLUE);
-//   display.tft->print(LIGHT2_STRING);
-// }
-// xSemaphoreGive(spiBus.mutex);
-// }
 
 #define FORWARD_STRING ""
 #define BACKWARD_STRING "Backward"
@@ -434,10 +385,7 @@ void DriverDisplay::task(void *pvParams) {
       if (DriveDirection.Value != DriveDirection.ValueLast || justInited) {
         write_drive_direction();
       }
-      // Light.Value = carState.Light;
-      // if (Light.Value != Light.ValueLast || justInited) {
-      //   show_light();
-      // }
+
       ConstantMode.Value = carState.ConstantMode;
       ConstantModeOn.Value = carState.ConstantModeOn;
       if (ConstantMode.Value != ConstantMode.ValueLast || ConstantModeOn.Value != ConstantModeOn.ValueLast || justInited) {

@@ -23,8 +23,8 @@ public:
   string re_init();
   bool isMounted() { return carState.SdCardDetect && mounted; }
   // write a string into the dataFile
-  void write_log(string msg);
-  void write_log_line(string msg);
+  void write_log(const string msg);
+  void write_log_line(const string msg);
   // prints the directory tree of the card
   void directory();
   // read hardware detect of sd card

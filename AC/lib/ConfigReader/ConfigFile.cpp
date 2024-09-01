@@ -29,7 +29,7 @@ string trim(string const &source, char const *delims = " \t\r\n") {
   return result;
 }
 
-ConfigFile::ConfigFile(string const &configFile) {
+ConfigFile::ConfigFile(const string &configFile) {
   console << "Start reading CONFIG.INI:" << configFile << "\n";
   if (sdCard.mount()) {
     try {
@@ -70,7 +70,7 @@ ConfigFile::ConfigFile(string const &configFile) {
   }
 }
 
-string const ConfigFile::get(string const &section, string const &entry, char const *default_value) {
+string const ConfigFile::get(const string &section, const string &entry, const char *default_value) {
   std::map<string, string>::const_iterator ci = content_.find(section + '/' + entry);
 
   if (ci == content_.end())
@@ -79,7 +79,7 @@ string const ConfigFile::get(string const &section, string const &entry, char co
   return ci->second;
 }
 
-bool ConfigFile::get(string const &section, string const &entry, bool default_value) {
+bool ConfigFile::get(const string &section, const string &entry, bool default_value) {
   std::map<string, string>::const_iterator ci = content_.find(section + '/' + entry);
 
   if (ci == content_.end()) {
@@ -90,7 +90,7 @@ bool ConfigFile::get(string const &section, string const &entry, bool default_va
   return value;
 }
 
-int ConfigFile::get(string const &section, string const &entry, int default_value) {
+int ConfigFile::get(const string &section, const string &entry, int default_value) {
   std::map<string, string>::const_iterator ci = content_.find(section + '/' + entry);
 
   if (ci == content_.end()) {
@@ -99,7 +99,7 @@ int ConfigFile::get(string const &section, string const &entry, int default_valu
   return stoi(ci->second);
 }
 
-float ConfigFile::get(string const &section, string const &entry, float default_value) {
+float ConfigFile::get(const string &section, const string &entry, float default_value) {
   std::map<string, string>::const_iterator ci = content_.find(section + '/' + entry);
 
   if (ci == content_.end()) {
@@ -108,7 +108,7 @@ float ConfigFile::get(string const &section, string const &entry, float default_
   return stof(ci->second);
 }
 
-double ConfigFile::get(string const &section, string const &entry, double default_value) {
+double ConfigFile::get(const string &section, const string &entry, double default_value) {
   std::map<string, string>::const_iterator ci = content_.find(section + '/' + entry);
 
   if (ci == content_.end()) {

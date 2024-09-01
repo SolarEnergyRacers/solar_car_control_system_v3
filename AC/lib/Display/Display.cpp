@@ -128,7 +128,7 @@ int Display::getPixelWidthOfTexts(int textSize, string t1, string t2) {
   return max(l1, l2);
 }
 
-void Display::print(string msg) {
+void Display::print(const string msg) {
   if (carState.displayStatus == DISPLAY_STATUS::ENGINEER_CONSOLE) {
     xSemaphoreTakeT(spiBus.mutex);
     tft->setTextSize(1);

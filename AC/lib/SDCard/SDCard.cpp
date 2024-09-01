@@ -70,13 +70,19 @@ bool SDCard::mount() {
     console << "     " << carState.EngineerInfo << NL;
     int attempts = 0;
     mounted = false;
-    xSemaphoreTakeT(spiBus.mutex);
+    // xSemaphoreTakeT(spiBus.mutex);
     // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
+    // while (!mounted && attempts++ < 3) {
+    //   mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
+    //   xSemaphoreGive(spiBus.mutex);
+    // }
+    // xSemaphoreGive(spiBus.mutex);
+      xSemaphoreTakeT(spiBus.mutex);
     while (!mounted && attempts++ < 3) {
       mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
       vTaskDelay(100);
     }
-    xSemaphoreGive(spiBus.mutex);
+      xSemaphoreGive(spiBus.mutex);
     if (mounted) {
       carState.EngineerInfo = "SD card mounted";
       console << "     " << carState.EngineerInfo << ", " << attempts << " attempts" << NL;
@@ -167,6 +173,7 @@ bool SDCard::unmount() {
     return false;
   }
   if (isMounted()) {
+    console << "     SD card unmounting..." << NL;
     try {
       xSemaphoreTakeT(spiBus.mutex);
       SD.end();
@@ -221,9 +228,9 @@ void SDCard::printDirectory(File dir, int numTabs) {
   }
 }
 
-void SDCard::write_log_line(string msg) { write_log(msg + NL); }
+void SDCard::write_log_line(const string msg) { write_log(msg + NL); }
 
-void SDCard::write_log(string msg) {
+void SDCard::write_log(const string msg) {
   if (isMounted()) {
     try {
       open_log_file();

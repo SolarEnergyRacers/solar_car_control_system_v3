@@ -1,5 +1,7 @@
 # SER4 Chase Car Manual
 
+[[_TOC_]]
+
 ## Preparation
 
 ## Control Elements
@@ -14,52 +16,79 @@
 
 ### Steering Wheel Preparation
 
-### Console Commands
+### Console Commands AC
 
-Available commands (!-:<>CcDdEHiIJklLMPRsSUuVvw):
-
-Available commands (!-:<>abBCcDEFGHiIJklLMPRsStTUVvw):
-
+```ini
+Available commands (REDPSVJMUFBICOTKi:!sc?):
+-------- SYSTEM COMMANDS -------------------------
+R _ _ _ _ _ _ _ _ _ _ reset and reinit driver display
+E _ _ _ _ _ _ _ _ _ _ switch to engineer screen
+D _ _ _ _ _ _ _ _ _ _ switch to driver display
+P _ _ _ _ _ _ _ _ _ _ print directory of sdcard
+S _ _ _ _ _ _ _ _ _ _ print status
+  [a]                   - print status and all values
+V [|+]  _ _ _ _ _ _ _ write_log to sdcard | with header (+)
+M _ _ _ _ _ _ _ _ _ _ mount sdcard and eneable logging
+U _ _ _ _ _ _ _ _ _ _ unmount sdcard and disable logging
+H _ _ _ _ _ _ _ _ _ _ memory_info
+B [v|m|<rate>]  _ _ _ _ show or set baud rate of Serial2, v-verbose mode
+F _ _ _ _ _ _ _ _ _ _ Re-read configuration
+I _ _ _ _ _ _ _ _ _ _ read and show IOs
+  [s]                   - scan and show I2C devices
+  [R]                   - reinit
+C _ _ _ _ _ _ _ _ _ _ set CAN verbose mode
+  [i]                   - verbose CAN in
+  [I]                   - verbose CAN in native packages
+  [o]                   - verbose CAN out
+  [O]                   - verbose CAN out native packages
+  [S]                   - verbose sd card
+  motC batV             - inject motor current [A] and battery voltage [V]
+O _ _ _ _ _ _ _ _ _ _ set CarControl verbose mode
+  [o]                   - verbose
+  [O]                   - verbose debug
+T _ _ _ _ _ _ _ _ _ _ get system time
+  [yyyy mm dd hh MM ss] - set RTC date and time
+K [|kp ki kd] _ _ _ _ show / update PID constants
+i _ _ _ _ _ _ _ _ _ _ minimal drive to console
+-------- DRIVER INFO COMMANDS --------------------
+:<text> _ _ _ _ _ _ _ display driver info text
+!<text> _ _ _ _ _ _ _ display driver warn text
+s [|+|-]  _ _ _ _ _ _ speed arrow off, green up (+), red down (-)
+-------- Driver SUPPORT COMMANDS -----------------
+c [-|+|s|p] _ _ _ _ _ _ constant mode on (-:off|+:on|s:speed|p:power)
 ```
-        -------- SYSTEM COMMANDS -------------------------
-        R _ _ _ _ _ _ _ _ _ _ reset and reinit driver display
-        C _ _ _ _ _ _ _ _ _ _ switch to console screen
-        E _ _ _ _ _ _ _ _ _ _ switch to engineer screen
-        D _ _ _ _ _ _ _ _ _ _ switch to driver display
-        P _ _ _ _ _ _ _ _ _ _ print directory of sdcard
-        s _ _ _ _ _ _ _ _ _ _ print status of all values
-        S _ _ _ _ _ _ _ _ _ _ print status
-        J _ _ _ _ _ _ _ _ _ _ write JSON status to sdcard
-        V|v _ _ _ _ _ _ _ _ _ write CSV status to sdcard (V-with, v-w/o header)
-        M _ _ _ _ _ _ _ _ _ _ mount sdcard and eneable logging
-        U _ _ _ _ _ _ _ _ _ _ unmount sdcard and disable logging
-        H _ _ _ _ _ _ _ _ _ _ memory_info
-        B [rate]  _ _ _ _ _ _ show or set baud rate of Serial2
-        I _ _ _ _ _ _ _ _ _ _ scan I2C devices
-        i _ _ _ _ _ _ _ _ _ _ read IOs
-           [i|o]               - show in|out continuously
-           [a|d]               - show ADC|DAC continuously
-           [c]                 - show controls acc/dec continuously
-           [R]                 - reinit
-        b _ _ _ _ _ _ _ _ __  show CAN in
-        T [yyyy mm dd hh MM]  get/set RTC date and time
-        k [|kp ki kd|v] _ _ _ show / update PID constants, v- verbose display
-        G [-] _ _ _ _ _ _ _ _ Green light on  (-:off)
-        F [-] _ _ _ _ _ _ _ _ Fan on  (-:off)
-        -------- DRIVER INFO COMMANDS --------------------
-        a [u|d|o] _ _ _ _ _ _ speed arrow up | down | off
-        :`<text>` _ _ _ _ _ _ _ display driver info text
-        !`<text>` _ _ _ _ _ _ _ display driver warn text
-        u [-] _ _ _ _ _ _ _ _ green speed up arrow (-:off)
-        d [-] _ _ _ _ _ _ _ _ red speed down arrow (-:off)
-        -------- Driver SUPPORT COMMANDS -----------------
-        - _ _ _ _ _ _ _ _ _ _ adjust paddels
-        < _ _ _ _ _ _ _ _ _ _ left indicator on/off
-        > _ _ _ _ _ _ _ _ _ _ right indicator on/off
-        w _ _ _ _ _ _ _ _ _ _ hazard warning lights on (-:off)
-        l [-] _ _ _ _ _ _ _ _ position lights on (-:off)
-        L [-] _ _ _ _ _ _ _ _ beam light on (-:off)
-        c [-|s|p] _ _ _ _ _ _ constant mode on (-:off|s:speed|p:power)
+
+### Console Commands DC
+
+```ini
+Available commands (SVMUICOTK:!sch?):
+-------- SYSTEM COMMANDS -------------------------
+S _ _ _ _ _ _ _ _ _ _ print status
+  [a]                 - print status and all values
+H _ _ _ _ _ _ _ _ _ _ memory_info
+I _ _ _ _ _ _ _ _ _ _ read and show IOs
+  [s]                 - scan and show I2C devices
+  [i|o]               - show in|out continuously
+  [h]                 - show in handler results
+  [a|d]               - show ADC|DAC continuously
+  [c]                 - show controls acc/dec continuously, breakPedal
+  [R]                 - reinit
+C _ _ _ _ _ _ _ _ _ _ set CAN verbose mode
+  [i]                 - verbose CAN in
+  [I]                 - verbose CAN in native packages
+  [o]                 - verbose CAN out
+  [O]                 - verbose CAN out native packages
+O _ _ _ _ _ _ _ _ _ _ set CarControl verbose mode
+  [o]                 - verbose
+  [O]                 - verbose debug
+T [yyyy mm dd hh MM]  get/set RTC date and time
+K [|kp ki kd] _ _ _ _ show / update PID constants
+-------- DRIVER INFO COMMANDS --------------------
+:<text> _ _ _ _ _ _ _ display driver info text
+!<text> _ _ _ _ _ _ _ display driver warn text
+s [|+|-]  _ _ _ _ _ _ speed arrow off, green up (+), red down (-)
+-------- Driver SUPPORT COMMANDS -----------------
+c [-|s|p] _ _ _ _ _ _ constant mode on (-:off|s:speed|p:power)
 ```
 
 #### SYSTEM COMMANDS
@@ -99,17 +128,6 @@ Available commands (!-:<>abBCcDEFGHiIJklLMPRsStTUVvw):
 | u [-]       | green speed up arrow (- => off) |
 | d [-]       | red speed down arrow (- => off) |
 
-#### Driver SUPPORT COMMANDS
-
-| command   | Function                     |
-| --------- | ---------------------------- |
-| <         | left indicator on/off        |
-| >         | right indicator on/off       |
-| w         | hazard warning lights on/off |
-| l [-]     | position lights on/off       |
-| L [-]     | beam light on/off            |
-| c [c/s/p] | constant speed/power mode    |
-
 ### Console Procedures
 
 Mount SD card and start logging:
@@ -126,15 +144,13 @@ The last display is a 4 Seconds countdown to allow an additional view to the val
 
 ### Adjust Paddles
 
-After each start the Paddles must be adjusted. Until that the acceleration is locked. It is shown by the number `-99` in the `acceleration/deceleration` display and the drivers information Acceleration still locked.
+After each start the paddles gets be adjusted automatically. 
 
-Procedure:
+> Make sure that the paddles are in the home position, i.e. the position in which the paddles are set to partially tighten and then fully release. **Never push the paddles towards the front of the vehicle!**
 
-- Send command `-`
-- Move both paddles at same time slow from min to max to min.
-  You have about 5s time for that.
-- If successful the `acceleration/deceleration` display show `+ 0`
-  Otherwise repeat the complete procedure
+If you release both paddles and the `acceleration/deceleration` display doesn't show `+ 0` the adjust procedure must be repeated by restarting DC.
+
+If the control range of the paddles is to rough then the adjust procedure must be repeated by restarting DC.
 
 ## Car Operate
 

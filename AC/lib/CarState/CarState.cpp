@@ -56,9 +56,7 @@ void CarState::init_values() {
   EngineerInfo = "";
   DriverInfo = "No DC connection!";
   DriverInfoType = INFO_TYPE::STATUS;
-  Light = LIGHT::OFF;
   GreenLight = false;
-  Fan = false;
 
   // read from SER4CONFIG.INI file
   initalize_config();
@@ -138,24 +136,20 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Motor Current ......... " << MotorCurrent << NL;
   ss << "Drive Direction ....... " << DRIVE_DIRECTION_str[(int)(DriveDirection)] << NL;
   ss << "Green Light ........... " << GreenLight << NL;
-  ss << "Fan ................... " << Fan << NL;
   ss << "------------------------" << NL;
   ss << "Constant Mode ......... " << CONSTANT_MODE_str[(int)(ConstantMode)] << NL;
   ss << "Target Speed .......... " << TargetSpeed << NL;
   ss << "Target Power .......... " << TargetPower << NL;
-  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << NL;
-  ss << "EngineerInfo Last ..... "
-     << "[NORMAL] " << getCleanString(EngineerInfo) << NL;
-  ss << "DriverInfo Last ....... "
-     << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << getCleanString(DriverInfo) << NL;
+  ss << "EngineerInfo Last ..... " << "[NORMAL] " << getCleanString(EngineerInfo) << NL;
+  ss << "DriverInfo Last ....... " << "[" << INFO_TYPE_str[(int)DriverInfoType] << "] " << getCleanString(DriverInfo) << NL;
   ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << NL;
-  ss << "Light ................. " << LIGHT_str[(int)(Light)] << NL;
   ss << "IO .................... " << printIOs("", false) << NL;
-
+  ss << "------------------------" << NL;
+  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << NL;
   ss << "Log file name ......... " << LogFilename << NL;
   ss << "Log file period [h].... " << LogFilePeriod << NL;
   ss << "Log file interval [ms]. " << LogInterval << NL;
-
+  ss << "------------------------" << NL;
   // [PID]
   ss << "Kp .................... " << Kp << NL;
   ss << "Ki .................... " << Ki << NL;
@@ -166,11 +160,11 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Paddle offset ......... " << PaddleOffset << NL;
   ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
   ss << "Const power invrease .. " << ConstPowerIncrease << NL;
-
+  ss << "------------------------" << NL;
   // [Communication]
-  ss << "Car data send period [ms]. " << CarDataSendPeriod << NL;
   ss << "Serial 1 baud rate .... " << Serial1Baudrate << NL;
   ss << "Serial 2 baud rate .... " << Serial2Baudrate << NL;
+  ss << "Car data send period [ms]. " << CarDataSendPeriod << NL;
 
   // [Telemetry]
   ss << "Telemetry send intervall" << SendInterval << NL;
@@ -180,7 +174,7 @@ const string CarState::print(string msg, bool withColors) {
   return ss.str();
 }
 
-const string CarState::serialize(string msg) {
+const string CarState::serialize(const string msg) {
   // string timeStamp = getDateTime();
   string timeStamp = globalTime.strTime("%F %R");
   // timeStamp.erase(timeStamp.end() - 1);
@@ -231,9 +225,7 @@ const string CarState::serialize(string msg) {
   cJSON_AddStringToObject(ctrData, "driverInfo",
                           fmt::format("[{}] {}", INFO_TYPE_str[(int)DriverInfoType], getCleanString(DriverInfo)).c_str());
   cJSON_AddStringToObject(ctrData, "speedArrow", SPEED_ARROW_str[(int)SpeedArrow]);
-  cJSON_AddStringToObject(ctrData, "light", LIGHT_str[(int)(Light)]);
   cJSON_AddBoolToObject(dynData, "greenLight", GreenLight);
-  cJSON_AddBoolToObject(dynData, "fan", Fan);
   cJSON_AddStringToObject(ctrData, "io:", printIOs("", false).c_str());
 
   cJSON_AddItemToObject(carData, "configData", cfgData);
@@ -246,7 +238,7 @@ const string CarState::serialize(string msg) {
   return fmt::format("{}\n", cJSON_Print(carData));
 }
 
-const string CarState::csv(string msg, bool withHeader) {
+const string CarState::csv(const string msg, bool withHeader) {
   stringstream ss;
   if (withHeader) {
     // header
@@ -347,7 +339,7 @@ const string CarState::csv(string msg, bool withHeader) {
   return ss.str();
 }
 
-const string CarState::printIOs(string msg, bool withColors, bool deltaOnly) {
+const string CarState::printIOs(const string msg, bool withColors, bool deltaOnly) {
   string normalColor = "";
   string highLightColorOut = "";
   string highLightColorChg = "";

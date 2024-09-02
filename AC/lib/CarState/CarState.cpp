@@ -164,13 +164,12 @@ const string CarState::print(string msg, bool withColors) {
   // [Communication]
   ss << "Serial 1 baud rate .... " << Serial1Baudrate << NL;
   ss << "Serial 2 baud rate .... " << Serial2Baudrate << NL;
-  ss << "Car data send period [ms]. " << CarDataSendPeriod << NL;
+  ss << "Car data send period .. " << CarDataSendPeriod << "ms"<< NL;
 
   // [Telemetry]
-  ss << "Telemetry send intervall" << SendInterval << NL;
+  ss << "Telemetry send interval " << SendInterval << "ms" << NL;
   ss << "Telemetry cache records " << MaxCachedRecords << NL;
-
-  ss << "===========================================================================================" << NL;
+  ss << "========================================================================" << NL;
   return ss.str();
 }
 

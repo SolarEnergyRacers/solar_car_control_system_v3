@@ -92,7 +92,7 @@ bool CarControl::read_sd_card_detect() {
     // console << msg << NL;
     // if (sdCard.check_log_file()) {
     //   string state = carState.csv("Recent State", true); // with header
-    //   sdCard.write_log_line(state);
+    //   sdCard.write_log(state + NL);
     // }
   } else if (!carState.SdCardDetect && sdCardDetectOld) {
     carState.EngineerInfo = "SD card removed.";

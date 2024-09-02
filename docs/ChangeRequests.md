@@ -6,7 +6,7 @@
 - [ ] Drive Light LED and Front Light LED too bright ([Git-Issue](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/issues/11))
   *done with version:* 
 - [ ] Need a DI Pin for SD-Card detected --> wire from display pin XX to CPU I35 (IO35)
-  *done with version:* 
+  *done with version:* V5
 - [x] How we signal the drive direction to the driver (Driver Display?)
   *done with version:* 
 - [ ] Battery On/Off - feedback missing

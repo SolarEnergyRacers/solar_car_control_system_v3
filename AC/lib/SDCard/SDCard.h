@@ -24,7 +24,6 @@ public:
   bool isMounted() { return update_sd_card_detect() && mounted; }
   // write a string into the dataFile
   void write_log(const string msg);
-  void write_log_line(const string msg);
   // prints the directory tree of the card
   void directory();
   // read hardware detect of sd card

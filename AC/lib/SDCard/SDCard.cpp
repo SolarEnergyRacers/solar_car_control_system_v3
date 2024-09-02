@@ -2,8 +2,8 @@
 // SD Card
 //
 
-#include <global_definitions.h>
 #include "../definitions.h"
+#include <global_definitions.h>
 
 // standard libraries
 #include <fmt/core.h>
@@ -54,12 +54,13 @@ string SDCard::init() {
 // https://github.com/espressif/arduino-esp32/blob/master/libraries/SPI/examples/SPI_Multiple_Buses/SPI_Multiple_Buses.ino
 
 bool SDCard::update_sd_card_detect() {
-  carState.SdCardDetect = digitalRead(ESP32_AC_SD_DETECT);
+  carState.SdCardDetect = (bool)digitalRead(ESP32_AC_SD_DETECT);
   return carState.SdCardDetect;
 }
 
 bool SDCard::mount() {
   if (isMounted()) {
+    console << "  SD card already mounted" << NL;
     return true;
   }
   if (!update_sd_card_detect()) {
@@ -124,6 +125,10 @@ bool SDCard::mount() {
 }
 
 void SDCard::close_log_file() {
+  if (!isMounted()) {
+    console << "  SD card not mounted (close_log_file failed)" << NL;
+    return;
+  }
   xSemaphoreTakeT(spiBus.mutex);
   dataFile.flush();
   dataFile.close();
@@ -131,6 +136,10 @@ void SDCard::close_log_file() {
 }
 
 bool SDCard::open_log_file() {
+  if (!isMounted()) {
+    console << "  SD card not mounted (open_log_file failed)" << NL;
+    return false;
+  }
   xSemaphoreTakeT(spiBus.mutex);
   dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
   xSemaphoreGive(spiBus.mutex);
@@ -140,6 +149,10 @@ bool SDCard::open_log_file() {
 }
 
 bool SDCard::check_log_file() {
+  if (!isMounted()) {
+    console << "  SD card not mounted (check_log_file failed)" << NL;
+    return false;
+  }
   if (carState.LogFilename.length() < 1) {
     carState.EngineerInfo = "ERROR empty open_log_file name";
     console << "     " << carState.EngineerInfo << NL;
@@ -199,9 +212,9 @@ bool SDCard::unmount() {
 
 void SDCard::directory() {
   if (!isMounted()) {
-    console << "SD card not mounted." << NL;
+    console << "  SD card not mounted" << NL;
+    return;
   }
-
   console << "SD-Card content:" << NL;
   File root = SD.open("/");
   printDirectory(root, 1);
@@ -231,20 +244,20 @@ void SDCard::printDirectory(File dir, int numTabs) {
   }
 }
 
-void SDCard::write_log_line(const string msg) { write_log(msg + NL); }
-
 void SDCard::write_log(const string msg) {
-  if (isMounted()) {
-    try {
-      open_log_file();
-      xSemaphoreTakeT(spiBus.mutex);
-      dataFile.print(msg.c_str());
-      xSemaphoreGive(spiBus.mutex);
-      close_log_file();
-    } catch (exception &ex) {
-      xSemaphoreGive(spiBus.mutex);
-      carState.EngineerInfo = "ERROR writing SD card";
-      console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
-    }
+  if (!isMounted()) {
+    console << "  SD card not mounted" << NL;
+    return;
+  }
+  try {
+    open_log_file();
+    xSemaphoreTakeT(spiBus.mutex);
+    dataFile.print(msg.c_str());
+    xSemaphoreGive(spiBus.mutex);
+    close_log_file();
+  } catch (exception &ex) {
+    xSemaphoreGive(spiBus.mutex);
+    carState.EngineerInfo = "ERROR writing SD card";
+    console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
   }
 }

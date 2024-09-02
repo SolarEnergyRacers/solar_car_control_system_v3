@@ -30,43 +30,47 @@ string trim(string const &source, char const *delims = " \t\r\n") {
 }
 
 ConfigFile::ConfigFile(const string &configFile) {
-  console << "Start reading CONFIG.INI:" << configFile << "\n";
-  if (sdCard.mount()) {
-    try {
-      ifstream file(configFile, ios_base::in);
-      string inSection = "UNKNOWN";
-      string line;
-      for (int lineNr = 0; getline(file, line); lineNr++) {
-        if (!line.length())
-          continue;
+  if (sdCard.update_sd_card_detect()) {
+    console << "Start reading CONFIG.INI:" << configFile << "\n";
+    if (sdCard.mount()) {
+      try {
+        ifstream file(configFile, ios_base::in);
+        string inSection = "UNKNOWN";
+        string line;
+        for (int lineNr = 0; getline(file, line); lineNr++) {
+          if (!line.length())
+            continue;
 
-        console << lineNr << ": " << line << "\n";
+          console << lineNr << ": " << line << "\n";
 
-        if (line[0] == '#')
-          continue;
-        if (line[0] == ';')
-          continue;
+          if (line[0] == '#')
+            continue;
+          if (line[0] == ';')
+            continue;
 
-        if (line[0] == '[') {
-          inSection = trim(line.substr(1, line.find(']') - 1));
-          continue;
+          if (line[0] == '[') {
+            inSection = trim(line.substr(1, line.find(']') - 1));
+            continue;
+          }
+
+          int posEqual = line.find('=');
+          string name = trim(line.substr(0, posEqual));
+          string value = trim(line.substr(posEqual + 1));
+
+          // remove line end comment
+          posEqual = value.find('#');
+          value = trim(value.substr(0, posEqual));
+          content_[inSection + '/' + name] = value;
         }
-
-        int posEqual = line.find('=');
-        string name = trim(line.substr(0, posEqual));
-        string value = trim(line.substr(posEqual + 1));
-
-        // remove line end comment
-        posEqual = value.find('#');
-        value = trim(value.substr(0, posEqual));
-        content_[inSection + '/' + name] = value;
+      } catch (exception &ex) {
+        console << "WARN: No readable configfile: '" << configFile << "' found: " << ex.what() << "\n";
       }
-    } catch (exception &ex) {
-      console << "WARN: No readable configfile: '" << configFile << "' found: " << ex.what() << "\n";
+    } else {
+      content_["no_config_info/not_found"] = "no value";
+      console << "WARN: No readable configfile: '" << configFile << "' found. Using coded settings.\n";
     }
   } else {
-    content_["no_config_info/not_found"] = "no value";
-    console << "WARN: No readable configfile: '" << configFile << "' found. Using coded settings.\n";
+    console << "WARN: No SD card found.\n";
   }
 }
 

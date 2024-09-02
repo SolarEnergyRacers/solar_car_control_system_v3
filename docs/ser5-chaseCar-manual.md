@@ -132,19 +132,23 @@ c [-|s|p] _ _ _ _ _ _ constant mode on (-:off|s:speed|p:power)
 
 Mount SD card and start logging:
 
+- Switch to Engineer Screen with button `R1`
+- plug in the SD card
+- Press button `R3`
+
+The Engineer Info at the bottom of the Engineer Screen 
+
 ## Car Start
 
 ### Boot Screen
 
-The bootscreen with blue font on yellow background shows the initialization of all devices controlled by the car control system.
-
-The first part shows the device init, the second part shows the control task creation.
+The bootscreen with blue font on white background shows the initialization of all devices controlled by the car control system.
 
 The last display is a 4 Seconds countdown to allow an additional view to the values.
 
 ### Adjust Paddles
 
-After each start the paddles gets be adjusted automatically. 
+During each start the paddles gets be adjusted automatically. 
 
 > Make sure that the paddles are in the home position, i.e. the position in which the paddles are set to partially tighten and then fully release. **Never push the paddles towards the front of the vehicle!**
 

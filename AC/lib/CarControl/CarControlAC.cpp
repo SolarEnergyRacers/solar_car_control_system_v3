@@ -83,10 +83,7 @@ bool CarControl::read_sd_card_detect() {
     return false;
 
   bool sdCardDetectOld = carState.SdCardDetect;
-  sdCard.update_sd_card_detect();
-  // console << "." << carState.SdCardDetect << sdCardDetectOld << "_";
-
-  if (carState.SdCardDetect && !sdCardDetectOld) {
+  if (sdCard.update_sd_card_detect() && !sdCardDetectOld) {
     // carState.EngineerInfo = "SD card detected, try to start logging...";
     carState.EngineerInfo = "SD card detected. Not mounted yet.";
     console << "     " << carState.EngineerInfo << NL;

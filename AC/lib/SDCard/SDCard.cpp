@@ -33,15 +33,19 @@ string SDCard::re_init() { return init(); }
 string SDCard::init() {
   bool hasError = true;
   console << "[  ] Init '" << getName() << "'..." << NL;
-  if (update_sd_card_detect()) {
-    carState.EngineerInfo = "SD card detected";
-    console << "     " << carState.EngineerInfo << NL;
-    hasError = !mount();
-    // if (!hasError)
-    //   hasError = !check_log_file();
-  } else {
-    carState.EngineerInfo = "No SD card detected during init!";
-    console << "     " << carState.EngineerInfo << NL;
+  try {
+    if (update_sd_card_detect()) {
+      carState.EngineerInfo = "SD card detected";
+      console << "     " << carState.EngineerInfo << NL;
+      hasError = !mount();
+    } else {
+      carState.EngineerInfo = "No SD card detected during init!";
+      console << "     " << carState.EngineerInfo << NL;
+    }
+  } catch (exception &ex) {
+    console << "ERROR initializing SD card: " << ex.what() << NL;
+    return fmt::format("[{}] SDCard           initialized.", hasError ? "!!" : "ok");
+    ;
   }
   return fmt::format("[{}] SDCard           initialized.", hasError ? "--" : "ok");
 }
@@ -58,8 +62,7 @@ bool SDCard::mount() {
   if (isMounted()) {
     return true;
   }
-  update_sd_card_detect();
-  if (!carState.SdCardDetect) {
+  if (!update_sd_card_detect()) {
     carState.EngineerInfo = "No SD card detected!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
@@ -77,12 +80,12 @@ bool SDCard::mount() {
     //   xSemaphoreGive(spiBus.mutex);
     // }
     // xSemaphoreGive(spiBus.mutex);
-      xSemaphoreTakeT(spiBus.mutex);
+    xSemaphoreTakeT(spiBus.mutex);
     while (!mounted && attempts++ < 3) {
       mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
-      vTaskDelay(100);
+      vTaskDelay(10);
     }
-      xSemaphoreGive(spiBus.mutex);
+    xSemaphoreGive(spiBus.mutex);
     if (mounted) {
       carState.EngineerInfo = "SD card mounted";
       console << "     " << carState.EngineerInfo << ", " << attempts << " attempts" << NL;
@@ -166,7 +169,7 @@ bool SDCard::check_log_file() {
 }
 
 bool SDCard::unmount() {
-  if (!carState.SdCardDetect) {
+  if (!update_sd_card_detect()) {
     carState.EngineerInfo = "No SD card detected to unmount!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;

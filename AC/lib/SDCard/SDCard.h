@@ -21,13 +21,13 @@ public:
   string getName() { return "SDCard"; };
   string init();
   string re_init();
-  bool isMounted() { return update_sd_card_detect() && mounted; }
+  // read hardware detect of sd card
+  bool update_sd_card_detect();
+  bool isMounted();
   // write a string into the dataFile
   void write_log(const string msg);
   // prints the directory tree of the card
   void directory();
-  // read hardware detect of sd card
-  bool update_sd_card_detect();
   // mount the card
   bool mount();
   // prepare log

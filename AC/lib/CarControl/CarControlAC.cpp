@@ -1,8 +1,8 @@
 //
 // CarControlx: Main control module of SER4
 //
-#include <global_definitions.h>
 #include "../definitions.h"
+#include <global_definitions.h>
 
 #include <fmt/core.h>
 #include <fmt/printf.h>
@@ -58,11 +58,15 @@ void CarControl::exit(void) {
 bool CarControl::read_nextScreenButton() {
   if (!SystemInited)
     return false;
+  unsigned long timestamp = millis();
+  if (timestamp < nextScreenButton_lastPress + nextScreenButton_debounceTime_ms)
+    return false;
 
   int button_nextScreen_pressed = !digitalRead(ESP32_AC_BUTTON_AC_NEXT);
   if (!button_nextScreen_pressed)
     return false;
-
+  nextScreenButton_lastPress = timestamp;
+  
   switch (carState.displayStatus) {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::DRIVER_SETUP;
@@ -152,12 +156,12 @@ void CarControl::task(void *pvParams) {
 #ifndef SUPRESS_CAN_OUT_AC
       bool constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? true : false;
       CANPacket packet = canBus.writePacket(AC_BASE0x00,
-                                            carState.LifeSign,            // LifeSign
+                                            carState.LifeSign,           // LifeSign
                                             (uint8_t)(carState.Kp * 10), // Kp
                                             (uint8_t)(carState.Ki * 10), // Ki
                                             (uint8_t)(carState.Kd * 10), // Kd
-                                            (bool)constantMode,           // switch constant mode Speed / Power
-                                            force                         // force or not
+                                            (bool)constantMode,          // switch constant mode Speed / Power
+                                            force                        // force or not
       );
       carStateRadio.push_if_radio_packet(AC_BASE0x00, packet);
 #endif

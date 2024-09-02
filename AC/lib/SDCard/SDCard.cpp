@@ -58,6 +58,8 @@ bool SDCard::update_sd_card_detect() {
   return carState.SdCardDetect;
 }
 
+bool SDCard::isMounted() { return update_sd_card_detect() && mounted; }
+
 bool SDCard::mount() {
   if (isMounted()) {
     console << "  SD card already mounted" << NL;
@@ -72,15 +74,8 @@ bool SDCard::mount() {
   try {
     carState.EngineerInfo = "Mounting SD card...";
     console << "     " << carState.EngineerInfo << NL;
-    int attempts = 0;
     mounted = false;
-    // xSemaphoreTakeT(spiBus.mutex);
-    // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
-    // while (!mounted && attempts++ < 3) {
-    //   mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
-    //   xSemaphoreGive(spiBus.mutex);
-    // }
-    // xSemaphoreGive(spiBus.mutex);
+    int attempts = 0;
     xSemaphoreTakeT(spiBus.mutex);
     while (!mounted && attempts++ < 3) {
       mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);

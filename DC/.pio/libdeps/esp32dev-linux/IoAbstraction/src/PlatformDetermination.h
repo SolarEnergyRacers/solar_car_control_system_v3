@@ -16,7 +16,7 @@
 #endif // has include "io_local_definitions"
 
 // when not on mbed, we need to load Arduino.h to get the right defines for some boards.
-#ifndef __MBED__
+#if !defined(__MBED__) && !defined(BUILD_FOR_PICO_CMAKE)
 #include <Arduino.h>
 #endif
 
@@ -45,7 +45,8 @@ typedef uint8_t pinid_t;
     defined(ARDUINO_EDGE_CONTROL) || \
     defined(ARDUINO_NICLA) || \
     defined(ARDUINO_NICLA_VISION) || \
-    defined(TMIOA_FORCE_ARDUINO_MBED)
+    defined(TMIOA_FORCE_ARDUINO_MBED) || \
+    defined(ARDUINO_ARCH_MBED)
 // here we're in a hybrid of mbed and Arduino basically. We treat all abstractions as Arduino though.
 #include <Arduino.h>
 # define IOA_USE_ARDUINO
@@ -58,6 +59,13 @@ typedef uint32_t pinid_t;
 # define IOA_USE_MBED
 #include <mbed.h>
 typedef uint32_t pinid_t;
+#elif defined(BUILD_FOR_PICO_CMAKE)
+#include <pico/stdlib.h>
+#include <cstring>
+#include <cctype>
+#include <valarray>
+typedef uint8_t pinid_t;
+#define pgm_read_byte_near(x) (*(x))
 #else
 // here we are in full arduino mode (AVR, MKR, ESP etc).
 # define IOA_USE_ARDUINO

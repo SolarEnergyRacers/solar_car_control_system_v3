@@ -66,7 +66,7 @@ bool CarControl::read_nextScreenButton() {
   if (!button_nextScreen_pressed)
     return false;
   nextScreenButton_lastPress = timestamp;
-  
+
   switch (carState.displayStatus) {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     carState.displayStatus = DISPLAY_STATUS::DRIVER_SETUP;
@@ -108,6 +108,10 @@ bool CarControl::read_sd_card_detect() {
 
 bool CarControl::read_const_mode_and_mountrequest() {
   if (!SystemInited)
+    return false;
+
+  unsigned long timestamp = millis();
+  if (timestamp < mountrequest_lastPress + mountrequest_debounceTime_ms)
     return false;
 
   bool button_constMode_pressed = !digitalRead(ESP32_AC_BUTTON_CONST_MODE); // switch constant mode (Speed, Power)

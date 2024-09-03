@@ -248,7 +248,7 @@ void SDCard::write_log(const string msg) {
     return;
   }
   try {
-    if (carState.EngineerInfo.length() < 52)
+    if (carState.EngineerInfo.length() < 51)
       carState.EngineerInfo += " #Log to SD card ";
     //console << "     " << carState.EngineerInfo;
     open_log_file();

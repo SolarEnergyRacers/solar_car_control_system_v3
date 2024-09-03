@@ -33,7 +33,7 @@ public:
   // prepare log
   bool check_log_file();
   bool open_log_file();
-  void close_log_file();
+  bool close_log_file();
   // close log file, unmount the card, end the SD and disable logging
   bool unmount();
 

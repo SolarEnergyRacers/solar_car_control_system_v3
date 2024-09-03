@@ -156,9 +156,6 @@ const string CarState::printP2(bool withColors) {
   ss << "------------------------" << NL;
   // [Communication]
   ss << "Serial 1 baud rate .... " << Serial1Baudrate << NL;
-#if SERIAL_RADIO_ON
-  ss << "Serial 2 baud rate .... " << Serial2Baudrate << NL;
-#endif
   ss << "Car data send period .. " << CarDataSendPeriod << "ms"<< NL;
 
   // [Telemetry]

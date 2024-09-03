@@ -122,10 +122,12 @@ bool CarControl::read_const_mode_and_mountrequest() {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     if (sdCard.isMounted()) {
       sdCard.unmount();
+      vTaskDelay(3000);
     } else {
       sdCard.mount();
       string state = carState.csv("Recent State just after mounting", true); // with header
       sdCard.write_log(state);
+      vTaskDelay(3000);
     }
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:

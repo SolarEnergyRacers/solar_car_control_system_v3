@@ -81,20 +81,20 @@ void CmdHandler::task(void *pvParams) {
   while (1) {
     try {
       while (SystemInited && (Serial.available()
-                              // #if SERIAL_RADIO_ON
-                              //                               || Serial2.available()
-                              // #endif
+                              #if SERIAL_RADIO_CMD_ON
+                                                            || Serial2.available()
+                              #endif
                               )) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
-          // #if SERIAL_RADIO_ON
-          //         } else if (Serial2.available()) {
-          //           input = Serial2.readString();
-          //           Serial2.flush();
-          // #endif
+          #if SERIAL_RADIO_CMD_ON
+                  } else if (Serial2.available()) {
+                    input = Serial2.readString();
+                    Serial2.flush();
+          #endif
         }
         if (input.length() == 0)
           break;

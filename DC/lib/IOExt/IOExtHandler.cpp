@@ -47,7 +47,7 @@ void buttonSetHandler() {
     return;
   if (carState.getPin(PinDI_Button_Set)->value != 0)
     return;
-  carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
+  carState.ConstantModeOn = !carState.ConstantModeOn; // #SAFETY#: deceleration unlock const mode
   // carState.TargetSpeed = carState.Speed;                                       // unit: km/h
   // carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
   if (ioExt.verboseModeDInHandler)

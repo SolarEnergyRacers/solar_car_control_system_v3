@@ -47,6 +47,8 @@ void CarState::init_values() {
   DriveDirection = DRIVE_DIRECTION::FORWARD;
   ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
   ConstantModeOn = false;
+  ConfirmDriverInfo = false;
+
   TargetSpeed = 0;
   TargetPower = 0;
   DriverInfo = "Acceleration\nstill locked!";
@@ -269,6 +271,7 @@ const string CarState::csv(const string msg, bool withHeader) {
     ss << "Kd, ";
     ss << "targetPower, ";
     ss << "driverInfo, ";
+    ss << "ConfirmDriverInfo, ";
     ss << "speedArrow, ";
     ss << "light, ";
     ss << "greenLight, ";
@@ -322,6 +325,7 @@ const string CarState::csv(const string msg, bool withHeader) {
   ss << Kd << ", ";
   ss << TargetPower << ", ";
   ss << fmt::format("\"{}: {}\"", INFO_TYPE_str[(int)DriverInfoType], tempStr) << ", ";
+  ss << ConfirmDriverInfo << ", ";
   ss << SPEED_ARROW_str[(int)SpeedArrow] << ", ";
   ss << GreenLight << ", ";
   ss << printIOs("", false).c_str() << ", ";

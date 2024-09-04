@@ -42,7 +42,7 @@ TODO: DESCRIBE IT!
 | L1+R1  | Hazard warning lights | on/off                                                       |
 | L2     | MINUS                 | decreases acceleration, switch on constant mode, current speed/power is overtaken as target speed |
 | R2     | PLUS                  | increases acceleration, switch on constant mode, current speed/power is overtaken as target speed |
-| L3     | const. off            | switches off the constant mode, resets the PID (constant controller) |
+| L3     | confirm               | confirm that the driver has read the info text (send the confirm back to the AC and radio) |
 | R3     | const. on             | switches on the constant mode, overtake last used target speed/power |
 | L4     | SPEAK                 | driver speak button for radio communication                  |
 | R4     | Const/Mount           | Driver screen: switches between speed and power constant mode<br />Engineer screen: mounts or unmounts the sd-card |

@@ -42,7 +42,7 @@
 #define DC_BASE0x00 DC_BASE_ADDR | 0x00 // DC: LifeSign, Potentiometer, Acceleration, Deceleration
 #define DC_BASE0x01 DC_BASE_ADDR | 0x01 // DC: TargetSpeed, TargetPower, AccelerationDisplay,
                                         //     Speed, Direction, DriveDirection, BreakPedal,
-                                        //     MotorOn, ConstantModeOn
+                                        //     MotorOn, ConstantModeOn, ConfirmDriverInfo
 
 #define Mppt1Base0x00 MPPT1_BASE_ADDR | 0x00 // MPPT_INPUT
 #define Mppt1Base0x01 MPPT1_BASE_ADDR | 0x01 // MPPT_OUTPUT
@@ -123,7 +123,7 @@ public:
                         bool b_56, bool b_57, bool b_58, bool b_59, bool b_60, bool b_61, bool b_62, bool b_63, bool force = false);
   CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint16_t data_u16_1, uint16_t data_u16_2, uint16_t data_u16_3,
                         bool force = false);
-  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint8_t data_u8_2, uint8_t data_u8_3, uint8_t data_u8_4, bool data_b_41,
+  CANPacket writePacket(uint16_t adr, uint16_t data_u16_0, uint8_t data_u8_2, uint8_t data_u8_3, uint8_t data_u8_4, bool data_b_41, bool data_b_42,
                         bool force);
   CANPacket writePacket(uint16_t adr, CANPacket packet, bool force = false);
 

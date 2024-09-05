@@ -140,10 +140,9 @@ bool CarControl::read_const_mode_and_mountrequest() {
   return true;
 }
 
-// int cyclecounter = 0;
+
 string carStateEngineerInfoLast = "";
 uint16_t carStateLifeSignLast = 0;
-uint16_t ConfirmClear = 0;
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
@@ -160,15 +159,6 @@ void CarControl::task(void *pvParams) {
       // vTaskDelay(10);
       read_const_mode_and_mountrequest();
       // vTaskDelay(10);
-
-      if (ConfirmClear == 0 && carState.ConfirmDriverInfo) {
-        carState.DriverInfo = "ok.";
-        ConfirmClear = millis() + carState.SendInterval * 2 + 1;
-      }
-      if (ConfirmClear != 0 && millis() > ConfirmClear) {
-        carState.ConfirmDriverInfo = false;
-        ConfirmClear = 0;
-      }
 #ifndef SUPRESS_CAN_OUT_AC
       bool constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? true : false;
       CANPacket packet = canBus.writePacket(AC_BASE0x00,

@@ -162,16 +162,16 @@ Interval: 1000ms
 
 Format | IdxFmt | Index8 | Meaning
 -------|--------|--------|----------------------------------------------
-i_8    | [0]    | 0      | Display Acceleration
-u_8    | [1]    | 1      | Display Speed
-u_16   | [1]    | 2,3    | Target Speed  [float as value\*1000]
-u_16   | [2]    | 4,5    | Target Power  [float as value\*1000]
-u_8    | [6]    | 6      | Constant Mode OFF [0] / Speed [1] / Power [2]
+u_16   | [1]    | 0,1    | Target Speed  [float as value\*1000]
+u_16   | [2]    | 2,3    | Target Power  [float as value\*1000]
+i_8    | [0]    | 4      | Display Acceleration
+u_8    | [1]    | 5      | Display Speed
+u_8    | [6]    | 6      | Drive
 b      | [56]   | 7      | Fwd [1] / Bwd [0]
 b      | [57]   | 7      | Button Lvl Brake Pedal
 b      | [58]   | 7      | MC Off [0] / On [1]
-b      | [59]   | 7      | 
-b      | [60]   | 7      | 
+b      | [59]   | 7      | ConstantModeOn 
+b      | [60]   | 7      | ConfirmDriverInfo 
 b      | [61]   | 7      | 
 b      | [62]   | 7      | 
 b      | [63]   | 7      | 

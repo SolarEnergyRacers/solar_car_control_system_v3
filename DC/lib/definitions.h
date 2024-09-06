@@ -4,8 +4,6 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-#define SER4TYPE "DC"
-
 #include "../lib/LocalFunctionsAndDevices.h"
 
 #define FILENAME_SER4CONFIG "SER4CNFG.INI"

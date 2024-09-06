@@ -103,7 +103,16 @@ void app_main(void) {
   // init console IO and radio console
   // msg = uart.init();
   msg = uart.init_t(1, 60, 1000, base_offset_suspend + 100);
-  console << msg << NL;
+  console << NL << msg << NL;
+  delay(1000);
+  console << NL << "------------------------------------------------------------" << NL;
+  console << "esp32dev + free RTOS" << NL;
+  console << "Solar Energy Car Racers SER4 Controller: v" << VERSION << ", build time: " << __DATE__ << " " << __TIME__ << NL;
+  console << "ARDUINO:              " << ARDUINO << NL;
+  console << "Compile Mode:         " << "AuxiliaryController (AC)" << NL;
+  console << "Main running on core: " << xPortGetCoreID() << NL;
+  console << "------------------------------------------------------------" << NL;
+  chip_info();
   console << "------------------------------------------------------------" << NL;
   console << "-- gpio pin settings ---------------------------------------" << NL;
   msg = gpio.init();

@@ -30,7 +30,7 @@ extern CarState carState;
 extern CarStateRadio carStateRadio;
 extern Console console;
 extern CANBus canBus;
-uint16_t ConfirmClearTime = 0;
+unsigned long ConfirmClearTime = 0;
 
 bool CANBus::is_to_ignore_packet(uint16_t packetId) {
   return packetId != (DC_BASE_ADDR | 0x00) && packetId != (DC_BASE_ADDR |

@@ -57,8 +57,7 @@ void CarState::init_values() {
 
   // read from SER4CONFIG.INI file
   initalize_config();
-  console << printP1("State after reading SER4CONFIG.INI") << NL;
-  console << printP2() << NL;
+  console << print("State after reading config") << NL;
 }
 
 bool CarState::initalize_config() {

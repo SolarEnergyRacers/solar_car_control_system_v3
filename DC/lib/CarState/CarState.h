@@ -247,8 +247,7 @@ public:
   int MaxCachedRecords; // number of telemetry records hold in cache in case of trasmit errors
 
   // tools
-  const string printP1(const string msg = "", bool withColors = true);
-  const string printP2(bool withColors = true);
+  const string print(const string msg = "", bool withColors = true);
   const string printIOs(const string msg, bool withColors = true, bool deltaOnly = false);
   const string serialize(const string msg = "");
   const string csv(const string msg = "", bool withHeader = false);

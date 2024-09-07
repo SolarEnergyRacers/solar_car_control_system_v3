@@ -257,6 +257,6 @@ void app_main(void) {
   console << ss.str();
   SystemInited = true;
 
-  // esp_task_wdt_init(3600 * 48, false);
-  esp_task_wdt_init(50, false);
+  esp_task_wdt_init(3600 * 48, false);
+  // esp_task_wdt_init(5, false);
 }

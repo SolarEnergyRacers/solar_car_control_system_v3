@@ -20,6 +20,8 @@
 #include <EngineerDisplay.h>
 #include <Helper.h>
 
+#include <System.h>
+
 extern Console console;
 extern SPIBus spiBus;
 extern CarState carState;
@@ -91,6 +93,7 @@ void EngineerDisplay::draw_display_background() {
 
 void EngineerDisplay::task(void *pvParams) {
   while (1) {
+    report_task_stack(this);
     switch (carState.displayStatus) {
     case DISPLAY_STATUS::ENGINEER_CONSOLE:
       break;

@@ -22,6 +22,8 @@
 #include <I2CBus.h>
 #include <SDCard.h>
 
+#include <System.h>
+
 extern CANBus canBus;
 extern CarControl carControl;
 extern CarState carState;
@@ -135,6 +137,7 @@ string carStateEngineerInfoLast = "";
 uint16_t carStateLifeSignLast = 0;
 void CarControl::task(void *pvParams) {
   while (1) {
+    report_task_stack(this);
     if (SystemInited) {
 
       bool force = false;

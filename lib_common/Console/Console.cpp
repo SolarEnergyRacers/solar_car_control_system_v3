@@ -34,12 +34,12 @@ Console &operator<<(Console &c, const volatile int &var) { return operator<<(c, 
 
 //------- OUT ---------
 Console &operator<<(Console &c, const char &chr) {
-  cout << chr << flush;
+  if (!xPortInIsrContext()) cout << chr << flush;
   return c;
 }
 
 Console &operator<<(Console &c, const char *str) {
-  cout << str << flush;
+  if (!xPortInIsrContext()) cout << str << flush;
   return c;
 }
 

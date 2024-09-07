@@ -174,7 +174,8 @@ void CarControl::switch_break_light() {
 void CarControl::task(void *pvParams) {
   while (1) {
     if (SystemInited) {
-      bool force = false;
+      // bool force = false;
+      bool force = true;
       unsigned long cur_millis = millis();
       if (cur_millis > millisNextCanSend) {
         millisNextCanSend = cur_millis + 1000;
@@ -186,8 +187,8 @@ void CarControl::task(void *pvParams) {
         force = true;
       }
 
-      read_reference_cell_data();
-      vTaskDelay(10);
+      // read_reference_cell_data();
+      // vTaskDelay(10);
       read_speed();
       vTaskDelay(10);
       read_potentiometer();
@@ -199,6 +200,7 @@ void CarControl::task(void *pvParams) {
       ioExt.writeAllPins(PinHandleMode::FORCED);
       constSpeed.update_pid();
 
+      for(int i=0; i<20; ++i)
       canBus.writePacket(DC_BASE_ADDR | 0x00,
                          carState.LifeSign,      // LifeSign
                          carState.Potentiometer, // Potentiometer value
@@ -208,6 +210,7 @@ void CarControl::task(void *pvParams) {
       );
 
       bool driveDirection = carState.DriveDirection == DRIVE_DIRECTION::FORWARD ? 1 : 0;
+      for(int i=0; i<20; ++i)
       canBus.writePacket(DC_BASE_ADDR | 0x01,
                          (uint16_t)carState.TargetSpeed,          // Target Speed [float as value\*1000]
                          (uint16_t)(carState.TargetPower * 1000), // Target Power [float as value\*1000]

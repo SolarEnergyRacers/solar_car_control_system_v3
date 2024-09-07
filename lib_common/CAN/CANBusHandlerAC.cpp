@@ -51,8 +51,9 @@ uint16_t CANBus::normalize_CAN_address(CANPacket *packet) {
 
 void CANBus::handle_rx_packet(CANPacket packet) {
   uint16_t packetId = packet.getId();
-  if (packetId == 0)
+  if (packetId == 0) {
     return;
+  }
   counterR++;
   packetId = normalize_CAN_address(&packet);
 

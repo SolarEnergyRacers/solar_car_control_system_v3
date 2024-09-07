@@ -52,6 +52,8 @@
 #include <Serial.h>
 #include <System.h>
 
+#include <esp_task_wdt.h>
+
 // add C linkage definition
 extern "C" {
 void app_main(void);
@@ -254,4 +256,7 @@ void app_main(void) {
   vTaskDelay(10);
   console << ss.str();
   SystemInited = true;
+
+  // esp_task_wdt_init(3600 * 48, false);
+  esp_task_wdt_init(50, false);
 }

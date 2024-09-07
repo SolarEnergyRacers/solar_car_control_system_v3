@@ -113,7 +113,19 @@ void CmdHandler::task(void *pvParams) {
           console << "Not implemented yet!" << NL;
           break;
         case 'H':
-          console << "Not implemented yet!" << NL;
+          if (input[1] == 's'){
+            memory_info();
+          }
+          else if (input[1] == 'h'){
+            // HeapStats_t pxHeapStats;
+            // vPortGetHeapStats(&pxHeapStats);
+            int retval = heap_caps_check_integrity_all(1);
+            console << "heap ok? " << retval << NL;
+          } else {
+            volatile int* goblin = new int[8192];
+            for (int i=0; i<16384;++i) goblin[i] = i;
+            console << "'Hs' for stack reporting, 'Hh' for heap." << NL;
+          }
           // memory_info();
           break;
         case 'I':

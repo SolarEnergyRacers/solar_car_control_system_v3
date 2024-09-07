@@ -11,7 +11,7 @@
 
 #define CAN_SPEED 125E3 // CAN Speed 125 kb/s
 //#define CAN_SPEED 500E3 // CAN Speed 500 kb/s
-#define CAN_RX_BUFFER_SIZE 20
+#define CAN_RX_BUFFER_SIZE 200
 #define CAN_TASK_WAIT 50
 
 #define MC_BASE_ADDR 0x500
@@ -21,8 +21,6 @@
 #define MPPT3_BASE_ADDR 0x620
 #define AC_BASE_ADDR 0x630
 #define DC_BASE_ADDR 0x660
-#define CAN_RX_BUFFER_SIZE 20
-#define CAN_TASK_WAIT 50
 
 /* CAN Frame max ages
  *  ------------------

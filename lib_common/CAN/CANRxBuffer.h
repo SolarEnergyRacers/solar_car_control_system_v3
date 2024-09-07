@@ -9,15 +9,14 @@
 
 class CANRxBuffer {
 private:
-  volatile uint8_t head;
-  volatile uint8_t tail;
-  volatile uint16_t items;
-  CANPacket rxBuffer[CAN_RX_BUFFER_SIZE];
+  StaticQueue_t overhead;
+  uint8_t buffer[CAN_RX_BUFFER_SIZE * sizeof(CANPacket)];
+  QueueHandle_t queue;
 
 public:
   CANRxBuffer();
 
-  void push(CANPacket packet);
+  void push(const CANPacket& packet);
   CANPacket pop();
   bool isAvailable();
   uint16_t getSize();

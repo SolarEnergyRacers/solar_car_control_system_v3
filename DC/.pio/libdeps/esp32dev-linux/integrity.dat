@@ -1,10 +1,11 @@
-mikalhart/Streaming@1.0.0
-davetcc/IoAbstraction@4.3.0
 paulstoffregen/OneWire@2.3.8
-robtillaart/ADS1X15@0.5.0
-fbiego/ESP32Time @ ^2.0.0
-plerup/EspSoftwareSerial@8.2.0
-blemasle/MCP23017 @ 2.0.0
-br3ttb/PID@1.2.1
-fmtlib/fmt@8.1.1
+davetcc/IoAbstraction@4.3.0
 https://github.com/sandeepmistry/arduino-CAN
+plerup/EspSoftwareSerial@8.2.0
+mikalhart/Streaming@1.0.0
+makuna/RTC @ ^2.3.7
+br3ttb/PID@1.2.1
+fbiego/ESP32Time @ ^2.0.0
+blemasle/MCP23017 @ 2.0.0
+fmtlib/fmt@8.1.1
+robtillaart/ADS1X15@0.5.0

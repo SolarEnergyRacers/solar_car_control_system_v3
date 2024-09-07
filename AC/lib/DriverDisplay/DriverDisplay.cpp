@@ -36,6 +36,8 @@
 // #include <Fonts/FreeSans24pt7b.h>
 // #include <Fonts/FreeSans9pt7b.h>
 
+#include <System.h>
+
 extern Console console;
 extern SPIBus spiBus;
 extern CarState carState;
@@ -317,6 +319,7 @@ void DriverDisplay::write_driver_info() {
 
 void DriverDisplay::task(void *pvParams) {
   while (1) {
+    report_task_stack(this);
     switch (carState.displayStatus) {
     case DISPLAY_STATUS::ENGINEER_CONSOLE:
       break;

@@ -17,6 +17,8 @@
 #include <Helper.h>
 #include <I2CBus.h>
 
+#include <System.h>
+
 extern CarState carState;
 extern Console console;
 extern I2CBus i2cBus;
@@ -33,26 +35,26 @@ void onReceive(int packetSize) {
     return;
 
   uint64_t rxData = 0l;
-  if (xSemaphoreTakeFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken) != pdTRUE) {
-    canBus.counterI_notAvail++;
-    return;
-  }
+  // if (xSemaphoreTakeFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken) != pdTRUE) {
+  //   canBus.counterI_notAvail++;
+  //   return;
+  // }
 
   uint16_t packetId = CAN.packetId();
   if (canBus.is_to_ignore_packet(packetId)) {
-    xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
+    // xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
     return;
   }
 
   if (!CAN.available()) {
-    xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
-    canBus.counterI_notAvail++;
+    // xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
+    // canBus.counterI_notAvail++;
     return;
   }
   for (int i = 0; i < packetSize && i < 8; i++) {
     rxData = rxData | (((uint64_t)CAN.read()) << (i * 8));
   }
-  xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
+  // xSemaphoreGiveFromISR(canBus.mutex_in, &xHigherPriorityTaskWoken);
 
   canBus.pushIn(CANPacket(packetId, rxData));
   canBus.counterI++;
@@ -82,18 +84,18 @@ string CANBus::init() {
   counterMaxPacketsIn = 0;
   counterMaxPacketsOut = 0;
 
-  mutex_out = xSemaphoreCreateBinary();
-  xSemaphoreGive(mutex_out);
-  mutex_in = xSemaphoreCreateBinary();
+  // mutex_out = xSemaphoreCreateBinary();
+  // xSemaphoreGive(mutex_out);
+  // mutex_in = xSemaphoreCreateBinary();
   CAN.setPins(CAN_RX, CAN_TX);
   if (!CAN.begin(CAN_SPEED)) {
     CAN.setTimeout(400);
-    xSemaphoreGive(mutex_in);
+    // xSemaphoreGive(mutex_in);
     hasError = true;
     console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   } else {
     CAN.onReceive(onReceive);
-    xSemaphoreGive(mutex_in);
+    // xSemaphoreGive(mutex_in);
     console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
   }
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
@@ -101,9 +103,9 @@ string CANBus::init() {
 
 void CANBus::exit() {
   // Exit needs to be implemented for Task, here or in AbstractTask
-  xSemaphoreTakeT(mutex_in);
+  // xSemaphoreTakeT(mutex_in);
   CAN.end();
-  xSemaphoreGive(mutex_in);
+  // xSemaphoreGive(mutex_in);
 }
 
 void CANBus::init_ages() {
@@ -301,7 +303,13 @@ void CANBus::write_rx_packet(CANPacket packet) {
     CAN.write(packet.getData_i8(5));
     CAN.write(packet.getData_i8(6));
     CAN.write(packet.getData_i8(7));
+
+    spinlock_t foo;
+    spinlock_initialize(&foo);
+    taskENTER_CRITICAL(&foo);
     CAN.endPacket();
+    taskEXIT_CRITICAL(&foo);
+    yield(); // try to make up for busy wait in CRITICAL
     // xSemaphoreGive(mutex_out);
   } catch (exception &ex) {
     // xSemaphoreGive(mutex_out);
@@ -319,8 +327,18 @@ string CANBus::print_raw_packet(const string msg, CANPacket packet) {
 }
 
 void CANBus::task(void *pvParams) {
+  deadCounter = 0;
+
+  // reset CAN controller
+  *((volatile uint32_t*)(0x3ff6b000 + 0x00 * 4)) |= 0x01;
+  *((volatile uint32_t*)(0x3ff6b000 + 0x00 * 4)) &= 0xFE;
+
   while (1) {
+    report_task_stack(this);
     if (SystemInited) {
+      if (deadCounter == 0){
+        deadCounter = millis() + 15e3;  // on boot: do not terminate for some time
+      }
       if (counterR_notAvail > 8 || counterI_notAvail > 8 || counterW_notAvail > 8) {
         console << NL
                 << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}", counterI_notAvail, counterI, counterR_notAvail, counterR,
@@ -329,12 +347,27 @@ void CANBus::task(void *pvParams) {
         canBus.re_init();
       }
 
+      if(verboseModeCanOutNative) console << "CAN 1" << NL;
+
       while (rxBufferIn.isAvailable()) {
         handle_rx_packet(rxBufferIn.pop());
+        deadCounter = millis();  
+        // deadCounter = max((uint64_t)deadCounter, millis());  
+        // // only ever increment (prevent override of grace period at startup)
       }
 
+      if(verboseModeCanOutNative) console << "CAN 2" << NL;
+
+      uint bench = esp_timer_get_time();  // this might be an unacceptably long time to disable all and any context switches / ISR? -> log time
       while (rxBufferOut.isAvailable()) {
         write_rx_packet(rxBufferOut.pop());
+      }
+
+      if(verboseModeCanOutNative) console << "CAN 3: " << (uint)(esp_timer_get_time() - bench) << NL;
+
+      if (millis() > deadCounter + 2e3) {
+        console << "CAN presumed dead. Rebooting..." << NL;
+        ESP.restart();
       }
     }
     taskSuspend();

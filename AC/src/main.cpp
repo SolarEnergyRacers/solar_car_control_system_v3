@@ -53,6 +53,8 @@
 #include <Serial.h>
 #include <System.h>
 
+#include <esp_task_wdt.h>
+
 // #include <Wire.h>
 #include <array>
 // #include <vector>
@@ -273,4 +275,7 @@ void app_main(void) {
   display.print("start\n");
   display.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
   SystemInited = true;
+
+  // esp_task_wdt_init(3600 * 48, false);
+  esp_task_wdt_init(5, false);
 }

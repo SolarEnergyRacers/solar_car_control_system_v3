@@ -89,6 +89,7 @@ public:
 
   // Class functions and members
 private:
+  int deadCounter = 0;
   int counterMaxPacketsIn;
   int counterMaxPacketsOut;
   int counterR;
@@ -144,8 +145,8 @@ public:
   int getMaxPacketsBufferInUsage() { return counterMaxPacketsIn; };
   int getMaxPacketsBufferOutUsage() { return counterMaxPacketsOut; };
 
-  SemaphoreHandle_t mutex_in;
-  SemaphoreHandle_t mutex_out;
+  // SemaphoreHandle_t mutex_in;
+  // SemaphoreHandle_t mutex_out;
   bool verboseModeCanIn = false;
   bool verboseModeCanInNative = false;
   bool verboseModeCanOut = false;

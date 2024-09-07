@@ -80,6 +80,7 @@ void CmdHandler::task(void *pvParams) {
   string state, msg;
   while (1) {
     try {
+      report_task_stack(this);
       while (SystemInited && (Serial.available()
                               // #if SERIAL_RADIO_ON
                               //                               || Serial2.available()
@@ -154,8 +155,19 @@ void CmdHandler::task(void *pvParams) {
           console << carState.print("State after reading SER4CNFG.INI") << NL;
           break;
         case 'H':
-          console << "Not implemented yet!" << NL;
-          // memory_info();
+          if (input[1] == 's'){
+            memory_info();
+          }
+          else if (input[1] == 'h'){
+            // HeapStats_t pxHeapStats;
+            // vPortGetHeapStats(&pxHeapStats);
+            int retval = heap_caps_check_integrity_all(1);
+            console << "heap ok? " << retval << NL;
+          } else {
+            volatile int* goblin = new int[8192];
+            for (int i=0; i<16384;++i) goblin[i] = i;
+            console << "'Hs' for stack reporting, 'Hh' for heap." << NL;
+          }
           break;
         case 'B':
           if (input[1] == '\0') {
@@ -203,7 +215,12 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'S') {
             sdCard.verboseModeSdCard = !sdCard.verboseModeSdCard;
             console << "set verboseModeSdCard: " << sdCard.verboseModeSdCard << NL;
-          } else {
+          } 
+          else if (input[1] == 'b') { 
+            console << "CAN RX buffer level: " << canBus.availiblePacketsIn()  << " / " << canBus.counterI << NL;
+            console << "CAN TX buffer level: " << canBus.availiblePacketsOut() << NL;
+          }
+          else {
             string arr[4];
             splitString(arr, &input[1]);
             float motCurrent = atof(arr[0].c_str());

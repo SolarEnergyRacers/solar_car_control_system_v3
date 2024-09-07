@@ -30,6 +30,7 @@ extern CarState carState;
 extern CarStateRadio carStateRadio;
 extern Console console;
 extern CANBus canBus;
+unsigned long ConfirmClearTime = 0;
 
 bool CANBus::is_to_ignore_packet(uint16_t packetId) {
   return packetId != (DC_BASE_ADDR | 0x00) && packetId != (DC_BASE_ADDR |
@@ -48,6 +49,11 @@ uint16_t CANBus::normalize_CAN_address(CANPacket *packet) {
   }
   return packet->getId();
 }
+
+string tail(std::string const& source, size_t const length) {
+  if (length >= source.size()) { return source; }
+  return source.substr(source.size() - length);
+};
 
 void CANBus::handle_rx_packet(CANPacket packet) {
   uint16_t packetId = packet.getId();
@@ -91,23 +97,39 @@ void CANBus::handle_rx_packet(CANPacket packet) {
     carState.BreakPedal = packet.getData_b(57);
     carState.MotorOn = packet.getData_b(58);
     carState.ConstantModeOn = packet.getData_b(59);
-  }
+    carState.ConfirmDriverInfo  = packet.getData_b(60);
+    }
+    if (ConfirmClearTime == 0 && carState.ConfirmDriverInfo) {
+        ConfirmClearTime = millis() + carState.SendInterval * 2 + 100;
+    } else {
+      if (ConfirmClearTime > 0){
+        if( millis() > ConfirmClearTime) {
+          ConfirmClearTime = 0;
+          carState.ConfirmDriverInfo = false;
+          carState.DriverInfoType = INFO_TYPE::INFO;
+          const string confirmation = " <OK>";
+          if(tail(carState.DriverInfo, confirmation.length()) != confirmation)
+            carState.DriverInfo.append(confirmation);
+        }else{
+          packet.setData_b(60, true);
+          carStateRadio.push_if_radio_packet(packetId, packet); // push with same address --> overwrites the other packet
+        }
+      }
+    }
     if (verboseModeCanIn)
       console << fmt::format(
                      "[{:02d}|{:02d}] "
                      "CAN.PacketId=0x{:03x}-R-data:targetSpeed={:3}, "
                      "targetPower={:3}, speed={:3d}, "
                      "accelDispl={:3d}, constMode={:5s}({}), direction={}, "
-                     "breakPedal={}, MotorOn={}",
+                     "breakPedal={}, MotorOn={}, ConfirmDriverInfo={}",
                      availiblePacketsIn(), getMaxPacketsBufferInUsage(),
                      packetId | 0x01, carState.TargetSpeed,
                      carState.TargetPower, carState.Speed,
-                     carState.AccelerationDisplay,
-                     CONSTANT_MODE_str[(int)(carState.ConstantMode)],
-                     carState.ConstantModeOn,
+                     carState.AccelerationDisplay, CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn,
                      DRIVE_DIRECTION_str[(int)(carState.DriveDirection)],
                      carState.BreakPedal, carState.MotorOn,
-                     carState.ConstantModeOn)
+                     carState.ConfirmDriverInfo)
               << NL;
     break;
   // case DC_BASE0x02:

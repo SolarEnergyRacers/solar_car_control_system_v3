@@ -27,9 +27,14 @@ public:
 
   // Class member and functions
   bool read_nextScreenButton();
+  unsigned long nextScreenButton_lastPress = 0;
+  uint nextScreenButton_debounceTime_ms = 500;
   bool update_sd_card_detect();
   bool read_sd_card_detect();
   bool read_const_mode_and_mountrequest();
+  unsigned long mountrequest_lastPress = 0;
+  uint mountrequest_debounceTime_ms = 500;
+
   bool verboseModeCarControl = false;
   bool verboseModeCarControlDebug = false;
 

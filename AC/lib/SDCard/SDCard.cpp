@@ -58,29 +58,25 @@ bool SDCard::update_sd_card_detect() {
   return carState.SdCardDetect;
 }
 
+bool SDCard::isMounted() { return update_sd_card_detect() && mounted; }
+
 bool SDCard::mount() {
   if (isMounted()) {
-    console << "  SD card already mounted" << NL;
+    carState.EngineerInfo = "  SD card already mounted.";
+    console << "     " << carState.EngineerInfo << NL;
     return true;
   }
   if (!update_sd_card_detect()) {
-    carState.EngineerInfo = "No SD card detected!";
+    carState.EngineerInfo = "  No SD card detected!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
     return false;
   }
   try {
-    carState.EngineerInfo = "Mounting SD card...";
+    carState.EngineerInfo = "  Mounting SD card...";
     console << "     " << carState.EngineerInfo << NL;
-    int attempts = 0;
     mounted = false;
-    // xSemaphoreTakeT(spiBus.mutex);
-    // mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi, 400000U, "/", 10); //fails!
-    // while (!mounted && attempts++ < 3) {
-    //   mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
-    //   xSemaphoreGive(spiBus.mutex);
-    // }
-    // xSemaphoreGive(spiBus.mutex);
+    int attempts = 0;
     xSemaphoreTakeT(spiBus.mutex);
     while (!mounted && attempts++ < 3) {
       mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
@@ -88,7 +84,7 @@ bool SDCard::mount() {
     }
     xSemaphoreGive(spiBus.mutex);
     if (mounted) {
-      carState.EngineerInfo = "SD card mounted";
+      carState.EngineerInfo = "  SD card mounted";
       console << "     " << carState.EngineerInfo << ", " << attempts << " attempts" << NL;
       xSemaphoreTakeT(spiBus.mutex);
       uint8_t cardType = SD.cardType();
@@ -124,15 +120,16 @@ bool SDCard::mount() {
   return false;
 }
 
-void SDCard::close_log_file() {
+bool SDCard::close_log_file() {
   if (!isMounted()) {
     console << "  SD card not mounted (close_log_file failed)" << NL;
-    return;
+    return false;
   }
   xSemaphoreTakeT(spiBus.mutex);
   dataFile.flush();
   dataFile.close();
   xSemaphoreGive(spiBus.mutex);
+  return true;
 }
 
 bool SDCard::open_log_file() {
@@ -183,18 +180,19 @@ bool SDCard::check_log_file() {
 
 bool SDCard::unmount() {
   if (!update_sd_card_detect()) {
-    carState.EngineerInfo = "No SD card detected to unmount!";
+    carState.EngineerInfo = "No mounted SD card detected to unmount!";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
     return false;
   }
-  if (isMounted()) {
-    console << "     SD card unmounting..." << NL;
+  if (close_log_file()) {
+    carState.EngineerInfo = "SD card unmounting...";
+    console << "     " << carState.EngineerInfo << NL;
     try {
       xSemaphoreTakeT(spiBus.mutex);
-      SD.end();
+      //SD.end();
       xSemaphoreGive(spiBus.mutex);
-      carState.EngineerInfo = "SD card unmounted.";
+      carState.EngineerInfo = "SD card UNmounted.";
       console << "     " << carState.EngineerInfo << NL;
       mounted = false;
     } catch (exception &ex) {
@@ -250,14 +248,20 @@ void SDCard::write_log(const string msg) {
     return;
   }
   try {
+    if (carState.EngineerInfo.length() < 51)
+      carState.EngineerInfo += " #Log to SD card ";
+    //console << "     " << carState.EngineerInfo;
     open_log_file();
+    //console << " --> print msg";
     xSemaphoreTakeT(spiBus.mutex);
     dataFile.print(msg.c_str());
     xSemaphoreGive(spiBus.mutex);
+    //console << " --> close log file";
     close_log_file();
   } catch (exception &ex) {
     xSemaphoreGive(spiBus.mutex);
     carState.EngineerInfo = "ERROR writing SD card";
     console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
   }
+  //console << "." << NL;
 }

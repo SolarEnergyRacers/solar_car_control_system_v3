@@ -45,6 +45,7 @@ void CANBus::handle_rx_packet(CANPacket packet) {
     carState.Ki = (double)packet.getData_u8(3) / 10.;
     carState.Kd = (double)packet.getData_u8(4) / 10.;
     carState.ConstantMode = packet.getData_b(41) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;
+    carState.ConfirmDriverInfo = packet.getData_b(42);
     if (canBus.verboseModeCanIn)
       console << fmt::format("LifeSign= {:4x}, Kp={5.2f}, Ki={5.2f}, Kd={5.2f} carState.ConstantMode={}\n", carState.LifeSign, carState.Kp,
                              carState.Ki, carState.Kd, CONSTANT_MODE_str[(int)(carState.ConstantMode)]);

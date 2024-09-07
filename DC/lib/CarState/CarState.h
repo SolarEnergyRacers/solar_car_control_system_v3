@@ -109,6 +109,7 @@ public:
     DriveDirection = DRIVE_DIRECTION::FORWARD;
     ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
     ConstantModeOn = false;
+    ConfirmDriverInfo = false;
 
     TargetSpeed = 0;
     TargetPower = 0;
@@ -131,7 +132,7 @@ public:
     (void)BATTERY_ERROR_str;
     // BEGIN prevent stupid compiler warnings "defined but not used"
   }
-  ~CarState(){};
+  ~CarState() {};
   void init_values();
   bool initalize_config();
 
@@ -140,7 +141,7 @@ public:
   bool ButtonPlus;
   bool ButtonMinus;
   bool ButtonConstantModeOn;
-  bool ButtonConstantModeOFF;
+  bool ButtonConfirmDriverInfo; //former: ButtonConstantModeOFF
   bool ButtonConstant_v_P;
 
   // physical car data (measurement values)
@@ -191,6 +192,7 @@ public:
   DRIVE_DIRECTION DriveDirection;
   CONSTANT_MODE ConstantMode;
   bool ConstantModeOn; // #SAFETY#: deceleration unlock const mode
+  bool ConfirmDriverInfo;
   bool SdCardDetect;
 
   float TargetSpeed;
@@ -200,7 +202,7 @@ public:
   SPEED_ARROW SpeedArrow;
   INFO_TYPE DriverInfoType;
   bool GreenLight;
-  
+
   // All IO pins
   static CarStatePin pins[IOExtPINCOUNT];
   int getIdx(const string pinName);
@@ -226,9 +228,9 @@ public:
   double Kd = 0.01; // differential
 
   // [Dynamic]
-  int PaddleDamping = 160;            // 0...ca.30000
-  int StartOffset_acc = 0;            // 0 ... 65535: offset calculated for paddle at start
-  int StartOffset_dec = 0;            // 0 ... 65535: offset calculated for paddle at start
+  int PaddleDamping = 160; // 0...ca.30000
+  int StartOffset_acc = 0; // 0 ... 65535: offset calculated for paddle at start
+  int StartOffset_dec = 0; // 0 ... 65535: offset calculated for paddle at start
 
   int ButtonControlModeIncrease;      // on click means ButtonControlModeIncrease units
   int ButtonControlModeIncreaseLow;   // ButtonControlModeIncrease low mode
@@ -239,16 +241,13 @@ public:
   // [Communication]
   int CarDataSendPeriod;        // [ms]
   int Serial1Baudrate = 115200; // baud
-#if SERIAL_RADIO_ON
-  int Serial2Baudrate = 115200; // baud
-#endif
+
   // [Telemetry]
   int SendInterval;     // [ms]
   int MaxCachedRecords; // number of telemetry records hold in cache in case of trasmit errors
 
   // tools
-  const string printP1(const string msg = "", bool withColors = true);
-  const string printP2(bool withColors = true);
+  const string print(const string msg = "", bool withColors = true);
   const string printIOs(const string msg, bool withColors = true, bool deltaOnly = false);
   const string serialize(const string msg = "");
   const string csv(const string msg = "", bool withHeader = false);

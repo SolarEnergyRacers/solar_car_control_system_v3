@@ -42,7 +42,7 @@ string Uart::init() {
   console << "     Serial TX0 is on pin: " << to_string(TX) << "\n";
   console << "     Serial RX0 is on pin: " << to_string(RX) << "\n";
   console << "     Serial Baud Rate:     " << carState.Serial1Baudrate << "\n";
-#if SERIAL_RADIO_ON
+#if SERIAL_RADIO_ON || SERIAL_RADIO_CMD_ON
   // init serial for radio console IO
   Serial2.begin(carState.Serial2Baudrate, SERIAL_8N1, SERIAL2_RX, SERIAL2_TX);
   // Serial2.enableIntTx(false);

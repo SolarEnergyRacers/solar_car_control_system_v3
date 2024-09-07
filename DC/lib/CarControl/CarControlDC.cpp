@@ -221,7 +221,7 @@ void CarControl::task(void *pvParams) {
                          carState.BreakPedal,                     // Button Lvl Brake Pedal
                          carState.MotorOn,                        // MC Off [0] / On [1]
                          carState.ConstantModeOn,                 // Constant Mode Off [false], On [true]
-                         false,                                   // empty
+                         carState.ConfirmDriverInfo,              // Confirm driver had read info [true]
                          false,                                   // empty
                          false,                                   // empty
                          false,                                   // empty
@@ -236,11 +236,11 @@ void CarControl::task(void *pvParams) {
                                canBus.getMaxPacketsBufferOutUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer,
                                carState.Acceleration, carState.Deceleration)
                 << NL;
-        console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, cMod={:1d}, speed={:3d}, "
-                               "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}",
-                               DC_BASE_ADDR | 0x01, (uint16_t)(carState.TargetSpeed * 1000), (uint16_t)(carState.TargetSpeed * 1000),
-                               carState.AccelerationDisplay, carState.ConstantModeOn, carState.Speed, driveDirection, carState.BreakPedal,
-                               carState.MotorOn, carState.ConstantModeOn)
+        console << fmt::format("        P.Id=0x{:03x}-S-data:tgtSpeed={:5d}, Powr={:5d}, accD={:5d}, speed={:3d}, "
+                               "direct={:1d}, break={}, MotorOn={}, ConstandModeOn={}, ConfirmDriverInfo={}",
+                               DC_BASE_ADDR | 0x01, (uint16_t)(carState.TargetSpeed * 1000), (uint16_t)(carState.TargetPower * 1000),
+                               carState.AccelerationDisplay, carState.Speed, driveDirection, carState.BreakPedal,
+                               carState.MotorOn, carState.ConstantModeOn, carState.ConfirmDriverInfo)
                 << NL;
       }
     }

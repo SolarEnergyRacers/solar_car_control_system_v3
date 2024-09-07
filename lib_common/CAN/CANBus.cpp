@@ -27,7 +27,6 @@ extern bool SystemInited;
 
 using namespace std;
 
-
 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 void onReceive(int packetSize) {
 
@@ -63,10 +62,14 @@ void onReceive(int packetSize) {
 }
 
 bool CANBus::isPacketToRenew(uint16_t packetId) {
-  return max_ages[packetId] == 0 || (max_ages[packetId] != -1 && millis() - ages[packetId] > max_ages[packetId]);
+  return max_ages[packetId] == 0 ||
+         (max_ages[packetId] != -1 &&
+          millis() - ages[packetId] > max_ages[packetId]);
 }
 
-void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) { ages[packetId] = millis; }
+void CANBus::setPacketTimeStamp(uint16_t packetId, int32_t millis) {
+  ages[packetId] = millis;
+}
 
 CANBus::CANBus() { init_ages(); }
 
@@ -92,11 +95,14 @@ string CANBus::init() {
     CAN.setTimeout(400);
     // xSemaphoreGive(mutex_in);
     hasError = true;
-    console << fmt::format("     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
+    console << fmt::format(
+        "     ERROR: CANBus with rx={}, tx={} NOT, speed={} inited.\n", CAN_RX,
+        CAN_TX, CAN_SPEED);
   } else {
     CAN.onReceive(onReceive);
     // xSemaphoreGive(mutex_in);
-    console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n", CAN_RX, CAN_TX, CAN_SPEED);
+    console << fmt::format("     CANBus with rx={}, tx={}, speed={} inited.\n",
+                           CAN_RX, CAN_TX, CAN_SPEED);
   }
   return fmt::format("[{}] CANBus initialized.", hasError ? "--" : "ok");
 }
@@ -202,21 +208,22 @@ void CANBus::init_ages() {
   ages[MPPT3_BASE_ADDR | 0x6] = INT32_MAX;
 }
 
-CANPacket CANBus::writePacket(uint16_t adr,
-                              uint16_t data_u16_0, // Target Speed [float as value\*1000]
-                              uint16_t data_u16_1, // Target Power [float as value\*1000]
-                              int8_t data_i8_4,    // Display Acceleration
-                              uint8_t data_u8_5,   // empty
-                              uint8_t data_u8_6,   // Display Speed
-                              bool b_56,           // Fwd [1] / Bwd [0]
-                              bool b_57,           // Button Lvl Brake Pedal
-                              bool b_58,           // MC Off [0] / On [1]
-                              bool b_59,           // Constant Mode Off [false], On [true]
-                              bool b_60,           // empty
-                              bool b_61,           // empty
-                              bool b_62,           // empty
-                              bool b_63,           // empty
-                              bool force) {
+CANPacket
+CANBus::writePacket(uint16_t adr,
+                    uint16_t data_u16_0, // Target Speed [float as value\*1000]
+                    uint16_t data_u16_1, // Target Power [float as value\*1000]
+                    int8_t data_i8_4,    // Display Acceleration
+                    uint8_t data_u8_5,   // empty
+                    uint8_t data_u8_6,   // Display Speed
+                    bool b_56,           // Fwd [1] / Bwd [0]
+                    bool b_57,           // Button Lvl Brake Pedal
+                    bool b_58,           // MC Off [0] / On [1]
+                    bool b_59,           // Constant Mode Off [false], On [true]
+                    bool b_60,           // empty
+                    bool b_61,           // empty
+                    bool b_62,           // empty
+                    bool b_63,           // empty
+                    bool force) {
   uint64_t data = 0;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
@@ -235,12 +242,13 @@ CANPacket CANBus::writePacket(uint16_t adr,
   return writePacket(adr, packet, force);
 }
 
-CANPacket CANBus::writePacket(uint16_t adr,
-                              uint16_t data_u16_0, // LifeSign
-                              uint16_t data_u16_1, // Potentiometer value
-                              uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
-                              uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
-                              bool force) {
+CANPacket
+CANBus::writePacket(uint16_t adr,
+                    uint16_t data_u16_0, // LifeSign
+                    uint16_t data_u16_1, // Potentiometer value
+                    uint16_t data_u16_2, // HAL-paddle Acceleration ADC value
+                    uint16_t data_u16_3, // HAL-paddle Deceleration ADC value
+                    bool force) {
   uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
   packet.setData_u16(0, data_u16_0);
@@ -256,6 +264,7 @@ CANPacket CANBus::writePacket(uint16_t adr,
                               uint8_t data_u8_3,   // Ki * 100
                               uint8_t data_u8_4,   // Kd * 100
                               bool data_b_41,      // ConstantMode Speed/Power
+                              bool data_b_42,      // confirmDriverInfoConfirm
                               bool force) {
   uint64_t data = 0UL;
   CANPacket packet = CANPacket(adr, data);
@@ -264,12 +273,14 @@ CANPacket CANBus::writePacket(uint16_t adr,
   packet.setData_u8(3, data_u8_3);
   packet.setData_u8(4, data_u8_4);
   packet.setData_b(41, data_b_41);
+  packet.setData_b(42, data_b_42);
   return writePacket(adr, packet, force);
 }
 
 std::map<uint16_t, CANPacket> packetsLast;
 CANPacket CANBus::writePacket(uint16_t adr, CANPacket packet, bool force) {
-  if (force || packetsLast.find(adr) == packetsLast.end() || packetsLast[adr].getData_i64() != packet.getData_i64()) {
+  if (force || packetsLast.find(adr) == packetsLast.end() ||
+      packetsLast[adr].getData_i64() != packet.getData_i64()) {
     packetsLast[adr] = packet;
     pushOut(packet);
   }
@@ -280,8 +291,8 @@ void CANBus::write_rx_packet(CANPacket packet) {
   uint16_t adr = 0;
   try {
     // if (xSemaphoreTake(mutex_out, (TickType_t)32) != pdTRUE) {
-    //   console << fmt::format("\nFAIL on Package [{:x}] write, counterW_notAvail={}\n", adr, counterW_notAvail);
-    //   counterW_notAvail++;
+    //   console << fmt::format("\nFAIL on Package [{:x}] write,
+    //   counterW_notAvail={}\n", adr, counterW_notAvail); counterW_notAvail++;
     //   return;
     // }
     adr = packet.getId();
@@ -313,17 +324,22 @@ void CANBus::write_rx_packet(CANPacket packet) {
     // xSemaphoreGive(mutex_out);
   } catch (exception &ex) {
     // xSemaphoreGive(mutex_out);
-    console << "ERROR: Couldn not send uint64_t data to address " << adr << ", ex: " << ex.what() << NL;
+    console << "ERROR: Couldn not send uint64_t data to address " << adr
+            << ", ex: " << ex.what() << NL;
   }
 }
 
 string CANBus::print_raw_packet(const string msg, CANPacket packet) {
   return fmt::format(
-      "C{}-{}-[I:{:02d}|{:02d},O:{:02d}|{:02d}]={}=Id=0x{:03x}-data: {:016x} -- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
+      "C{}-{}-[I:{:02d}|{:02d},O:{:02d}|{:02d}]={}=Id=0x{:03x}-data: {:016x} "
+      "-- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
       "{:02x} - {:02x} - {:02x}",
-      xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePacketsIn(), getMaxPacketsBufferInUsage(), availiblePacketsOut(),
-      getMaxPacketsBufferOutUsage(), msg, packet.getId(), packet.getData_u64(), packet.getData_u8(7), packet.getData_u8(6),
-      packet.getData_u8(5), packet.getData_u8(4), packet.getData_u8(3), packet.getData_u8(2), packet.getData_u8(1), packet.getData_u8(0));
+      xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePacketsIn(),
+      getMaxPacketsBufferInUsage(), availiblePacketsOut(),
+      getMaxPacketsBufferOutUsage(), msg, packet.getId(), packet.getData_u64(),
+      packet.getData_u8(7), packet.getData_u8(6), packet.getData_u8(5),
+      packet.getData_u8(4), packet.getData_u8(3), packet.getData_u8(2),
+      packet.getData_u8(1), packet.getData_u8(0));
 }
 
 void CANBus::task(void *pvParams) {
@@ -339,10 +355,12 @@ void CANBus::task(void *pvParams) {
       if (deadCounter == 0){
         deadCounter = millis() + 15e3;  // on boot: do not terminate for some time
       }
-      if (counterR_notAvail > 8 || counterI_notAvail > 8 || counterW_notAvail > 8) {
+      if (counterR_notAvail > 8 || counterI_notAvail > 8 ||
+          counterW_notAvail > 8) {
         console << NL
-                << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}", counterI_notAvail, counterI, counterR_notAvail, counterR,
-                               counterW_notAvail, counterW)
+                << fmt::format("CANBus REINIT trigger: I{}|{}, R{}|{}, W{}|{}",
+                               counterI_notAvail, counterI, counterR_notAvail,
+                               counterR, counterW_notAvail, counterW)
                 << NL;
         canBus.re_init();
       }

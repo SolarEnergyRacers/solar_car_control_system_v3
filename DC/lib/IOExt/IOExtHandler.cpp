@@ -47,24 +47,21 @@ void buttonSetHandler() {
     return;
   if (carState.getPin(PinDI_Button_Set)->value != 0)
     return;
-  carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
-  // carState.TargetSpeed = carState.Speed;                                       // unit: km/h
-  // carState.TargetPower = carState.MotorCurrent * carState.MotorVoltage / 1000; // unit: kW
+  carState.ConstantModeOn = !carState.ConstantModeOn; // #SAFETY#: deceleration unlock const mode
   if (ioExt.verboseModeDInHandler)
     console << "Set constant mode " << CONSTANT_MODE_str[(int)(carState.ConstantMode)] << ", target Speed: " << carState.TargetSpeed
             << "km/h / " << carState.TargetPower << "W.\n";
 }
 
-void buttenResetHandler() {
+void buttonConfirmDriverInfoHandler() {
   if (!SystemInited)
     return;
-  if (carState.getPin(PinDI_Button_Reset)->value != 0)
+  if (carState.getPin(PinDI_Button_Confirm)->value != 0)
     return;
-  carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
-  constSpeed.re_init();
+  carState.ConfirmDriverInfo = true;
+  carState.DriverInfo = "";
   if (ioExt.verboseModeDInHandler)
-    console << "ConstantModeOn: " << carState.ConstantModeOn << ", mode: " << CONSTANT_MODE_str[(int)(carState.ConstantMode)]
-            << " - buttenResetHandler " << NL;
+    console << "ConfirmDriverInfo: " << carState.ConfirmDriverInfo<< " - buttenConfirmDriverInfoResetHandler " << NL;
 }
 
 void buttonMinusHandler() {

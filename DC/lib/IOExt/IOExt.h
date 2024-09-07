@@ -24,7 +24,7 @@
 #define PinDI_Break "DI_Break-GPA4"
 #define PinDI_Button_Set "DI_Button_Set-GPA3"
 #define PinDI_Button_Minus "DI_Button_Minus-GPA2"
-#define PinDI_Button_Reset "DI_Button_Reset-GPA1"
+#define PinDI_Button_Confirm "PinDI_Button_Confirm-GPA1"
 #define PinDI_Button_Plus "DI_Button_Plus-GPA0"
 #define PinGPB7 "GPB7"
 #define PinGPB6 "GPB6"

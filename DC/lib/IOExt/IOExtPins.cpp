@@ -14,7 +14,7 @@ CarStatePin CarState::pins[] = {
     //
     // IOExtDev0-PortA (main board)
     {0x00, 0x01, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Plus, buttonPlusHandler, true, 200},
-    {0x01, 0x02, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Reset, buttenResetHandler, false, 200},
+    {0x01, 0x02, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Confirm, buttonConfirmDriverInfoHandler, false, 200},
     {0x02, 0x04, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Minus, buttonMinusHandler, true, 200},
     {0x03, 0x08, INPUT_PULLUP, 0, 0, false, 0l, PinDI_Button_Set, buttonSetHandler, false, 200},
     //

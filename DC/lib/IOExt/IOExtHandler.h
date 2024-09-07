@@ -20,7 +20,7 @@
 // known pin handler
 // the handler must its bit copy to oldValue
 void buttonPlusHandler();
-void buttenResetHandler();
+void buttonConfirmDriverInfoHandler();
 void buttonSetHandler();
 void buttonMinusHandler();
 void breakPedalHandler();

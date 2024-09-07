@@ -99,7 +99,7 @@ void app_main(void) {
   console << "esp32dev + free RTOS" << NL;
   console << "Solar Energy Car Racers SER4 Controller: v" << VERSION << ", build time: " << __DATE__ << " " << __TIME__ << NL;
   console << "ARDUINO:              " << ARDUINO << NL;
-  console << "SER4TYPE:             " << SER4TYPE << NL;
+  console << "Compile Mode:         " << "DriveController (DC)" << NL;
   console << "Main running on core: " << xPortGetCoreID() << NL;
   console << "------------------------------------------------------------" << NL;
   // init arduino library

@@ -28,6 +28,8 @@ extern Console console;
 extern SPIBus spiBus;
 extern SDCard sdCard;
 
+extern bool SystemInited;
+
 string SDCard::re_init() { return init(); }
 
 string SDCard::init() {
@@ -61,6 +63,8 @@ bool SDCard::update_sd_card_detect() {
 bool SDCard::isMounted() { return update_sd_card_detect() && mounted; }
 
 bool SDCard::mount() {
+  if (!SystemInited) return 0;
+
   if (isMounted()) {
     carState.EngineerInfo = "  SD card already mounted.";
     console << "     " << carState.EngineerInfo << NL;

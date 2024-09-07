@@ -365,7 +365,7 @@ void CANBus::task(void *pvParams) {
         canBus.re_init();
       }
 
-      if(verboseModeCanOutNative) console << "CAN 1" << NL;
+      // if(verboseModeCanOutNative) console << "CAN 1" << NL;
 
       while (rxBufferIn.isAvailable()) {
         handle_rx_packet(rxBufferIn.pop());
@@ -374,19 +374,19 @@ void CANBus::task(void *pvParams) {
         // // only ever increment (prevent override of grace period at startup)
       }
 
-      if(verboseModeCanOutNative) console << "CAN 2" << NL;
+      // if(verboseModeCanOutNative) console << "CAN 2" << NL;
 
-      uint bench = esp_timer_get_time();  // this might be an unacceptably long time to disable all and any context switches / ISR? -> log time
+      uint bench = esp_timer_get_time();  // this might be an unacceptably long time to disable all and any context switches / ISR? -> log time (~80us -> ok?)
       while (rxBufferOut.isAvailable()) {
         write_rx_packet(rxBufferOut.pop());
       }
 
-      if(verboseModeCanOutNative) console << "CAN 3: " << (uint)(esp_timer_get_time() - bench) << NL;
+      // if(verboseModeCanOutNative) console << "CAN 3: " << (uint)(esp_timer_get_time() - bench) << NL;
 
-      if (millis() > deadCounter + 2e3) {
-        console << "CAN presumed dead. Rebooting..." << NL;
-        ESP.restart();
-      }
+      // if (millis() > deadCounter + 2e3) {
+      //   console << "CAN presumed dead. Rebooting..." << NL;
+      //   ESP.restart();
+      // }
     }
     taskSuspend();
   }

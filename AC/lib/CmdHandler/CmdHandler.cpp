@@ -151,8 +151,11 @@ void CmdHandler::task(void *pvParams) {
           sdCard.unmount();
           break;
         case 'F':
-          carState.initalize_config();
-          console << carState.print("State after reading SER4CNFG.INI") << NL;
+          if (input.length()==1) {
+            carState.initalize_config();
+          } else {
+            carState.initalize_config(&input[1]);
+          }
           break;
         case 'H':
           if (input[1] == 's'){
@@ -329,7 +332,6 @@ void CmdHandler::task(void *pvParams) {
                   << NL;
           break;
         default:
-          console << "ERROR:: Unknown command '" << input.c_str() << "' \n" << helpText << NL;
           break;
         // -------- Command Help -----------------
         case 'h':

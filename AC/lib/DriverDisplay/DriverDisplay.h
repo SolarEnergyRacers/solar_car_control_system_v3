@@ -30,7 +30,7 @@ public:
 
 private:
   // int x, int y, string label, string format, string unit, int textColor, int bgColor, int textSize
-  DisplayValue<string> DriverInfo = DisplayValue<string>(0, 0, "", "%s", "");
+  DisplayValue<string> DriverInfo = DisplayValue<string>(0, 4, "", "%s", "");
   DisplayValue<INFO_TYPE> DriverInfoType = DisplayValue<INFO_TYPE>(0, 0, "", "%s", "");
   DisplayValue<DRIVE_DIRECTION> DriveDirection = DisplayValue<DRIVE_DIRECTION>(0, 0, "", "%s", "");
   DisplayValue<CONSTANT_MODE> ConstantMode = DisplayValue<CONSTANT_MODE>(0, 0, "", "%s", "");

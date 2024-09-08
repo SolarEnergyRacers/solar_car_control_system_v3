@@ -253,10 +253,7 @@ void CmdHandler::task(void *pvParams) {
             console << "Kp=" << carState.Kp << ", Ki=" << carState.Ki << ", Kd=" << carState.Kd << NL;
           }
           break;
-          //-------- DRIVER INFO COMMANDS --------------------
-
         default:
-          console << "ERROR:: Unknown command '" << input.c_str() << "' \n" << helpText << NL;
           break;
         // -------- Command Help -----------------
         case 'h':

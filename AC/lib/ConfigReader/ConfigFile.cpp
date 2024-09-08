@@ -31,17 +31,23 @@ string trim(string const &source, char const *delims = " \t\r\n") {
 
 ConfigFile::ConfigFile(const string &configFile) {
   if (sdCard.update_sd_card_detect()) {
-    console << "Start reading CONFIG.INI:" << configFile << "\n";
+    console << "Start reading CONFIG.INI:" << configFile.c_str() << "\n";
     if (sdCard.mount()) {
       try {
-        ifstream file(configFile, ios_base::in);
+        File configFileStream = SD.open(configFile.c_str(), FILE_READ);
+        if (!configFileStream) { 
+          cerr << "ERROR: opening config file '" << configFile.c_str() << "'" << NL; 
+          return; 
+        }
         string inSection = "UNKNOWN";
         string line;
-        for (int lineNr = 0; getline(file, line); lineNr++) {
+        console << "Start reading..." << NL;
+        for (int lineNr = 0; configFileStream.available(); lineNr++) {
+          line = configFileStream.readStringUntil('\n').c_str();
+          console << lineNr << ": " << line << NL;
+          
           if (!line.length())
             continue;
-
-          console << lineNr << ": " << line << "\n";
 
           if (line[0] == '#')
             continue;

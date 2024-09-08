@@ -70,7 +70,7 @@ private:
   DisplayValue<float> VoltageMin = DisplayValue<float>(4, 150, "U-min:", "%5.3f", "V");
   DisplayValue<float> VoltageAvg = DisplayValue<float>(4, 170, "U-avg:", "%5.3f", "V");
   DisplayValue<float> VoltageMax = DisplayValue<float>(4, 190, "U-max:", "%5.3f", "V");
-  DisplayValue<string> EngineerInfo = DisplayValue<string>(4, 212, "", "%s", "", ILI9341_RED, ILI9341_ORANGE, 1);
+  DisplayValue<string> EngineerInfo = DisplayValue<string>(0, 212, "", "%s", "", ILI9341_RED, ILI9341_ORANGE, 1);
   //==== Engineer Display definition ==== END
 
   void write_engineer_info(bool force = false);

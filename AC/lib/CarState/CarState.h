@@ -138,6 +138,7 @@ public:
   ~CarState(){};
   void init_values();
   bool initalize_config();
+  bool initalize_config(const string &configFile);
 
   uint16_t LifeSign;
   // Buttons

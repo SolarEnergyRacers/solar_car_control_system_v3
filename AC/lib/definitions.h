@@ -8,7 +8,7 @@
 
 #include "../lib/LocalFunctionsAndDevices.h"
 
-#define FILENAME_SER4CONFIG "SER4CNFG.INI"
+#define FILENAME_SER4CONFIG "/SER4CNFG.INI"
 
 /*
  * ESP32 IOs.

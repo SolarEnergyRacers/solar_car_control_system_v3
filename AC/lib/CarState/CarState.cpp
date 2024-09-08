@@ -64,8 +64,12 @@ void CarState::init_values() {
 }
 
 bool CarState::initalize_config() {
+  return initalize_config(FILENAME_SER4CONFIG);
+}
+
+bool CarState::initalize_config(const string &configFile) {
   try {
-    ConfigFile cf = ConfigFile(FILENAME_SER4CONFIG);
+    ConfigFile cf = ConfigFile(configFile);
     // [Main]
     LogFilename = cf.get("Main", "LogFilename", "/SER4DATA.CSV");
     LogFilePeriod = cf.get("Main", "LogFilePeriod", 24);
@@ -79,9 +83,6 @@ bool CarState::initalize_config() {
     PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
     ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
     ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
-    // ButtonControlModeIncreaseLow = cf.get("Dynamic", "ButtonControlModeIncreaseLow", 2);
-    // ButtonControlModeIncreaseHeigh = cf.get("Dynamic", "ButtonControlModeIncreaseHeigh", 10);
-    // ButtonControlModeIncrease = ButtonControlModeIncreaseLow;
     // [Communication]
     CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 1000);
     Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);

@@ -78,11 +78,6 @@ bool CarState::initalize_config(const string &configFile) {
     Kp = cf.get("PID", "Kp", 20);
     Ki = cf.get("PID", "Ki", 15);
     Kd = cf.get("PID", "Kd", 1);
-    // [Dynamic]
-    PaddleDamping = cf.get("Dynamic", "PaddleDamping", 10);
-    PaddleOffset = cf.get("Dynamic", "PaddleOffset", 999);
-    ConstSpeedIncrease = cf.get("Dynamic", "ConstSpeedIncrease", 1.0);
-    ConstPowerIncrease = cf.get("Dynamic", "ConstPowerIncrease", 0.5);
     // [Communication]
     CarDataSendPeriod = cf.get("Communication", "CarDataSendPeriod", 1000);
     Serial1Baudrate = cf.get("Communication", "Serail1Baudrate", 115200);
@@ -155,10 +150,9 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Ki .................... " << Ki << NL;
   ss << "Kd .................... " << Kd << NL;
   // [Dynamic]
-  ss << "Paddle damping ........ " << PaddleDamping << NL;
-  ss << "Paddle offset ......... " << PaddleOffset << NL;
   ss << "Const speed increase .. " << ConstSpeedIncrease << NL;
   ss << "Const power invrease .. " << ConstPowerIncrease << NL;
+  
   ss << NL;
   // [Communication]
   ss << "Serial 1 baud rate .... " << Serial1Baudrate << NL;

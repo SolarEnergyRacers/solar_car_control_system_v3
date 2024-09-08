@@ -234,8 +234,6 @@ public:
   double Kd; // differential
 
   // [Dynamic]
-  int PaddleDamping = 10; // 0...99
-  int PaddleOffset;       // 0 ... 65535: offset when paddle recognize not 0 values
   int ConstSpeedIncrease; // [km/h] per click
   int ConstPowerIncrease; // [W] per click
 

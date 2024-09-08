@@ -41,7 +41,7 @@ void CANBus::handle_rx_packet(CANPacket packet) {
   switch (packetId) {
   case AC_BASE_ADDR | 0x00:
     carState.LifeSign = packet.getData_u16(0);
-    carState.Kp = (double)packet.getData_u8(2) / 10.;
+    carState.Kp = (double)packet.getData_u8(2) / 4.;
     carState.Ki = (double)packet.getData_u8(3) / 10.;
     carState.Kd = (double)packet.getData_u8(4) / 10.;
     carState.ConstantMode = packet.getData_b(41) ? CONSTANT_MODE::SPEED : CONSTANT_MODE::POWER;

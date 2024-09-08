@@ -277,9 +277,18 @@ void CmdHandler::task(void *pvParams) {
           if (count == 0) {
             console << "PID parameters: ";
           } else {
-            carState.Kp = atof(arr[0].c_str());
-            carState.Ki = atof(arr[1].c_str());
-            carState.Kd = atof(arr[2].c_str());
+            if(atof(arr[0].c_str()) > 63.0)
+              console << "ERROR: max. value for Kp = 63" <<NL;
+            else
+              carState.Kp = atof(arr[0].c_str());
+            if(atof(arr[1].c_str()) > 25.0)
+              console << "ERROR: max. value for Ki = 25" <<NL;
+            else
+              carState.Ki = atof(arr[1].c_str());
+            if(atof(arr[2].c_str()) > 25.0)
+              console << "ERROR: max. value for Kd = 25" <<NL;
+            else
+              carState.Kd = atof(arr[2].c_str());
             // later Kp,Ki,Kd will be sent by CAN to DC
             console << "PID set parameters: ";
           }

@@ -53,7 +53,7 @@ void EngineerDisplay::write_engineer_info(bool force) {
     if (len > 7 * 53)
       msg = msg.substr(0, 7 * 53 - 3) + "...";
     xSemaphoreTakeT(spiBus.mutex);
-    display.tft->fillRect(4, 212, 316, 28, EngineerInfo.getBgColor());
+    display.tft->fillRect(0, 212, 316, 28, EngineerInfo.getBgColor());
     // display.tft->setFont(&FreeSans18pt7b);
     display.tft->setTextSize(textSize);
     display.tft->setTextWrap(true);

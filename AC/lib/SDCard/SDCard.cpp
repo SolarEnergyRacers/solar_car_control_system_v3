@@ -193,9 +193,9 @@ bool SDCard::unmount() {
     carState.EngineerInfo = "SD card unmounting...";
     console << "     " << carState.EngineerInfo << NL;
     try {
-      xSemaphoreTakeT(spiBus.mutex);
-      SD.end();
-      xSemaphoreGive(spiBus.mutex);
+      //xSemaphoreTakeT(spiBus.mutex);
+      //SD.end();
+      //xSemaphoreGive(spiBus.mutex);
       carState.EngineerInfo = "SD card UNmounted.";
       console << "     " << carState.EngineerInfo << NL;
       mounted = false;

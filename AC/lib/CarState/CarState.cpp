@@ -140,7 +140,7 @@ const string CarState::print(string msg, bool withColors) {
   ss << "Speed Arrow ........... " << SPEED_ARROW_str[(int)SpeedArrow] << NL;
   ss << "IO .................... " << printIOs("", false) << NL;
   ss << NL;
-  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << ")" << NL;
+  ss << "SD Card detected....... " << BOOL_str[(int)(SdCardDetect)] << "(" << SdCardDetect << "), mounted:" << BOOL_str[(int)(sdCard.isMounted())] << NL;
   ss << "Log file name ......... " << LogFilename << NL;
   ss << "Log file period [h].... " << LogFilePeriod << NL;
   ss << "Log file interval [ms]. " << LogInterval << NL;

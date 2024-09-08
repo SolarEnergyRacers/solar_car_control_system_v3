@@ -241,16 +241,17 @@ void app_main(void) {
   display.print(msg + NL);
   // vTaskDelay(10);
 
-  //------------------------------------------------------------
-  // SC card
-  msg = sdCard.init();
-  console << msg << NL;
-  display.print(msg + NL);
-  //--- SD card available
-  carState.initalize_config();
-  console << carState.print("State after reading SER4CNFG.INI") << NL;
-  sdCard.check_log_file();
-  //------from now config ini values can be used
+  // //------------------------------------------------------------
+  // // SC card
+  // msg = sdCard.init();
+  // console << msg << NL;
+  // display.print(msg + NL);
+  // sdCard.mount();
+  // //--- SD card available
+  // carState.initalize_config();
+  // console << carState.print("State after reading SER4CNFG.INI") << NL;
+  // sdCard.check_log_file();
+  // //------from now config ini values can be used
 
   stringstream ss;
   ss << NL;
@@ -284,6 +285,17 @@ void app_main(void) {
   display.print("start\n");
   display.set_DisplayStatus(DISPLAY_STATUS::DRIVER_SETUP);
   SystemInited = true;
+  //------------------------------------------------------------
+  // SC card
+  msg = sdCard.init();
+  console << msg << NL;
+  display.print(msg + NL);
+  sdCard.mount();
+  //--- SD card available
+  carState.initalize_config();
+  console << carState.print("State after reading SER4CNFG.INI") << NL;
+  sdCard.check_log_file();
+  //------from now config ini values can be used
 
   esp_task_wdt_init(3600 * 48, false);
   // esp_task_wdt_init(5, false);

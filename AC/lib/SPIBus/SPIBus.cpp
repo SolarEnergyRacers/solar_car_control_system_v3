@@ -29,7 +29,7 @@ string SPIBus::init(void) {
   console << "     " << getName() << " initializing with: SPI_CLK=" << SPI_CLK << ", SPI_MISO=" << SPI_MISO << ", SPI_MOSI=" << SPI_MOSI
           << "..." << NL;
 
-  mutex = xSemaphoreCreateMutex();
+  mutex = xSemaphoreCreateMutex();  // memory leak on re_init()
   // spi = SPIClass(VSPI);
   // init mutex (it is acquired)
   spi.begin(SPI_CLK, SPI_MISO, SPI_MOSI, SPI_CS_TFT);

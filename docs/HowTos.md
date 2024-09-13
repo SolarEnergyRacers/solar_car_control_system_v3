@@ -26,7 +26,8 @@ writes the file `sdconfig` and sdconfig.esp32dev
 
 in `~/.config/Code/User/settings.json`:
 
-change
+behind
+
 ```json
 {
   "text": "$(arrow-right)",
@@ -34,10 +35,12 @@ change
   "commands": "platformio-ide.upload"
 },
 ```
-to
+
+add
+
 ```json
 {
-  "text": "$(arrow-right)",
+  "text": "$(arrow-right)$(plug)",
   "tooltip": "PlatformIO: Upload and Monitor",
   "commands": "platformio-ide.uploadAndMonitor"
 },

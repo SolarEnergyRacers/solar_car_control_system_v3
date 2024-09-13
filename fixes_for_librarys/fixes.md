@@ -69,7 +69,9 @@ To avoid problem in `binary.h` change the following file:
 
 ```c++
 // marker line:
-template <bool B = false> constexpr auto count() -> size_t { return B ? 1 : 0; }
+// template <bool B1, bool B2, bool... Tail> constexpr auto count() -> size_t {
+//   return (B1 ? 1 : 0) + count<B2, Tail...>();
+// }
 // CHANGE_KSC: Conflict with #define B1 1 in .platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h
 template <bool BOOL1, bool BOOL2, bool... Tail> constexpr auto count() -> size_t {
   return (BOOL1 ? 1 : 0) + count<BOOL2, Tail...>();

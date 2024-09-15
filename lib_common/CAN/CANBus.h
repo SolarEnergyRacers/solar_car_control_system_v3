@@ -130,18 +130,18 @@ public:
 
   void pushIn(CANPacket packet) {
     rxBufferIn.push(packet);
-    counterMaxPacketsIn = max(counterMaxPacketsIn, availiblePacketsIn());
+    counterMaxPacketsIn = max(counterMaxPacketsIn, availablePacketsIn());
   }
   void pushOut(CANPacket packet) {
     rxBufferOut.push(packet);
-    counterMaxPacketsOut = max(counterMaxPacketsOut, availiblePacketsOut());
+    counterMaxPacketsOut = max(counterMaxPacketsOut, availablePacketsOut());
   }
 
   bool isPacketToRenew(uint16_t packetId);
   void setPacketTimeStamp(uint16_t packetId, int32_t millis);
 
-  int availiblePacketsIn() { return rxBufferIn.getSize(); }
-  int availiblePacketsOut() { return rxBufferOut.getSize(); }
+  int availablePacketsIn() { return rxBufferIn.getSize(); }
+  int availablePacketsOut() { return rxBufferOut.getSize(); }
   int getMaxPacketsBufferInUsage() { return counterMaxPacketsIn; };
   int getMaxPacketsBufferOutUsage() { return counterMaxPacketsOut; };
 

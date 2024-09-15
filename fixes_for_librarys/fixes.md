@@ -202,13 +202,15 @@ Please call `idf.py menuconfig` then go to Component config -> mbedTLS -> TLS Ke
 ### SD card: fix memory access after free (RAII DTOR):
 in .platformio/packages/framework-arduinoespressif32/libraries/SD/src/sd_diskio.cpp:715 ff
 
-```
+```c++
 AcquireSPI lock(card);
 sdTransaction(pdrv, GO_IDLE_STATE, 0, NULL);
 ff_diskio_register(pdrv, NULL);
 ```
-to -> 
-```
+
+to ->
+
+```c++
 {AcquireSPI lock(card);
   sdTransaction(pdrv, GO_IDLE_STATE, 0, NULL);
 }

@@ -220,8 +220,8 @@ void CmdHandler::task(void *pvParams) {
             console << "set verboseModeSdCard: " << sdCard.verboseModeSdCard << NL;
           } 
           else if (input[1] == 'b') { 
-            console << "CAN RX buffer level: " << canBus.availiblePacketsIn()  << " / " << canBus.counterI << NL;
-            console << "CAN TX buffer level: " << canBus.availiblePacketsOut() << NL;
+            console << "CAN RX buffer level: " << canBus.availablePacketsIn()  << " / " << canBus.counterI << NL;
+            console << "CAN TX buffer level: " << canBus.availablePacketsOut() << NL;
           }
           else {
             string arr[4];

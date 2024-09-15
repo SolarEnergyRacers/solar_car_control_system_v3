@@ -124,12 +124,18 @@ bool CarControl::read_const_mode_and_mountrequest() {
   case DISPLAY_STATUS::ENGINEER_RUNNING:
     if (sdCard.isMounted()) {
       sdCard.unmount();
-      vTaskDelay(3000);
+      vTaskDelay(1000);
     } else {
-      sdCard.mount();
-      string state = carState.csv("Recent State just after mounting", true); // with header
-      sdCard.write_log(state);
-      vTaskDelay(3000);
+      if (sdCard.mount()) {
+        carState.EngineerInfo = "SD card mounted.";
+        console << "     " << carState.EngineerInfo << NL;
+        vTaskDelay(1000);
+        string state = carState.csv("Recent State just after mounting", true); // with header
+        sdCard.write_log(state);
+      } else {
+        carState.EngineerInfo = "SD card mount failed.";
+        console << "     " << carState.EngineerInfo << NL;
+      }
     }
     break;
   case DISPLAY_STATUS::DRIVER_RUNNING:
@@ -141,7 +147,6 @@ bool CarControl::read_const_mode_and_mountrequest() {
 
   return true;
 }
-
 
 string carStateEngineerInfoLast = "";
 uint16_t carStateLifeSignLast = 0;
@@ -166,7 +171,7 @@ void CarControl::task(void *pvParams) {
       bool constantMode = carState.ConstantMode == CONSTANT_MODE::SPEED ? true : false;
       CANPacket packet = canBus.writePacket(AC_BASE0x00,
                                             (uint16_t)carState.LifeSign,      // LifeSign
-                                            (uint8_t)(carState.Kp * 4),      // Kp
+                                            (uint8_t)(carState.Kp * 4),       // Kp
                                             (uint8_t)(carState.Ki * 10),      // Ki
                                             (uint8_t)(carState.Kd * 10),      // Kd
                                             (bool)constantMode,               // switch constant mode Speed / Power
@@ -177,13 +182,13 @@ void CarControl::task(void *pvParams) {
 #endif
       if (carControl.verboseModeCarControlDebug)
         console << fmt::format("[I:{:02d}|{:02d},O::{:02d}|{:02d}] CAN.PacketId=0x{:03x}-S-data:LifeSign={:4x}, button2 = {:1x} ",
-                               canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
+                               canBus.availablePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availablePacketsOut(),
                                canBus.getMaxPacketsBufferOutUsage(), AC_BASE0x00, carState.LifeSign, button_nextScreen_pressed)
                 << NL;
       // self destroying engineer info
       if (carState.EngineerInfo.compare(carStateEngineerInfoLast) != 0) {
         carStateEngineerInfoLast = carState.EngineerInfo;
-        millisNextEngineerInfoCleanup = millis() + 4000;
+        millisNextEngineerInfoCleanup = millis() + 7000;
       }
       if (millis() > millisNextEngineerInfoCleanup && carState.EngineerInfo.length() > 0) {
         carStateEngineerInfoLast = carState.EngineerInfo = "";

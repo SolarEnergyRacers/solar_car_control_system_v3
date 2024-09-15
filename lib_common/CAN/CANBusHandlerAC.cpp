@@ -79,7 +79,7 @@ void CANBus::handle_rx_packet(CANPacket packet) {
           << fmt::format(
                  "[{:02d}|{:02d}] CAN.PacketId=0x{:03x}-R-data:lifeSign={:4x}, "
                  "speed={:4x}, decl={:4x}, accl={:4x}, poti={:4x}",
-                 availiblePacketsIn(), getMaxPacketsBufferInUsage(),
+                 availablePacketsIn(), getMaxPacketsBufferInUsage(),
                  packetId | 0x00, carState.LifeSign, carState.Speed,
                  carState.Deceleration, carState.Acceleration,
                  carState.Potentiometer)
@@ -123,7 +123,7 @@ void CANBus::handle_rx_packet(CANPacket packet) {
                      "targetPower={:3}, speed={:3d}, "
                      "accelDispl={:3d}, constMode={:5s}({}), direction={}, "
                      "breakPedal={}, MotorOn={}, ConfirmDriverInfo={}",
-                     availiblePacketsIn(), getMaxPacketsBufferInUsage(),
+                     availablePacketsIn(), getMaxPacketsBufferInUsage(),
                      packetId | 0x01, carState.TargetSpeed,
                      carState.TargetPower, carState.Speed,
                      carState.AccelerationDisplay, CONSTANT_MODE_str[(int)(carState.ConstantMode)], carState.ConstantModeOn,

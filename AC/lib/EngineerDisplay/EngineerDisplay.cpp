@@ -8,10 +8,10 @@
 #include <Adafruit_ILI9341.h> // display
 #include <SPIBus.h>
 
-#include <AbstractTask.h>
 #include "../LocalFunctionsAndDevices.h"
-#include <global_definitions.h>
 #include "../definitions.h"
+#include <AbstractTask.h>
+#include <global_definitions.h>
 
 #include <CarState.h>
 #include <Console.h>
@@ -29,7 +29,7 @@ extern Display display;
 // extern Adafruit_ILI9341 tft;
 
 EngineerDisplay::EngineerDisplay() { display.bgColor = ILI9341_LIGHTGREY; };
-EngineerDisplay::~EngineerDisplay(){};
+EngineerDisplay::~EngineerDisplay() {};
 
 string EngineerDisplay::init() {
   console << "     Init '" << getName() << "'..." << NL;
@@ -48,18 +48,28 @@ void EngineerDisplay::write_engineer_info(bool force) {
   if (EngineerInfo.Value != EngineerInfo.ValueLast || justInited || force) {
     string msg = EngineerInfo.get_recent_overtake_last();
     int color = EngineerInfo.getTextColor(); // getColorForInfoType(carState.EngineerInfoType);
-    int len = msg.length();
-    int textSize = EngineerInfo.getTextSize();
-    if (len > 7 * 53)
-      msg = msg.substr(0, 7 * 53 - 3) + "...";
+    uint textSize = EngineerInfo.getTextSize();
+    uint max_chars = line_length * number_of_lines;
+    if (msg.length() > max_chars) // 3 lines a 53 characters
+      msg = msg.substr(0, max_chars - 3) + "...";
+    string buffer = "";
+    for (int idx = 0; idx < msg.length(); idx++) {
+      if (msg[idx] == '#') {
+        int rest = buffer.length() % line_length;
+        for (int idx_fill = 0; idx_fill < line_length-rest; idx_fill++) {
+          buffer += " ";
+        }
+      } else
+        buffer += msg[idx];
+    }
     xSemaphoreTakeT(spiBus.mutex);
     display.tft->fillRect(0, 212, 316, 28, EngineerInfo.getBgColor());
     // display.tft->setFont(&FreeSans18pt7b);
     display.tft->setTextSize(textSize);
     display.tft->setTextWrap(true);
     display.tft->setTextColor(color);
-    display.tft->setCursor(4, 212);
-    display.tft->print(msg.c_str());
+    display.tft->setCursor(0, 212);
+    display.tft->print(buffer.c_str());
     xSemaphoreGive(spiBus.mutex);
   }
 }

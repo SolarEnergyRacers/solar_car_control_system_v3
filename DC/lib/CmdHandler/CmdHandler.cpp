@@ -112,20 +112,19 @@ void CmdHandler::task(void *pvParams) {
           console << "Not implemented yet!" << NL;
           break;
         case 'H':
-          if (input[1] == 's'){
+          if (input[1] == 's') {
             memory_info();
-          }
-          else if (input[1] == 'h'){
+          } else if (input[1] == 'h') {
             // HeapStats_t pxHeapStats;
             // vPortGetHeapStats(&pxHeapStats);
             int retval = heap_caps_check_integrity_all(1);
             console << "heap ok? " << retval << NL;
           } else {
-            volatile int* goblin = new int[8192];
-            for (int i=0; i<16384;++i) goblin[i] = i;
+            volatile int *goblin = new int[8192];
+            for (int i = 0; i < 16384; ++i)
+              goblin[i] = i;
             console << "'Hs' for stack reporting, 'Hh' for heap." << NL;
           }
-          // memory_info();
           break;
         case 'I':
           console << "Received: '" << input.c_str() << "' --> ";
@@ -254,6 +253,9 @@ void CmdHandler::task(void *pvParams) {
           }
           break;
         default:
+          if (isalpha(input[0])) {
+            console << "unknown command, ? for help" << NL;
+          }
           break;
         // -------- Command Help -----------------
         case 'h':

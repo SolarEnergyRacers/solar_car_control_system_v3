@@ -57,13 +57,17 @@ string SDCard::init() {
 
 bool SDCard::update_sd_card_detect() {
   carState.SdCardDetect = (bool)digitalRead(ESP32_AC_SD_DETECT);
+  if (!carState.SdCardDetect) {
+    mounted = false;
+  }
   return carState.SdCardDetect;
 }
 
 bool SDCard::isMounted() { return update_sd_card_detect() && mounted; }
 
 bool SDCard::mount() {
-  if (!SystemInited) return 0;
+  if (!SystemInited)
+    return 0;
 
   if (isMounted()) {
     carState.EngineerInfo = "  SD card already mounted.";
@@ -76,46 +80,56 @@ bool SDCard::mount() {
     mounted = false;
     return false;
   }
+  bool hasSemaphore = false; // prevent SemaphoreGive when taken by other task
   try {
     carState.EngineerInfo = "  Mounting SD card...";
     console << "     " << carState.EngineerInfo << NL;
     mounted = false;
     int attempts = 0;
+    bool mounted_temp = false;
     xSemaphoreTakeT(spiBus.mutex);
+    hasSemaphore = true;
     while (!mounted && attempts++ < 3) {
-      mounted = SD.begin(SPI_CS_SDCARD, spiBus.spi);
+      mounted_temp = SD.begin(SPI_CS_SDCARD, spiBus.spi);
       vTaskDelay(10);
     }
     xSemaphoreGive(spiBus.mutex);
-    if (mounted) {
+    hasSemaphore = false;
+    if (mounted_temp) {
       carState.EngineerInfo = "  SD card mounted";
       console << "     " << carState.EngineerInfo << ", " << attempts << " attempts" << NL;
       xSemaphoreTakeT(spiBus.mutex);
+      hasSemaphore = true;
       uint8_t cardType = SD.cardType();
+      uint64_t cardSize = SD.cardSize();
       xSemaphoreGive(spiBus.mutex);
+      hasSemaphore = false;
+      console << "     SD Card Size: " << (cardSize / 1024 / 1024) << "MB" << NL;
       console << "     SD Card Type: ";
       switch (cardType) {
       case CARD_NONE:
-        console << "CARD_NONE";
+        console << "CARD_NONE" << NL;
         break;
       case CARD_MMC:
-        console << "MMC";
+        console << "MMC" << NL;
         break;
       case CARD_SD:
-        console << "SDSC";
+        console << "SDSC" << NL;
         break;
       case CARD_SDHC:
-        console << "SDHC";
+        console << "SDHC" << NL;
         break;
       default:
-        console << "UNKNOWN";
+        console << "UNKNOWN" << NL;
       }
-      uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-      console << NL << "     SD Card Size: " << cardSize << "MB" << NL;
+      carState.EngineerInfo = "  SD card mounted";
+      console << "     " << carState.EngineerInfo << ", " << attempts << " attempts" << NL;
+      mounted = true;
       return true;
     }
   } catch (exception &ex) {
-    xSemaphoreGive(spiBus.mutex);
+    if (hasSemaphore)
+      xSemaphoreGive(spiBus.mutex);
     carState.EngineerInfo = "ERROR: Unable to mount sdCard";
     console << "     " << carState.EngineerInfo << ", exception: " << ex.what() << NL;
   }
@@ -130,8 +144,12 @@ bool SDCard::close_log_file() {
     return false;
   }
   xSemaphoreTakeT(spiBus.mutex);
-  dataFile.flush();
-  dataFile.close();
+  try {
+    dataFile.flush();
+    dataFile.close();
+  } catch (...) {
+    return false;
+  }
   xSemaphoreGive(spiBus.mutex);
   return true;
 }
@@ -142,7 +160,11 @@ bool SDCard::open_log_file() {
     return false;
   }
   xSemaphoreTakeT(spiBus.mutex);
-  dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
+  try {
+    dataFile = SD.open(carState.LogFilename.c_str(), FILE_APPEND); // mode: APPEND: FILE_APPEND, OVERWRITE: FILE_WRITE
+  } catch (...) {
+    dataFile = (fs::File)0;
+  }
   xSemaphoreGive(spiBus.mutex);
   if (dataFile != 0)
     return true;
@@ -155,7 +177,7 @@ bool SDCard::check_log_file() {
     return false;
   }
   if (carState.LogFilename.length() < 1) {
-    carState.EngineerInfo = "ERROR empty open_log_file name";
+    carState.EngineerInfo = "ERROR at open_log_file: empty logfile name";
     console << "     " << carState.EngineerInfo << NL;
     return false;
   }
@@ -175,7 +197,6 @@ bool SDCard::check_log_file() {
     carState.EngineerInfo = "ERROR opening logfile";
     console << "     " << carState.EngineerInfo << ": " << carState.LogFilename << NL;
   } catch (exception &ex) {
-    xSemaphoreGive(spiBus.mutex);
     carState.EngineerInfo = "ERROR opening logfile, exception";
     console << "     ERROR opening '" << carState.LogFilename << "': " << ex.what() << NL;
   }
@@ -192,15 +213,19 @@ bool SDCard::unmount() {
   if (close_log_file()) {
     carState.EngineerInfo = "SD card unmounting...";
     console << "     " << carState.EngineerInfo << NL;
+    bool hasSemaphore = false;
     try {
-      //xSemaphoreTakeT(spiBus.mutex);
-      //SD.end();
-      //xSemaphoreGive(spiBus.mutex);
+      xSemaphoreTakeT(spiBus.mutex);
+      hasSemaphore = true;
+      SD.end();
+      xSemaphoreGive(spiBus.mutex);
+      hasSemaphore = false;
       carState.EngineerInfo = "SD card UNmounted.";
       console << "     " << carState.EngineerInfo << NL;
       mounted = false;
     } catch (exception &ex) {
-      xSemaphoreGive(spiBus.mutex);
+      if (hasSemaphore)
+        xSemaphoreGive(spiBus.mutex);
       carState.EngineerInfo = "ERROR unmounting SD card: ";
       console << "     " << carState.EngineerInfo << ex.what() << NL;
       return false;
@@ -252,20 +277,19 @@ void SDCard::write_log(const string msg) {
     return;
   }
   try {
-    if (carState.EngineerInfo.length() < 51)
-      carState.EngineerInfo += " #Log to SD card ";
-    //console << "     " << carState.EngineerInfo;
+    string mounted_info = "SD card mounted.";
+    string logInfo = "#Log to SD card";
+    if(mounted_info.compare(carState.EngineerInfo) == 0) {
+      carState.EngineerInfo += logInfo;
+    }
     open_log_file();
-    //console << " --> print msg";
     xSemaphoreTakeT(spiBus.mutex);
     dataFile.print(msg.c_str());
     xSemaphoreGive(spiBus.mutex);
-    //console << " --> close log file";
     close_log_file();
   } catch (exception &ex) {
     xSemaphoreGive(spiBus.mutex);
     carState.EngineerInfo = "ERROR writing SD card";
     console << "     " << carState.EngineerInfo << ": " << ex.what() << NL;
   }
-  //console << "." << NL;
 }

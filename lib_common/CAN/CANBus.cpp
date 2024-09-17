@@ -334,8 +334,8 @@ string CANBus::print_raw_packet(const string msg, CANPacket packet) {
       "C{}-{}-[I:{:02d}|{:02d},O:{:02d}|{:02d}]={}=Id=0x{:03x}-data: {:016x} "
       "-- {:02x} - {:02x} - {:02x} - {:02x} - {:02x} - "
       "{:02x} - {:02x} - {:02x}",
-      xPortGetCoreID(), esp_timer_get_time() / 1000000, availiblePacketsIn(),
-      getMaxPacketsBufferInUsage(), availiblePacketsOut(),
+      xPortGetCoreID(), esp_timer_get_time() / 1000000, availablePacketsIn(),
+      getMaxPacketsBufferInUsage(), availablePacketsOut(),
       getMaxPacketsBufferOutUsage(), msg, packet.getId(), packet.getData_u64(),
       packet.getData_u8(7), packet.getData_u8(6), packet.getData_u8(5),
       packet.getData_u8(4), packet.getData_u8(3), packet.getData_u8(2),

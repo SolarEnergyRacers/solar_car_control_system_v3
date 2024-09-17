@@ -6,8 +6,8 @@
 #define SER_DISPLAYVALUE_H
 
 #include "../LocalFunctionsAndDevices.h"
-#include <global_definitions.h>
 #include "../definitions.h"
+#include <global_definitions.h>
 
 #include <Adafruit_GFX.h>     // graphics library
 #include <Adafruit_ILI9341.h> // display
@@ -89,7 +89,10 @@ public:
 
   void showLabel(Adafruit_ILI9341 *tft) {
     char label[15];
-    snprintf(label, 15, "%s", Label.c_str());
+    if (Label.length() > 0)
+      snprintf(label, 15, "%s", Label.c_str());
+    else
+      label[0] = '\0';
     int16_t x1, y1;
     uint16_t w, h;
     vWidth = atoi(Format.substr(1, 1).c_str()) * TextSize * 6 + 4;
@@ -102,7 +105,8 @@ public:
     if (h == 0)
       h = TextSize * 8;
     tft->setCursor(X + w + vWidth, Y);
-    tft->printf("%s", Unit.c_str());
+    if(Unit.length() > 0)
+      tft->printf("%s", Unit.c_str());
     xSemaphoreGive(spiBus.mutex);
     vX = x1 + w;
     vY = y1;

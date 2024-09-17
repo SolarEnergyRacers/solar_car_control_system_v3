@@ -231,7 +231,7 @@ void CarControl::task(void *pvParams) {
 
       if (carControl.verboseModeDebug) {
         console << fmt::format("[I:{:02d}|{:02d},O:{:02d}|{:02d}] P.Id=0x{:03x}-S-data:lifesign={:5d}, poti={:5d}, decl={:5d}, accl={:5d}",
-                               canBus.availiblePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availiblePacketsOut(),
+                               canBus.availablePacketsIn(), canBus.getMaxPacketsBufferInUsage(), canBus.availablePacketsOut(),
                                canBus.getMaxPacketsBufferOutUsage(), DC_BASE_ADDR | 0x00, carState.LifeSign, carState.Potentiometer,
                                carState.Acceleration, carState.Deceleration)
                 << NL;

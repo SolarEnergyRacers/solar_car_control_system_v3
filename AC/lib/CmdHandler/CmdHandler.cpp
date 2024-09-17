@@ -2,8 +2,8 @@
 // Command Receiver and Handler
 //
 // reads commands from serial console and deploy it
-#include <global_definitions.h>
 #include "../definitions.h"
+#include <global_definitions.h>
 
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -82,20 +82,20 @@ void CmdHandler::task(void *pvParams) {
     try {
       report_task_stack(this);
       while (SystemInited && (Serial.available()
-                              #if SERIAL_RADIO_CMD_ON
-                                                            || Serial2.available()
-                              #endif
-                              )) {
+#if SERIAL_RADIO_CMD_ON
+                              || Serial2.available()
+#endif
+                                  )) {
         // read the incoming chars:
         String input = "";
         if (Serial.available()) {
           input = Serial.readString();
           Serial.flush();
-          #if SERIAL_RADIO_CMD_ON
-                  } else if (Serial2.available()) {
-                    input = Serial2.readString();
-                    Serial2.flush();
-          #endif
+#if SERIAL_RADIO_CMD_ON
+        } else if (Serial2.available()) {
+          input = Serial2.readString();
+          Serial2.flush();
+#endif
         }
         if (input.length() == 0)
           break;
@@ -151,24 +151,24 @@ void CmdHandler::task(void *pvParams) {
           sdCard.unmount();
           break;
         case 'F':
-          if (input.length()==1) {
+          if (input.length() == 1) {
             carState.initalize_config();
           } else {
             carState.initalize_config(&input[1]);
           }
           break;
         case 'H':
-          if (input[1] == 's'){
+          if (input[1] == 's') {
             memory_info();
-          }
-          else if (input[1] == 'h'){
+          } else if (input[1] == 'h') {
             // HeapStats_t pxHeapStats;
             // vPortGetHeapStats(&pxHeapStats);
             int retval = heap_caps_check_integrity_all(1);
             console << "heap ok? " << retval << NL;
           } else {
-            volatile int* goblin = new int[8192];
-            for (int i=0; i<16384;++i) goblin[i] = i;
+            volatile int *goblin = new int[8192];
+            for (int i = 0; i < 16384; ++i)
+              goblin[i] = i;
             console << "'Hs' for stack reporting, 'Hh' for heap." << NL;
           }
           break;
@@ -218,12 +218,10 @@ void CmdHandler::task(void *pvParams) {
           } else if (input[1] == 'S') {
             sdCard.verboseModeSdCard = !sdCard.verboseModeSdCard;
             console << "set verboseModeSdCard: " << sdCard.verboseModeSdCard << NL;
-          } 
-          else if (input[1] == 'b') { 
-            console << "CAN RX buffer level: " << canBus.availiblePacketsIn()  << " / " << canBus.counterI << NL;
-            console << "CAN TX buffer level: " << canBus.availiblePacketsOut() << NL;
-          }
-          else {
+          } else if (input[1] == 'b') {
+            console << "CAN RX buffer level: " << canBus.availablePacketsIn() << " / " << canBus.counterI << NL;
+            console << "CAN TX buffer level: " << canBus.availablePacketsOut() << NL;
+          } else {
             string arr[4];
             splitString(arr, &input[1]);
             float motCurrent = atof(arr[0].c_str());
@@ -277,16 +275,16 @@ void CmdHandler::task(void *pvParams) {
           if (count == 0) {
             console << "PID parameters: ";
           } else {
-            if(atof(arr[0].c_str()) > 63.0)
-              console << "ERROR: max. value for Kp = 63" <<NL;
+            if (atof(arr[0].c_str()) > 63.0)
+              console << "ERROR: max. value for Kp = 63" << NL;
             else
               carState.Kp = atof(arr[0].c_str());
-            if(atof(arr[1].c_str()) > 25.0)
-              console << "ERROR: max. value for Ki = 25" <<NL;
+            if (atof(arr[1].c_str()) > 25.0)
+              console << "ERROR: max. value for Ki = 25" << NL;
             else
               carState.Ki = atof(arr[1].c_str());
-            if(atof(arr[2].c_str()) > 25.0)
-              console << "ERROR: max. value for Kd = 25" <<NL;
+            if (atof(arr[2].c_str()) > 25.0)
+              console << "ERROR: max. value for Kd = 25" << NL;
             else
               carState.Kd = atof(arr[2].c_str());
             // later Kp,Ki,Kd will be sent by CAN to DC
@@ -327,9 +325,9 @@ void CmdHandler::task(void *pvParams) {
         // -------- Driver SUPPORT COMMANDS -----------------
         case 'c':
           if (input[1] == '-') {
-            carState.ConstantModeOn = false;              // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = false; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == '+') {
-            carState.ConstantModeOn = true;               // #SAFETY#: deceleration unlock const mode
+            carState.ConstantModeOn = true; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 's') {
             carState.ConstantMode = CONSTANT_MODE::SPEED; // #SAFETY#: deceleration unlock const mode
           } else if (input[1] == 'p') {
@@ -341,6 +339,9 @@ void CmdHandler::task(void *pvParams) {
                   << NL;
           break;
         default:
+          if (isalpha(input[0])) {
+            console << "unknown command, ? for help" << NL;
+          }
           break;
         // -------- Command Help -----------------
         case 'h':

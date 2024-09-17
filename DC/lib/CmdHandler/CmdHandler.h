@@ -17,7 +17,7 @@ public:
   void task(void *pvParams);
 
   // Class functions and members
-  string commands = "SVMUICOTK:!sc?";
+  string commands = "SVICOTK:!sc?";
   string helpText = "Available commands (" + commands +
                     "):\n"
                     "\t-------- SYSTEM COMMANDS -------------------------\n"

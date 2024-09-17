@@ -26,6 +26,9 @@ public:
   string getName(void) { return "EngineerDisplay"; };
   bool verboseModeEngineer = false;
 
+  int number_of_lines = 3;
+  int line_length = 53;
+
 protected:
   // DISPLAY_STATUS display_task();
   //==== overwrites from base class ==== END
@@ -37,6 +40,8 @@ private:
   //=======================================
 
   //==== Engineer Display definitions ==== START
+  // Parameters: 
+  // int x, int y, string label, string format = "%4.1f", string unit = "", int textColor = ILI9341_BLACK, int bgColor = ILI9341_ORANGE, int textSize = 2
   // Stati [On/Off]
   DisplayValue<bool> MotorOn = DisplayValue<bool>(4, 10, "MC   :", "%3s", "", ILI9341_BLUE);
   // DisplayValue<bool> BatteryOn = DisplayValue<bool>(4, 30, "Bat  :", "%3s", "", ILI9341_BLUE);
@@ -70,10 +75,11 @@ private:
   DisplayValue<float> VoltageMin = DisplayValue<float>(4, 150, "U-min:", "%5.3f", "V");
   DisplayValue<float> VoltageAvg = DisplayValue<float>(4, 170, "U-avg:", "%5.3f", "V");
   DisplayValue<float> VoltageMax = DisplayValue<float>(4, 190, "U-max:", "%5.3f", "V");
-  DisplayValue<string> EngineerInfo = DisplayValue<string>(4, 212, "", "%s", "", ILI9341_RED, ILI9341_ORANGE, 1);
+  DisplayValue<string> EngineerInfo = DisplayValue<string>(0, 212, "", "%s", "", ILI9341_RED, ILI9341_ORANGE, 1);
   //==== Engineer Display definition ==== END
 
   void write_engineer_info(bool force = false);
+  
   void draw_display_background();
   string display_setup();
 };

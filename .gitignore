@@ -47,3 +47,4 @@ AC/.pio/**
 tio-USB*.log
 
 logs_archive/**
+__pycache__/**

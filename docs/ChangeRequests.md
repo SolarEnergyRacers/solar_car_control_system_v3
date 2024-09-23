@@ -1,8 +1,13 @@
-# Change Requests SER4
+# Change Requests SER5
 
 [[_TOC_]]
 
 ## Hardware
+### General
+- [ ] Jumper to select USB / DC converter for PCB power
+- [ ] Indifference to startup order (current issue: paddle calibration on startup)
+- [ ] Fix ground or EMC issues (spurious greenlight)
+
 ### Steering Wheel & AC Board
 - [ ] Replace indicator pushbuttons with kip switches ([Git-Issue](https://github.com/SolarEnergyRacers/solar_car_control_system_v3/issues/10))
   *done with version:* 
@@ -52,8 +57,10 @@
 
 ### AC
 
-- [ ] improve SD card handling
-  *done with version:* 
+- [x] improve SD card handling
+  *done with version:* v5 
+- [ ] implement handshake / feedback / heartbeat for telemetry (driver text line)
+- [ ] improve visibility of driver text line
 
 ### DC
 
